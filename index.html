@@ -132,21 +132,46 @@ input:checked + .slider::before {
 }
 
 /* HERO */
-.hero{position:relative;z-index:1;padding:110px 6% 90px;text-align:center;overflow:hidden}
-.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(99,102,241,0.1) 0%,transparent 70%);pointer-events:none}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.08);border:1px solid var(--border2);color:var(--indigo);padding:7px 18px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:32px;letter-spacing:.01em}
+.hero{position:relative;z-index:1;padding:80px 6% 60px;overflow:hidden}
+.hero-glow{position:absolute;top:-200px;right:-100px;width:700px;height:700px;background:radial-gradient(ellipse,rgba(99,102,241,0.12) 0%,transparent 65%);pointer-events:none}
+.hero-inner{display:flex;align-items:center;gap:48px;max-width:1200px;margin:0 auto}
+.hero-text{flex:1;min-width:0}
+.hero-visual{flex:0 0 420px;display:flex;align-items:center;justify-content:center;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.08);border:1px solid var(--border2);color:var(--indigo);padding:7px 18px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:28px;letter-spacing:.01em}
 body.dark-mode .hero-badge{color:var(--indigo2);background:rgba(99,102,241,0.1)}
 .badge-pulse{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.8s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(16,185,129,0)}}
-.hero h1{font-size:clamp(38px,5.5vw,72px);color:var(--text);max-width:860px;margin:0 auto 10px;letter-spacing:-.025em}
+.hero h1{font-size:clamp(34px,4.5vw,62px);color:var(--text);letter-spacing:-.025em;line-height:1.1;margin-bottom:10px}
 .hero h1 .grad{background:linear-gradient(90deg,var(--indigo),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 body.dark-mode .hero h1 .grad{background:linear-gradient(90deg,#818CF8,#22D3EE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:600px;margin:20px auto 44px;line-height:1.7}
-.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.btn-glow{background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;padding:16px 38px;border-radius:100px;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;transition:.2s;box-shadow:0 4px 16px rgba(99,102,241,0.25);position:relative;overflow:hidden}
+.hero-sub{font-size:clamp(15px,1.6vw,18px);color:var(--muted);max-width:520px;margin:20px 0 40px;line-height:1.75}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+/* Imagem 3D hero */
+.hero-3d{width:380px;height:380px;position:relative;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.hero-3d-glow{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);width:200px;height:30px;background:radial-gradient(ellipse,rgba(99,102,241,0.35) 0%,transparent 70%);filter:blur(8px)}
+body.dark-mode .hero-3d svg .doc-body{fill:#1C2035}
+body.dark-mode .hero-3d svg .doc-shadow{fill:rgba(0,0,0,.3)}
+@media(max-width:900px){
+  .hero-inner{flex-direction:column;text-align:center;gap:32px}
+  .hero-text{display:flex;flex-direction:column;align-items:center}
+  .hero-sub{text-align:center}
+  .hero-btns{justify-content:center}
+  .hero-visual{flex:0 0 auto}
+  .hero-3d{width:280px;height:280px}
+  .hero-glow{right:-200px}
+}
+
+/* Adaptação SVG tema escuro */
+body.dark-mode .hero-3d .doc-body{fill:url(#doc-grad-dark) !important}
+body.dark-mode .hero-3d rect[fill="url(#doc-grad)"]{fill:#1C2035}
+body.dark-mode .hero-3d .hero-3d-glow{background:radial-gradient(ellipse,rgba(99,102,241,0.5) 0%,transparent 70%)}
+
+/* BUTTONS */
+.btn-glow{background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;padding:16px 32px;border-radius:100px;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;transition:.2s;box-shadow:0 4px 16px rgba(99,102,241,0.25);position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px}
 .btn-glow::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);border-radius:100px}
 .btn-glow:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(99,102,241,0.4)}
-.btn-outline{background:transparent;border:2px solid var(--indigo);color:var(--indigo);padding:16px 38px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;transition:.2s}
+.btn-outline{background:transparent;border:2px solid var(--indigo);color:var(--indigo);padding:16px 32px;border-radius:100px;text-decoration:none;font-weight:600;font-size:15px;transition:.2s;display:inline-flex;align-items:center;gap:6px}
 body.dark-mode .btn-outline{border-color:rgba(255,255,255,0.5);color:#fff;background:rgba(255,255,255,0.08)}
 .btn-outline:hover{background:rgba(99,102,241,.1);border-color:var(--indigo)}
 body.dark-mode .btn-outline:hover{background:rgba(255,255,255,0.18);border-color:#fff}
@@ -352,15 +377,109 @@ body.dark-mode footer{background:#03040A}
 
 <div class="hero">
   <div class="hero-glow"></div>
-  <div class="hero-badge">
-    <span class="badge-pulse"></span>
-    Plataforma de assessoria acadêmica
-  </div>
-  <h1>Seu TCC, artigo ou monografia<br><span class="grad">entregue com tecnologia</span></h1>
-  <p class="hero-sub">Consultores especializados + plataforma digital segura. Do técnico ao doutorado — orçamento automático, pagamento Pix, acompanhamento em tempo real.</p>
-  <div class="hero-btns">
-    <a href="/dashboard" class="btn-glow">Solicitar assessoria agora</a>
-    <a href="#depoimentos" class="btn-outline">Ver quem passou →</a>
+  <div class="hero-inner">
+
+    <!-- TEXTO ESQUERDA -->
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="badge-pulse"></span>
+        Plataforma de assessoria acadêmica
+      </div>
+      <h1>Seu TCC, artigo ou<br>monografia <span class="grad">entregue<br>com tecnologia.</span></h1>
+      <p class="hero-sub">Consultores especializados + plataforma digital segura. Do técnico ao doutorado — orçamento automático, pagamento Pix, acompanhamento em tempo real.</p>
+      <div class="hero-btns">
+        <a href="/dashboard" class="btn-glow">Solicitar assessoria agora →</a>
+        <a href="#como-funciona" class="btn-outline">Ver como funciona →</a>
+      </div>
+    </div>
+
+    <!-- IMAGEM 3D DIREITA -->
+    <div class="hero-visual">
+      <div class="hero-3d">
+        <svg viewBox="0 0 380 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="doc-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#E8E8FF"/>
+              <stop offset="100%" stop-color="#C8CAFF"/>
+            </linearGradient>
+            <linearGradient id="doc-grad-dark" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2A2D50"/>
+              <stop offset="100%" stop-color="#1C2035"/>
+            </linearGradient>
+            <linearGradient id="fold-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#6366F1"/>
+              <stop offset="100%" stop-color="#818CF8"/>
+            </linearGradient>
+            <linearGradient id="check-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#6366F1"/>
+              <stop offset="100%" stop-color="#22D3EE"/>
+            </linearGradient>
+            <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#6366F1" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#22D3EE" stop-opacity="0.3"/>
+            </linearGradient>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#6366F1" flood-opacity="0.2"/>
+            </filter>
+            <filter id="shadow-dark" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#6366F1" flood-opacity="0.5"/>
+            </filter>
+          </defs>
+
+          <!-- PLATAFORMA / SOMBRA -->
+          <ellipse cx="190" cy="340" rx="120" ry="18" fill="rgba(99,102,241,0.15)"/>
+
+          <!-- DOCUMENTO PRINCIPAL -->
+          <g filter="url(#shadow)" transform="translate(70, 40)">
+            <!-- Corpo do documento -->
+            <rect class="doc-body" x="0" y="0" width="200" height="260" rx="16" fill="url(#doc-grad)"/>
+            <!-- Dobra superior direita -->
+            <path d="M200 0 L200 40 L160 0 Z" fill="rgba(99,102,241,0.15)"/>
+            <path d="M160 0 L160 40 L200 40" stroke="rgba(99,102,241,0.3)" stroke-width="1" fill="none"/>
+            <!-- Triângulo da dobra -->
+            <path d="M162 0 L200 38 L200 0 Z" fill="url(#fold-grad)" opacity="0.8"/>
+
+            <!-- Linhas de texto simuladas -->
+            <rect x="20" y="60" width="130" height="10" rx="5" fill="url(#line-grad)"/>
+            <rect x="20" y="82" width="160" height="8" rx="4" fill="rgba(99,102,241,0.15)"/>
+            <rect x="20" y="98" width="140" height="8" rx="4" fill="rgba(99,102,241,0.12)"/>
+            <rect x="20" y="114" width="155" height="8" rx="4" fill="rgba(99,102,241,0.10)"/>
+
+            <rect x="20" y="138" width="160" height="8" rx="4" fill="rgba(99,102,241,0.15)"/>
+            <rect x="20" y="154" width="130" height="8" rx="4" fill="rgba(99,102,241,0.12)"/>
+            <rect x="20" y="170" width="150" height="8" rx="4" fill="rgba(99,102,241,0.10)"/>
+            <rect x="20" y="186" width="120" height="8" rx="4" fill="rgba(99,102,241,0.08)"/>
+
+            <rect x="20" y="210" width="100" height="8" rx="4" fill="rgba(99,102,241,0.12)"/>
+            <rect x="20" y="226" width="140" height="8" rx="4" fill="rgba(99,102,241,0.10)"/>
+          </g>
+
+          <!-- BADGE CHECK (círculo com checkmark) -->
+          <circle cx="256" cy="272" r="38" fill="url(#check-grad)" filter="url(#shadow)"/>
+          <circle cx="256" cy="272" r="34" fill="url(#check-grad)"/>
+          <!-- Checkmark SVG path -->
+          <path d="M240 272 L251 283 L272 262" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+          <!-- PARTÍCULAS DECORATIVAS -->
+          <circle cx="80" cy="80" r="5" fill="#6366F1" opacity="0.4"/>
+          <circle cx="310" cy="100" r="7" fill="#22D3EE" opacity="0.35"/>
+          <circle cx="60" cy="280" r="4" fill="#818CF8" opacity="0.4"/>
+          <circle cx="320" cy="200" r="5" fill="#6366F1" opacity="0.3"/>
+          <circle cx="340" cy="300" r="3" fill="#22D3EE" opacity="0.4"/>
+
+          <!-- Estrelinhas / sparkles -->
+          <path d="M330 80 L333 86 L340 83 L333 86 L330 92 L327 86 L320 83 L327 86 Z" fill="#818CF8" opacity="0.6"/>
+          <path d="M50 180 L52 184 L56 182 L52 184 L50 188 L48 184 L44 182 L48 184 Z" fill="#22D3EE" opacity="0.5"/>
+          <path d="M300 40 L302 44 L306 42 L302 44 L300 48 L298 44 L294 42 L298 44 Z" fill="#6366F1" opacity="0.5"/>
+
+          <!-- Linhas orbitais -->
+          <ellipse cx="200" cy="200" rx="155" ry="60" stroke="rgba(99,102,241,0.08)" stroke-width="1.5" fill="none" transform="rotate(-15, 200, 200)"/>
+          <ellipse cx="200" cy="200" rx="130" ry="50" stroke="rgba(34,211,238,0.06)" stroke-width="1" fill="none" transform="rotate(25, 200, 200)"/>
+        </svg>
+        <div class="hero-3d-glow"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
