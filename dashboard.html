@@ -182,6 +182,12 @@ tr:last-child td{border-bottom:none}
 .pix-code{font-size:11px;color:var(--muted);word-break:break-all;background:var(--bg);padding:10px;border-radius:6px;margin:10px 0;font-family:monospace}
 .btn-copy{padding:8px 18px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:var(--cyan);border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
 .btn-copy:hover{background:rgba(34,211,238,.2)}
+.qr-wrap{background:#fff;border-radius:12px;padding:12px;display:inline-block;margin:10px auto}
+.qr-wrap img{width:140px;height:140px;display:block}
+.pix-owner{font-size:11px;color:var(--muted2);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.pix-owner strong{color:var(--muted);display:block;margin-bottom:2px}
+.card-mp-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:linear-gradient(135deg,#009ee3,#007eb5);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;transition:.2s;font-family:inherit}
+.card-mp-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,158,227,.3)}
 
 /* NOVO PEDIDO FORM */
 .new-order-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
@@ -540,16 +546,45 @@ tr:last-child td{border-bottom:none}
         <span class="pay-method-icon">💳</span>Cartão
       </div>
     </div>
+
+    <!-- PIX SECTION -->
     <div id="pix-section" class="pix-box show">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Chave Pix para pagamento:</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:6px">Escaneie o QR Code ou copie a chave Pix:</p>
+      <div class="qr-wrap">
+        <img id="pix-qr-img" src="" alt="QR Code Pix">
+      </div>
       <div class="pix-code" id="pix-key-display">profpaulofilho@gmail.com</div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Após o pagamento, envie o comprovante no chat</p>
       <button class="btn-copy" onclick="copyPix()">📋 Copiar chave Pix</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px">Após o pagamento, envie o comprovante no chat</p>
+      <div class="pix-owner">
+        <strong>Recebedor</strong>
+        AcadêmicoFácil · profpaulofilho@gmail.com<br>
+        <span style="font-size:10px;color:var(--muted2)">Este serviço é de propriedade de profpaulofilho@gmail.com</span>
+      </div>
     </div>
-    <div id="card-section" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Você será redirecionado ao Mercado Pago</p>
-      <p style="font-size:12px;color:var(--muted2)">Ambiente seguro · Cartão em até 12x</p>
+
+    <!-- CARTÃO SECTION -->
+    <div id="card-section" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">💳</div>
+      <p style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">Pagar com cartão de crédito</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Você será redirecionado para o ambiente seguro do Mercado Pago. Parcele em até 12x.</p>
+      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        <span style="font-size:10px;background:rgba(99,102,241,.1);color:var(--indigo2);padding:3px 10px;border-radius:100px">🔒 SSL</span>
+        <span style="font-size:10px;background:rgba(16,185,129,.1);color:var(--green);padding:3px 10px;border-radius:100px">✓ Ambiente seguro</span>
+        <span style="font-size:10px;background:rgba(245,158,11,.1);color:var(--gold);padding:3px 10px;border-radius:100px">📱 Até 12x</span>
+      </div>
+      <button class="card-mp-btn" id="btn-mp" onclick="abrirMercadoPago()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        Pagar no Mercado Pago
+      </button>
+      <p style="font-size:11px;color:var(--muted2);margin-top:10px">Após o pagamento você será redirecionado de volta</p>
+      <div class="pix-owner" style="margin-top:10px">
+        <strong>Recebedor</strong>
+        AcadêmicoFácil · profpaulofilho@gmail.com<br>
+        <span style="font-size:10px;color:var(--muted2)">Este serviço é de propriedade de profpaulofilho@gmail.com</span>
+      </div>
     </div>
+
     <button class="btn-pay" id="btn-confirmar-pag" onclick="confirmarPagamento()">Confirmar pedido e pagar</button>
   </div>
 </div>
@@ -923,8 +958,24 @@ function criarPedido() {
 }
 
 // ============ PAYMENT ============
-function openPayModal() { document.getElementById('pay-modal').classList.add('open') }
+function openPayModal() {
+  document.getElementById('pay-modal').classList.add('open');
+  // Gera QR Code do Pix automaticamente
+  gerarQRPix();
+}
 function closePayModal() { document.getElementById('pay-modal').classList.remove('open') }
+
+function gerarQRPix() {
+  const chave = PIX_KEY;
+  const valor = pendingOrder ? pendingOrder.valor : 0;
+  const nome = 'AcademicoFacil';
+  const cidade = 'Brasil';
+  // Usa API gratuita de QR Code com texto da chave Pix
+  const texto = encodeURIComponent(`Pix: ${chave} | Valor: R$${valor} | ${nome}`);
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${texto}&bgcolor=ffffff&color=000000&margin=8`;
+  document.getElementById('pix-qr-img').src = qrUrl;
+  document.getElementById('pix-key-display').textContent = chave;
+}
 
 function setPayMethod(method, el) {
   selectedPayMethod = method;
@@ -932,74 +983,75 @@ function setPayMethod(method, el) {
   el.classList.add('active');
   document.getElementById('pix-section').classList.toggle('show', method==='pix');
   document.getElementById('card-section').style.display = method==='card' ? 'block' : 'none';
+  // Atualiza texto do botão confirmar
+  const btn = document.getElementById('btn-confirmar-pag');
+  btn.textContent = method === 'pix' ? 'Confirmar pedido — pagar via Pix' : 'Ir para o Mercado Pago →';
 }
 
 function copyPix() {
   navigator.clipboard.writeText(PIX_KEY).then(()=>toast('Chave Pix copiada!','success'));
 }
 
+async function abrirMercadoPago() {
+  if(!pendingOrder) return;
+  const btn = document.getElementById('btn-mp');
+  btn.disabled = true; btn.textContent = 'Gerando link...';
+  try {
+    const resp = await fetch('https://api.mercadopago.com/checkout/preferences', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+MP_ACCESS_TOKEN},
+      body: JSON.stringify({
+        items:[{title:pendingOrder.servico,quantity:1,unit_price:pendingOrder.valor,currency_id:'BRL'}],
+        payer:{email:currentUser.email},
+        back_urls:{
+          success:'https://academicofacil.com.br/dashboard?status=success',
+          failure:'https://academicofacil.com.br/dashboard?status=failure',
+          pending:'https://academicofacil.com.br/dashboard?status=pending'
+        },
+        auto_return:'approved',
+        statement_descriptor:'ACADEMICOFACIL',
+        external_reference:currentUser.uid
+      })
+    });
+    const data = await resp.json();
+    if(data.init_point){
+      await salvarPedido('aguardando_pagamento');
+      window.open(data.init_point,'_blank');
+      closePayModal();
+      toast('Redirecionando para o Mercado Pago...','success');
+      loadClientData();
+    } else { throw new Error(); }
+  } catch(e) {
+    toast('Erro ao gerar link. Tente o Pix.','error');
+    btn.disabled = false; btn.textContent = 'Pagar no Mercado Pago';
+  }
+}
+
 async function confirmarPagamento() {
   if(!pendingOrder) return;
-  const btn = document.getElementById('btn-confirmar-pag');
-  btn.disabled = true; btn.textContent = 'Processando...';
+  // Se cartão, usa a função específica do MP
+  if(selectedPayMethod === 'card') { abrirMercadoPago(); return; }
 
+  // PIX — salva pedido e instrui enviar comprovante
+  const btn = document.getElementById('btn-confirmar-pag');
+  btn.disabled = true; btn.textContent = 'Registrando pedido...';
   try {
-    if(selectedPayMethod === 'card') {
-      // Mercado Pago Checkout Pro
-      const resp = await fetch('https://api.mercadopago.com/checkout/preferences', {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+MP_ACCESS_TOKEN
-        },
-        body: JSON.stringify({
-          items:[{
-            title: pendingOrder.servico,
-            quantity: 1,
-            unit_price: pendingOrder.valor,
-            currency_id: 'BRL'
-          }],
-          payer: { email: currentUser.email },
-          back_urls: {
-            success: 'https://academicofacil.com.br/dashboard?status=success',
-            failure: 'https://academicofacil.com.br/dashboard?status=failure',
-            pending: 'https://academicofacil.com.br/dashboard?status=pending'
-          },
-          auto_return: 'approved',
-          statement_descriptor: 'ACADEMICOFACIL',
-          external_reference: currentUser.uid
-        })
+    await salvarPedido('aguardando_comprovante');
+    closePayModal();
+    toast('Pedido registrado! Após o Pix, envie o comprovante no chat.','success');
+    showP('chat', null);
+    setTimeout(()=>{
+      db.collection('chats').add({
+        text:`✅ Pedido registrado!\n\nValor: R$ ${pendingOrder ? pendingOrder.valor.toLocaleString('pt-BR') : '...'}\nChave Pix: ${PIX_KEY}\nRecebedor: AcadêmicoFácil (profpaulofilho@gmail.com)\n\nApós o pagamento, envie o comprovante aqui para liberarmos seu projeto.`,
+        senderId:'system',senderName:'Sistema',
+        createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+        read:false,participants:[currentUser.uid,'admin']
       });
-      const data = await resp.json();
-      if(data.init_point) {
-        await salvarPedido('aguardando_pagamento');
-        window.open(data.init_point, '_blank');
-        closePayModal();
-        toast('Redirecionando para o Mercado Pago...','success');
-      } else {
-        throw new Error('Erro no Mercado Pago');
-      }
-    } else {
-      // PIX — salva pedido e instrui enviar comprovante
-      await salvarPedido('aguardando_comprovante');
-      closePayModal();
-      toast('Pedido criado! Envie o comprovante Pix no chat.','success');
-      showP('chat', null);
-      setTimeout(()=>{
-        db.collection('chats').add({
-          text: `✅ Pedido criado! Valor: R$ ${pendingOrder.valor.toLocaleString('pt-BR')} — Chave Pix: ${PIX_KEY}\n\nApós o pagamento, envie o comprovante aqui para liberarmos seu projeto.`,
-          senderId: 'system',
-          senderName: 'Sistema',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          read: false,
-          participants: [currentUser.uid, 'admin']
-        });
-      }, 500);
-    }
+    }, 500);
     loadClientData();
   } catch(e) {
-    toast('Erro ao processar pagamento. Tente novamente.','error');
-    btn.disabled = false; btn.textContent = 'Confirmar pedido e pagar';
+    toast('Erro ao registrar pedido. Tente novamente.','error');
+    btn.disabled = false; btn.textContent = 'Confirmar pedido — pagar via Pix';
   }
 }
 
