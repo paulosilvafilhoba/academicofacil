@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AcadêmicoFácil — Assessoria Acadêmica com Tecnologia</title>
+<meta name="description" content="Plataforma de assessoria acadêmica para TCC, artigos e monografias. Tecnologia + consultores especializados. Orçamento instantâneo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080F;
+  --bg2:#0D0F1C;
+  --bg3:#12152A;
+  --surface:#161929;
+  --border:rgba(99,102,241,0.18);
+  --border2:rgba(99,102,241,0.35);
+  --indigo:#6366F1;
+  --indigo2:#818CF8;
+  --indigo-glow:rgba(99,102,241,0.25);
+  --cyan:#22D3EE;
+  --cyan-glow:rgba(34,211,238,0.2);
+  --green:#10B981;
+  --gold:#F59E0B;
+  --text:#F0F1FF;
+  --muted:#8B8FA8;
+  --radius:14px;
+  --radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:1.15}
+
+/* CANVAS PARTICLES */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.5}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:68px;background:rgba(7,8,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--indigo),var(--cyan));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--indigo);color:#fff;padding:10px 22px;border-radius:100px;text-decoration:none;font-size:14px;font-weight:600;transition:.2s;box-shadow:0 0 20px var(--indigo-glow)}
+.nav-cta:hover{background:#4F46E5;box-shadow:0 0 32px rgba(99,102,241,0.5)}
+
+/* HERO */
+.hero{position:relative;z-index:1;padding:110px 6% 90px;text-align:center;overflow:hidden}
+.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(99,102,241,0.15) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.1);border:1px solid var(--border2);color:var(--indigo2);padding:7px 18px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:32px;letter-spacing:.01em}
+.badge-pulse{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(16,185,129,0)}}
+.hero h1{font-size:clamp(38px,5.5vw,72px);color:var(--text);max-width:860px;margin:0 auto 10px;letter-spacing:-.025em}
+.hero h1 .grad{background:linear-gradient(90deg,var(--indigo2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:600px;margin:20px auto 44px;line-height:1.7}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-glow{background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;padding:16px 38px;border-radius:100px;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;transition:.2s;box-shadow:0 0 32px var(--indigo-glow),0 4px 16px rgba(0,0,0,.4);position:relative;overflow:hidden}
+.btn-glow::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);border-radius:100px}
+.btn-glow:hover{transform:translateY(-2px);box-shadow:0 0 48px rgba(99,102,241,.5),0 8px 24px rgba(0,0,0,.4)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--indigo2);padding:16px 38px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;transition:.2s}
+.btn-outline:hover{background:rgba(99,102,241,.1);border-color:var(--indigo)}
+
+/* STATS */
+.stats-bar{position:relative;z-index:1;display:flex;justify-content:center;gap:0;margin:60px 6% 0;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.stat-item{flex:1;min-width:160px;padding:28px 20px;text-align:center;position:relative}
+.stat-item:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:var(--border)}
+.stat-num{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;background:linear-gradient(135deg,var(--indigo2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* SECTION BASE */
+section{position:relative;z-index:1;padding:90px 6%}
+.section-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,.1);border:1px solid var(--border2);color:var(--indigo2);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:16px}
+.chip-dot{width:5px;height:5px;background:var(--cyan);border-radius:50%}
+.section-title{font-size:clamp(28px,3.5vw,44px);color:var(--text);margin-bottom:14px;letter-spacing:-.02em}
+.section-sub{font-size:17px;color:var(--muted);max-width:560px;line-height:1.7}
+.section-header{margin-bottom:56px}
+.section-header.center{text-align:center}
+.section-header.center .section-sub{margin:0 auto}
+
+/* TECH GRID - SERVICES */
+.tech-section{background:var(--bg2)}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.svc-card{background:var(--bg2);padding:32px;transition:.25s;cursor:default;position:relative;overflow:hidden}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--indigo),var(--cyan));transform:scaleX(0);transform-origin:left;transition:transform .35s}
+.svc-card:hover{background:var(--surface)}
+.svc-card:hover::before{transform:scaleX(1)}
+.svc-icon-wrap{width:52px;height:52px;background:rgba(99,102,241,.12);border:1px solid var(--border2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px}
+.svc-card h3{font-size:17px;color:var(--text);margin-bottom:8px}
+.svc-card p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px}
+.svc-price{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;background:linear-gradient(90deg,var(--indigo2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.svc-unit{font-size:13px;color:var(--muted);font-weight:400;-webkit-text-fill-color:var(--muted)}
+
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+.how-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative}
+.how-num{font-family:'Space Grotesk',sans-serif;font-size:48px;font-weight:700;background:linear-gradient(135deg,rgba(99,102,241,.3),rgba(34,211,238,.2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:12px}
+.how-card h3{font-size:16px;color:var(--text);margin-bottom:8px}
+.how-card p{font-size:13px;color:var(--muted);line-height:1.7}
+.how-connector{display:none}
+
+/* TESTIMONIALS */
+.testi-section{background:var(--bg2)}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:.2s;position:relative;overflow:hidden}
+.testi-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,.04),transparent);pointer-events:none}
+.testi-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.testi-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;flex-shrink:0;border:2px solid var(--border2)}
+.av-purple{background:rgba(99,102,241,.2);color:var(--indigo2)}
+.av-cyan{background:rgba(34,211,238,.15);color:var(--cyan)}
+.av-green{background:rgba(16,185,129,.15);color:var(--green)}
+.av-gold{background:rgba(245,158,11,.15);color:var(--gold)}
+.testi-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:var(--text)}
+.testi-role{font-size:12px;color:var(--muted);margin-top:2px}
+.testi-badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:4px}
+.badge-approved{background:rgba(16,185,129,.15);color:var(--green)}
+.badge-delivered{background:rgba(99,102,241,.15);color:var(--indigo2)}
+.stars{color:var(--gold);font-size:14px;letter-spacing:2px;margin-bottom:14px}
+.testi-quote{font-size:14px;color:var(--muted);line-height:1.8;font-style:italic}
+.testi-quote strong{color:var(--text);font-style:normal}
+.testi-result{margin-top:18px;padding:12px 16px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:var(--radius-sm);font-size:13px;color:var(--green);font-weight:500;display:flex;align-items:center;gap:8px}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:980px;margin:0 auto}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;position:relative;transition:.2s}
+.price-card.featured{border-color:var(--indigo);background:linear-gradient(145deg,rgba(99,102,241,.08),var(--surface));box-shadow:0 0 40px var(--indigo-glow)}
+.feat-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--indigo),#4F46E5);color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 16px;border-radius:100px;white-space:nowrap}
+.price-card h3{font-size:19px;color:var(--text);margin-bottom:4px}
+.price-level{font-size:12px;color:var(--muted);margin-bottom:22px}
+.price-val{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;background:linear-gradient(90deg,var(--indigo2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.price-from{font-size:13px;color:var(--muted);-webkit-text-fill-color:var(--muted);display:block;margin-bottom:4px}
+.price-unit{font-size:16px;font-weight:500;-webkit-text-fill-color:var(--indigo2)}
+.price-list{list-style:none;margin-top:24px;display:flex;flex-direction:column;gap:10px}
+.price-list li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.price-list li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.price-cta{display:block;text-align:center;margin-top:28px;padding:14px;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;text-decoration:none;transition:.2s}
+.cta-outline{border:1px solid var(--border2);color:var(--indigo2)}
+.cta-outline:hover{background:rgba(99,102,241,.1)}
+.cta-solid{background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;box-shadow:0 0 24px var(--indigo-glow)}
+.cta-solid:hover{box-shadow:0 0 40px rgba(99,102,241,.5);transform:translateY(-1px)}
+
+/* CALC FORM */
+.form-section{background:var(--bg3)}
+.form-wrap{max-width:640px}
+.calc-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;margin-top:36px;position:relative;overflow:hidden}
+.calc-box::before{content:'';position:absolute;top:-1px;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--cyan))}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg{margin-bottom:20px}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase}
+.fg select,.fg input{width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;transition:.2s;appearance:none}
+.fg select option{background:var(--bg2)}
+.fg select:focus,.fg input:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-glow)}
+.fg input::placeholder{color:var(--muted)}
+.price-display{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.price-display .pd-label{font-size:14px;color:var(--muted)}
+.price-display .pd-value{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;background:linear-gradient(90deg,var(--indigo2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.btn-send{width:100%;padding:16px;background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer;transition:.2s;box-shadow:0 0 24px var(--indigo-glow)}
+.btn-send:hover{box-shadow:0 0 40px rgba(99,102,241,.5);transform:translateY(-1px)}
+
+/* TRUST */
+.trust-section{background:var(--bg)}
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
+.trust-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;align-items:flex-start;gap:14px}
+.trust-ic{width:40px;height:40px;background:rgba(99,102,241,.12);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.trust-card h4{font-size:14px;color:var(--text);margin-bottom:4px}
+.trust-card p{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* FAQ */
+.faq-section{background:var(--bg2)}
+.faq-list{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.faq-q{width:100%;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--text);text-align:left;transition:.2s}
+.faq-q:hover{color:var(--indigo2)}
+.faq-icon{color:var(--indigo);font-size:22px;flex-shrink:0;transition:transform .3s;font-style:normal}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-a{display:none;padding:0 24px 20px;font-size:14px;color:var(--muted);line-height:1.8}
+.faq-item.open .faq-a{display:block}
+
+/* FOOTER */
+footer{background:#03040A;padding:64px 6% 32px;border-top:1px solid var(--border)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.footer-brand p{font-size:14px;color:var(--muted);line-height:1.7;max-width:280px}
+.footer-col h4{color:var(--text);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;font-family:'Space Grotesk',sans-serif}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+.footer-col a:hover{color:var(--indigo2)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);flex-wrap:wrap;gap:12px}
+.footer-bottom span{display:flex;align-items:center;gap:6px}
+
+/* WHATSAPP */
+.wa-fab{position:fixed;bottom:28px;right:28px;width:58px;height:58px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:.2s;z-index:200;font-size:28px}
+.wa-fab:hover{transform:scale(1.1);box-shadow:0 8px 30px rgba(37,211,102,.5)}
+
+/* GLOW LINE TOP */
+.glow-line{height:1px;background:linear-gradient(90deg,transparent,var(--indigo),var(--cyan),transparent);width:100%;opacity:.5}
+
+@media(max-width:700px){
+  nav{padding:0 4%}.nav-links{display:none}
+  section{padding:60px 4%}
+  .hero{padding:80px 4% 60px}
+  .form-row{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr;gap:32px}
+  .stats-bar{margin:40px 4% 0}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <span class="logo-icon">🎓</span>
+    AcadêmicoFácil
+  </a>
+  <ul class="nav-links">
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#depoimentos">Depoimentos</a></li>
+    <li><a href="#precos">Preços</a></li>
+    <li><a href="#faq">Dúvidas</a></li>
+  </ul>
+  <a href="#orcamento" class="nav-cta">Orçamento grátis</a>
+</nav>
+
+<div class="glow-line"></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">
+    <span class="badge-pulse"></span>
+    Plataforma de assessoria acadêmica
+  </div>
+  <h1>Seu TCC, artigo ou monografia<br><span class="grad">entregue com tecnologia</span></h1>
+  <p class="hero-sub">Consultores especializados + plataforma digital segura. Do técnico ao doutorado — orçamento automático, pagamento Pix, acompanhamento em tempo real.</p>
+  <div class="hero-btns">
+    <a href="#orcamento" class="btn-glow">Calcular orçamento agora</a>
+    <a href="#depoimentos" class="btn-outline">Ver quem passou →</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">+1.400</div>
+    <div class="stat-label">Trabalhos entregues</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">98,2%</div>
+    <div class="stat-label">Taxa de aprovação</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">4,9 ★</div>
+    <div class="stat-label">Avaliação dos clientes</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">72h</div>
+    <div class="stat-label">Primeiro retorno</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">LGPD</div>
+    <div class="stat-label">Dados protegidos</div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="servicos" class="tech-section">
+  <div class="section-header">
+    <div class="section-chip"><span class="chip-dot"></span> Serviços</div>
+    <h2 class="section-title">Cobertura acadêmica completa</h2>
+    <p class="section-sub">Do técnico ao doutorado, com consultores especializados em cada área do conhecimento.</p>
+  </div>
+  <div class="services-grid">
+    <div class="svc-card">
+      <div class="svc-icon-wrap">📘</div>
+      <h3>TCC técnico</h3>
+      <p>Cursos técnicos SENAI, SENAC e equivalentes. Linguagem adequada à área técnica com normas ABNT.</p>
+      <div class="svc-price">R$ 25 <span class="svc-unit">/ lauda</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon-wrap">🎓</div>
+      <h3>TCC graduação</h3>
+      <p>Bacharelado, licenciatura e tecnólogos. Metodologia científica, referencial teórico e análise crítica.</p>
+      <div class="svc-price">R$ 35 <span class="svc-unit">/ lauda</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon-wrap">🏅</div>
+      <h3>Pós / MBA / Especialização</h3>
+      <p>Monografias e trabalhos de pós-graduação com nível avançado de redação e argumentação.</p>
+      <div class="svc-price">R$ 55 <span class="svc-unit">/ lauda</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon-wrap">📄</div>
+      <h3>Artigo científico</h3>
+      <p>Elaboração e revisão para congressos, revistas e periódicos. ABNT, APA ou Vancouver.</p>
+      <div class="svc-price">R$ 480 <span class="svc-unit">a partir de</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon-wrap">🗂️</div>
+      <h3>Formatação ABNT</h3>
+      <p>Capa, sumário, referências, margens e estrutura completa. Entrega em até 48h.</p>
+      <div class="svc-price">R$ 12 <span class="svc-unit">/ lauda</span></div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon-wrap">✏️</div>
+      <h3>Revisão e reescrita</h3>
+      <p>Correção gramatical, coesão e adequação do nível de linguagem acadêmica.</p>
+      <div class="svc-price">R$ 180 <span class="svc-unit">a partir de</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="como-funciona">
+  <div class="section-header center">
+    <div class="section-chip"><span class="chip-dot"></span> Como funciona</div>
+    <h2 class="section-title">4 etapas. Simples assim.</h2>
+    <p class="section-sub">Da solicitação à entrega, tudo dentro de uma plataforma segura que você acompanha em tempo real.</p>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">01</div>
+      <h3>Preencha o formulário</h3>
+      <p>Informe o tipo de trabalho, número de laudas, tema e prazo. O orçamento aparece automaticamente.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">02</div>
+      <h3>Aprove e pague</h3>
+      <p>Pix com liberação imediata ou cartão em até 12x. Recibo gerado automaticamente.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">03</div>
+      <h3>Acesse a plataforma</h3>
+      <p>Você recebe login por e-mail e acompanha o progresso do seu trabalho em tempo real. Chat com o consultor incluso.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">04</div>
+      <h3>Revise e baixe</h3>
+      <p>Receba o trabalho completo em PDF e DOCX com relatório Originality.ai. Revisões inclusas até sua aprovação.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="depoimentos" class="testi-section">
+  <div class="section-header center">
+    <div class="section-chip"><span class="chip-dot"></span> Depoimentos reais</div>
+    <h2 class="section-title">Eles passaram. Agora é a sua vez.</h2>
+    <p class="section-sub">Histórias reais de quem estava no limite — e encontrou uma saída profissional.</p>
+  </div>
+  <div class="testi-grid">
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="avatar av-purple">JM</div>
+        <div>
+          <div class="testi-name">Juliana Mendes</div>
+          <div class="testi-role">Administração — UNIP São Paulo</div>
+          <div class="testi-badge badge-approved">✓ Aprovada com distinção</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Trabalhava 10 horas por dia e ainda tinha que escrever o TCC. <strong>Eu cheguei a chorar de desespero</strong> três semanas antes da entrega. Uma amiga me indicou a plataforma. Em 12 dias recebi o trabalho completo, formatado e com o relatório de originalidade. Minha orientadora elogiou a qualidade do referencial teórico. <strong>Passei com nota 9,5.</strong>"</p>
+      <div class="testi-result">✓ Entregue 4 dias antes do prazo — nota 9,5 na banca</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="avatar av-cyan">RL</div>
+        <div>
+          <div class="testi-name">Ricardo Lima</div>
+          <div class="testi-role">Engenharia Civil — UFC Fortaleza</div>
+          <div class="testi-badge badge-approved">✓ Aprovado pela banca</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Fui reprovado na primeira tentativa por problemas na metodologia. <strong>Estava quase desistindo do curso.</strong> Contratei a assessoria e o consultor me explicou tudo pelo chat — cada detalhe do que estava errado. Reescremos a metodologia juntos. Na segunda defesa, <strong>a banca elogiou exatamente essa parte.</strong>"</p>
+      <div class="testi-result">✓ Aprovado na segunda defesa — salvou o semestre</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="avatar av-green">CS</div>
+        <div>
+          <div class="testi-name">Carolina Souza</div>
+          <div class="testi-role">MBA Gestão de Pessoas — FGV Online</div>
+          <div class="testi-badge badge-delivered">✓ Monografia entregue</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Como mãe de dois filhos e diretora de RH, não tinha 1 minuto livre. <strong>O prazo da monografia chegou e eu tinha só 3 páginas escritas.</strong> A plataforma foi a solução. Acompanhei tudo pelo celular mesmo. Em 18 dias, trabalho completo com 52 laudas. Defendi sem nenhuma ressalva."</p>
+      <div class="testi-result">✓ 52 laudas em 18 dias — aprovada sem ressalvas</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="avatar av-gold">MF</div>
+        <div>
+          <div class="testi-name">Marcos Ferreira</div>
+          <div class="testi-role">Técnico em Enfermagem — SENAC Campinas</div>
+          <div class="testi-badge badge-approved">✓ Formado</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Nunca tinha escrito um trabalho acadêmico na minha vida. <strong>Com 43 anos voltando a estudar, estava perdido nas normas ABNT.</strong> O consultor foi muito paciente, explicou tudo e o trabalho ficou profissional. Minha coordenadora disse que era o melhor da turma. <strong>Não acreditei quando li isso."</strong></p>
+      <div class="testi-result">✓ Melhor TCC da turma segundo a coordenação</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="avatar av-purple">PP</div>
+        <div>
+          <div class="testi-name">Patricia Pinheiro</div>
+          <div class="testi-role">Psicologia — PUC Minas</div>
+          <div class="testi-badge badge-approved">✓ Aprovada</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Tentei escrever sozinha por meses mas o tema era muito complexo. <strong>Meu orientador devolveu 3 versões sem aprovação.</strong> Com a assessoria, a abordagem mudou completamente. O consultor entendeu o que o orientador queria melhor do que eu. Na quarta versão, aprovação imediata. Defesa marcada em 2 semanas."</p>
+      <div class="testi-result">✓ Aprovação após 3 devoluções pelo orientador</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="avatar av-cyan">DG</div>
+        <div>
+          <div class="testi-name">Diego Gomes</div>
+          <div class="testi-role">Direito — UNINOVE São Paulo</div>
+          <div class="testi-badge badge-delivered">✓ Formado</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Tinha medo de plágio e de dar errado. <strong>Pesquisei muito antes de contratar.</strong> O que me convenceu foi a transparência: plataforma própria, contrato, relatório de originalidade incluso. O trabalho foi 100% original e a consultora ainda me mandou dicas para a defesa oral. <strong>Parecia ter uma orientadora particular.</strong>"</p>
+      <div class="testi-result">✓ 0% plágio no relatório — banca elogiou a defesa oral</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="precos">
+  <div class="section-header center">
+    <div class="section-chip"><span class="chip-dot"></span> Preços</div>
+    <h2 class="section-title">Transparente. Sem surpresas.</h2>
+    <p class="section-sub">Preço por lauda — 1 lauda = página A4 padrão com ~250 palavras.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <h3>Técnico</h3>
+      <div class="price-level">Cursos técnicos SENAI / SENAC</div>
+      <div class="price-val"><span class="price-from">a partir de</span>R$ 25<span class="price-unit">/lauda</span></div>
+      <ul class="price-list">
+        <li>Formatação ABNT completa</li>
+        <li>Referencial teórico incluso</li>
+        <li>Relatório Originality.ai</li>
+        <li>2 rodadas de revisão</li>
+        <li>Entrega PDF e DOCX</li>
+      </ul>
+      <a href="#orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
+    </div>
+    <div class="price-card featured">
+      <div class="feat-badge">Mais solicitado</div>
+      <h3>Graduação</h3>
+      <div class="price-level">Bacharelado e licenciatura</div>
+      <div class="price-val"><span class="price-from">a partir de</span>R$ 35<span class="price-unit">/lauda</span></div>
+      <ul class="price-list">
+        <li>Metodologia científica completa</li>
+        <li>Análise e discussão dos dados</li>
+        <li>Formatação ABNT completa</li>
+        <li>Relatório Originality.ai</li>
+        <li>3 rodadas de revisão</li>
+        <li>Entrega PDF e DOCX</li>
+      </ul>
+      <a href="#orcamento" class="price-cta cta-solid">Solicitar orçamento</a>
+    </div>
+    <div class="price-card">
+      <h3>Pós / MBA</h3>
+      <div class="price-level">Especialização e pós-graduação</div>
+      <div class="price-val"><span class="price-from">a partir de</span>R$ 55<span class="price-unit">/lauda</span></div>
+      <ul class="price-list">
+        <li>Nível avançado de redação</li>
+        <li>Fundamentação teórica robusta</li>
+        <li>Relatório Originality.ai</li>
+        <li>Revisões ilimitadas</li>
+        <li>Suporte para defesa oral</li>
+        <li>Entrega PDF e DOCX</li>
+      </ul>
+      <a href="#orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
+    </div>
+  </div>
+</section>
+
+<!-- FORM -->
+<section id="orcamento" class="form-section">
+  <div class="form-wrap">
+    <div class="section-chip"><span class="chip-dot"></span> Orçamento gratuito</div>
+    <h2 class="section-title">Calcule agora.<br>Sem compromisso.</h2>
+    <p class="section-sub">Preencha os dados e veja o valor estimado instantaneamente.</p>
+    <div class="calc-box">
+      <div class="form-row">
+        <div class="fg">
+          <label for="tipo">Tipo de trabalho</label>
+          <select id="tipo" onchange="calcular()">
+            <option value="">Selecione</option>
+            <option value="tecnico">TCC técnico</option>
+            <option value="graduacao">TCC graduação</option>
+            <option value="pos">Pós / MBA</option>
+            <option value="artigo">Artigo científico</option>
+            <option value="formatacao">Formatação ABNT</option>
+            <option value="revisao">Revisão textual</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label for="laudas">Número de laudas</label>
+          <input type="number" id="laudas" placeholder="Ex: 40" min="5" max="500" oninput="calcular()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label for="prazo">Prazo necessário</label>
+          <select id="prazo" onchange="calcular()">
+            <option value="normal">Normal — 15+ dias</option>
+            <option value="rapido">Rápido — 7 a 14 dias (+15%)</option>
+            <option value="urgente">Urgente — 3 a 6 dias (+30%)</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label for="email">Seu e-mail</label>
+          <input type="email" id="email" placeholder="voce@email.com">
+        </div>
+      </div>
+      <div class="price-display">
+        <span class="pd-label">Estimativa de investimento:</span>
+        <span class="pd-value" id="priceOut">—</span>
+      </div>
+      <button class="btn-send" onclick="enviar()">Solicitar assessoria agora →</button>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust-section">
+  <div class="section-header center">
+    <div class="section-chip"><span class="chip-dot"></span> Sua segurança</div>
+    <h2 class="section-title">Confiança em cada detalhe</h2>
+  </div>
+  <div class="trust-grid">
+    <div class="trust-card">
+      <div class="trust-ic">🔒</div>
+      <div>
+        <h4>Pagamento seguro</h4>
+        <p>SSL, Pix e cartão com criptografia. Recibo automático após confirmação.</p>
+      </div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ic">📋</div>
+      <div>
+        <h4>Originality.ai incluso</h4>
+        <p>Relatório de originalidade entregue junto ao trabalho em todos os planos.</p>
+      </div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ic">🛡️</div>
+      <div>
+        <h4>LGPD compliant</h4>
+        <p>Seus dados e conteúdo são confidenciais. Nunca compartilhados com terceiros.</p>
+      </div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ic">⏱️</div>
+      <div>
+        <h4>Prazo garantido</h4>
+        <p>Prazo estabelecido em contrato. Descumprimento gera reembolso proporcional.</p>
+      </div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ic">💬</div>
+      <div>
+        <h4>Chat com o consultor</h4>
+        <p>Comunicação direta com quem está desenvolvendo seu trabalho, na plataforma.</p>
+      </div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-ic">🔄</div>
+      <div>
+        <h4>Revisões inclusas</h4>
+        <p>Ajustes e correções sem custo adicional, até sua completa satisfação.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="faq-section">
+  <div class="section-header center">
+    <div class="section-chip"><span class="chip-dot"></span> Perguntas frequentes</div>
+    <h2 class="section-title">Respostas diretas</h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="faq(this)">O que é uma lauda? <i class="faq-icon">+</i></button>
+      <div class="faq-a">Uma lauda é uma página A4 com margens padrão (2,5 cm), espaçamento 1,5 entre linhas e fonte Times New Roman ou Arial 12. Equivale a cerca de 250 palavras ou 25 linhas de texto corrido.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="faq(this)">Como funciona o pagamento? <i class="faq-icon">+</i></button>
+      <div class="faq-a">Aceitamos Pix (liberação imediata) e cartão de crédito em até 12x. Após confirmação você recebe o acesso à plataforma por e-mail em até 30 minutos, com link do consultor responsável.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="faq(this)">O trabalho passa no detector de plágio? <i class="faq-icon">+</i></button>
+      <div class="faq-a">Sim. Todos os trabalhos são produzidos com texto original e acompanham o relatório do Originality.ai como comprovação. Esse relatório é entregue junto ao trabalho final, sem custo adicional.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="faq(this)">Posso pedir alterações depois de receber? <i class="faq-icon">+</i></button>
+      <div class="faq-a">Sim. O plano Técnico inclui 2 rodadas de revisão, Graduação inclui 3, e Pós/MBA tem revisões ilimitadas. Todas as alterações são feitas dentro da plataforma, com rastreamento de versões.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="faq(this)">Meus dados e o conteúdo ficam protegidos? <i class="faq-icon">+</i></button>
+      <div class="faq-a">Absolutamente. Seguimos a LGPD (Lei 13.709/2018). Seu nome, e-mail e todo o conteúdo do trabalho são mantidos em sigilo total. Os consultores assinam NDA (acordo de confidencialidade) antes de acessar qualquer projeto.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="faq(this)">Qual o prazo mínimo para entrega? <i class="faq-icon">+</i></button>
+      <div class="faq-a">O prazo mínimo é de 72 horas para trabalhos simples (formatação, revisão). Para TCCs e monografias, o prazo urgente é de 3 a 6 dias úteis com acréscimo de 30% no valor. Prazos acima de 15 dias têm valor normal.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="footer-logo">
+        <span class="logo-icon">🎓</span> AcadêmicoFácil
+      </a>
+      <p>Plataforma de assessoria acadêmica para TCC, artigos e monografias. Tecnologia + consultores especializados em todo o Brasil.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Serviços</h4>
+      <ul>
+        <li><a href="#">TCC técnico</a></li>
+        <li><a href="#">TCC graduação</a></li>
+        <li><a href="#">Pós-graduação / MBA</a></li>
+        <li><a href="#">Artigo científico</a></li>
+        <li><a href="#">Formatação ABNT</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Empresa</h4>
+      <ul>
+        <li><a href="#">Sobre nós</a></li>
+        <li><a href="#">Como funciona</a></li>
+        <li><a href="#">Depoimentos</a></li>
+        <li><a href="#">Política de privacidade</a></li>
+        <li><a href="#">Termos de uso</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 AcadêmicoFácil. Todos os direitos reservados.</span>
+    <span>🔒 SSL · LGPD · Pagamento seguro</span>
+  </div>
+</footer>
+
+<a href="https://wa.me/5500000000000" class="wa-fab" target="_blank" aria-label="WhatsApp">💬</a>
+
+<script>
+/* PARTICLES */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let pts = [];
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+resize();window.addEventListener('resize',resize);
+for(let i=0;i<90;i++) pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.5});
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>canvas.width)p.vx*=-1;
+    if(p.y<0||p.y>canvas.height)p.vy*=-1;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle='rgba(99,102,241,.5)';ctx.fill();
+  });
+  pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{
+    const d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(d<120){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=`rgba(99,102,241,${.12*(1-d/120)})`;ctx.lineWidth=.6;ctx.stroke()}
+  }));
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* CALC */
+const precos={tecnico:{pl:25,fx:null},graduacao:{pl:35,fx:null},pos:{pl:55,fx:null},artigo:{pl:null,fx:480},formatacao:{pl:12,fx:null},revisao:{pl:null,fx:180}};
+function calcular(){
+  const tipo=document.getElementById('tipo').value;
+  const laudas=parseInt(document.getElementById('laudas').value)||0;
+  const prazo=document.getElementById('prazo').value;
+  const el=document.getElementById('priceOut');
+  if(!tipo){el.textContent='—';return}
+  const p=precos[tipo];
+  let total=p.fx||(p.pl&&laudas>0?p.pl*laudas:0);
+  if(!total){el.textContent='—';return}
+  if(prazo==='rapido')total=Math.round(total*1.15);
+  if(prazo==='urgente')total=Math.round(total*1.30);
+  el.textContent='R$ '+total.toLocaleString('pt-BR')+(p.fx?'+':'');
+}
+function enviar(){
+  const email=document.getElementById('email').value;
+  const tipo=document.getElementById('tipo').value;
+  if(!email||!tipo){alert('Preencha o tipo de trabalho e seu e-mail para continuar.');return}
+  alert('Solicitação enviada! Você receberá acesso à plataforma em até 30 minutos no e-mail: '+email);
+}
+function faq(btn){btn.closest('.faq-item').classList.toggle('open')}
+</script>
+</body>
+</html>
