@@ -221,8 +221,9 @@ footer{background:#03040A;padding:64px 6% 32px;border-top:1px solid var(--border
     <li><a href="#depoimentos">Depoimentos</a></li>
     <li><a href="#precos">Preços</a></li>
     <li><a href="#faq">Dúvidas</a></li>
+    <li><a href="/dashboard" style="color:var(--indigo2)">Entrar →</a></li>
   </ul>
-  <a href="#orcamento" class="nav-cta">Orçamento grátis</a>
+  <a href="/dashboard" class="nav-cta">Solicitar agora</a>
 </nav>
 
 <div class="glow-line"></div>
@@ -237,7 +238,7 @@ footer{background:#03040A;padding:64px 6% 32px;border-top:1px solid var(--border
   <h1>Seu TCC, artigo ou monografia<br><span class="grad">entregue com tecnologia</span></h1>
   <p class="hero-sub">Consultores especializados + plataforma digital segura. Do técnico ao doutorado — orçamento automático, pagamento Pix, acompanhamento em tempo real.</p>
   <div class="hero-btns">
-    <a href="#orcamento" class="btn-glow">Calcular orçamento agora</a>
+    <a href="/dashboard" class="btn-glow">Solicitar assessoria agora</a>
     <a href="#depoimentos" class="btn-outline">Ver quem passou →</a>
   </div>
 </div>
@@ -459,7 +460,7 @@ footer{background:#03040A;padding:64px 6% 32px;border-top:1px solid var(--border
         <li>2 rodadas de revisão</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="#orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
+      <a href="/dashboard" class="price-cta cta-outline">Solicitar orçamento</a>
     </div>
     <div class="price-card featured">
       <div class="feat-badge">Mais solicitado</div>
@@ -474,7 +475,7 @@ footer{background:#03040A;padding:64px 6% 32px;border-top:1px solid var(--border
         <li>3 rodadas de revisão</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="#orcamento" class="price-cta cta-solid">Solicitar orçamento</a>
+      <a href="/dashboard" class="price-cta cta-solid">Solicitar orçamento</a>
     </div>
     <div class="price-card">
       <h3>Pós / MBA</h3>
@@ -488,7 +489,7 @@ footer{background:#03040A;padding:64px 6% 32px;border-top:1px solid var(--border
         <li>Suporte para defesa oral</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="#orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
+      <a href="/dashboard" class="price-cta cta-outline">Solicitar orçamento</a>
     </div>
   </div>
 </section>
@@ -663,7 +664,7 @@ footer{background:#03040A;padding:64px 6% 32px;border-top:1px solid var(--border
   </div>
 </footer>
 
-<a href="https://wa.me/5500000000000" class="wa-fab" target="_blank" aria-label="WhatsApp">💬</a>
+<a href="https://wa.me/55profpaulofilho" class="wa-fab" target="_blank" aria-label="WhatsApp">💬</a>
 
 <script>
 /* PARTICLES */
@@ -707,10 +708,10 @@ function calcular(){
   el.textContent='R$ '+total.toLocaleString('pt-BR')+(p.fx?'+':'');
 }
 function enviar(){
-  const email=document.getElementById('email').value;
-  const tipo=document.getElementById('tipo').value;
+  const email = document.getElementById('email').value;
+  const tipo = document.getElementById('tipo').value;
   if(!email||!tipo){alert('Preencha o tipo de trabalho e seu e-mail para continuar.');return}
-  alert('Solicitação enviada! Você receberá acesso à plataforma em até 30 minutos no e-mail: '+email);
+  window.location.href = '/dashboard?email=' + encodeURIComponent(email) + '&tipo=' + encodeURIComponent(tipo);
 }
 function faq(btn){btn.closest('.faq-item').classList.toggle('open')}
 </script>
