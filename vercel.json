@@ -1,0 +1,6 @@
+json{
+  "rewrites": [
+    { "source": "/dashboard", "destination": "/plataforma_completa.html" },
+    { "source": "/plataforma", "destination": "/plataforma_completa.html" }
+  ]
+}
