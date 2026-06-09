@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366F1"/>
+      <stop offset="100%" style="stop-color:#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5"/>
+      <stop offset="100%" style="stop-color:#6366F1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo arredondado -->
+  <rect width="64" height="64" rx="14" fill="url(#g2)"/>
+
+  <!-- Brilho sutil no topo -->
+  <rect width="64" height="32" rx="14" fill="rgba(255,255,255,0.06)"/>
+
+  <!-- Capelo — base/aba -->
+  <ellipse cx="32" cy="26" rx="20" ry="6" fill="url(#g1)"/>
+
+  <!-- Capelo — topo quadrado -->
+  <rect x="20" y="18" width="24" height="8" rx="2" fill="#fff" opacity="0.95"/>
+
+  <!-- Capelo — linha divisória do topo -->
+  <rect x="20" y="24" width="24" height="2" rx="1" fill="rgba(99,102,241,0.3)"/>
+
+  <!-- Capelo — cordão/borla pendente à direita -->
+  <line x1="52" y1="26" x2="52" y2="36" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="52" cy="37" r="3" fill="#F59E0B"/>
+
+  <!-- Letra A estilizada embaixo -->
+  <text x="32" y="54" font-family="'Space Grotesk',Arial,sans-serif" font-size="16" font-weight="700" fill="white" text-anchor="middle" opacity="0.9">AF</text>
+</svg>

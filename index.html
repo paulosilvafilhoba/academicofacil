@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AcadêmicoFácil — Assessoria Acadêmica com Tecnologia</title>
 <meta name="description" content="Plataforma de assessoria acadêmica para TCC, artigos e monografias. Tecnologia + consultores especializados. Orçamento instantâneo.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="shortcut icon" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -764,6 +766,10 @@ body.dark-mode footer{background:#03040A}
         <span class="logo-icon">🎓</span> AcadêmicoFácil
       </a>
       <p>Plataforma de assessoria acadêmica para TCC, artigos e monografias. Tecnologia + consultores especializados em todo o Brasil.</p>
+      <a href="https://wa.me/5500000000000" target="_blank" style="display:inline-flex;align-items:center;gap:10px;margin-top:20px;padding:12px 22px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border-radius:100px;text-decoration:none;font-size:14px;font-weight:600;box-shadow:0 4px 16px rgba(37,211,102,.3);transition:.2s;width:fit-content" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.553 4.122 1.523 5.855L.057 23.082a.75.75 0 00.906.937l5.428-1.418A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.853 0-3.584-.504-5.073-1.381l-.362-.215-3.762.982.999-3.648-.236-.375A9.953 9.953 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Falar com um consultor
+      </a>
     </div>
     <div class="footer-col">
       <h4>Serviços</h4>
@@ -792,7 +798,226 @@ body.dark-mode footer{background:#03040A}
   </div>
 </footer>
 
-<a href="https://wa.me/5500000000000" class="wa-fab" target="_blank" aria-label="WhatsApp">💬</a>
+<!-- WhatsApp removido do FAB — agora está no footer -->
+
+<!-- ========== CHATBOT ========== -->
+<style>
+#chat-fab{position:fixed;bottom:28px;right:28px;width:60px;height:60px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(99,102,241,.5);transition:.3s;z-index:9999}
+#chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(99,102,241,.6)}
+#chat-fab svg{width:26px;height:26px;fill:#fff;transition:.3s}
+#chat-fab .icon-close{display:none}
+#chat-fab.open .icon-chat{display:none}
+#chat-fab.open .icon-close{display:block}
+.cb-notif{position:absolute;top:8px;right:8px;width:10px;height:10px;background:#EF4444;border-radius:50%;border:2px solid var(--bg);animation:pdot 2s infinite}
+#chat-window{position:fixed;bottom:102px;right:28px;width:370px;height:560px;background:#07080F;border:1px solid rgba(99,102,241,.2);border-radius:16px;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:9998;transform:scale(0.8) translateY(20px);opacity:0;pointer-events:none;transform-origin:bottom right;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .2s ease;overflow:hidden}
+#chat-window.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
+.cb-header{background:linear-gradient(135deg,#2D1580,#6366F1);padding:16px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:relative;overflow:hidden}
+.cb-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3C/g%3E%3C/svg%3E")}
+.cb-av{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative;z-index:1}
+.cb-info{position:relative;z-index:1}
+.cb-name{font-size:15px;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif}
+.cb-status{font-size:11px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:5px;margin-top:2px}
+.cb-status::before{content:'';width:6px;height:6px;background:#10B981;border-radius:50%;flex-shrink:0}
+.cb-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.cb-msgs::-webkit-scrollbar{width:4px}
+.cb-msgs::-webkit-scrollbar-thumb{background:rgba(99,102,241,.2);border-radius:4px}
+.cbmsg{display:flex;gap:8px;max-width:88%;animation:fadeUp .3s ease}
+.cbmsg.bot{align-self:flex-start}
+.cbmsg.user{align-self:flex-end;flex-direction:row-reverse}
+.cbmsg-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#22D3EE);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.cbmsg-b{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6}
+.cbmsg.bot .cbmsg-b{background:#161929;border:1px solid rgba(99,102,241,.2);color:#F0F1FF;border-bottom-left-radius:4px}
+.cbmsg.user .cbmsg-b{background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border-bottom-right-radius:4px}
+.cbmsg-t{font-size:10px;color:#8B8FA8;margin-top:3px;padding:0 4px}
+.cbmsg.user .cbmsg-t{text-align:right}
+.cb-typing{display:flex;gap:5px;align-items:center;padding:10px 14px}
+.cb-dot{width:7px;height:7px;background:#8B8FA8;border-radius:50%;animation:typing 1.2s infinite}
+.cb-dot:nth-child(2){animation-delay:.2s}
+.cb-dot:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+.cb-qr{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px}
+.cb-qrbtn{padding:7px 14px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:100px;color:#818CF8;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
+.cb-qrbtn:hover{background:rgba(99,102,241,.2);border-color:#6366F1}
+.cb-input-area{padding:12px 14px;border-top:1px solid rgba(99,102,241,.15);display:flex;gap:8px;align-items:flex-end;flex-shrink:0;background:#1C2035}
+.cb-input{flex:1;padding:10px 14px;background:#07080F;border:1px solid rgba(99,102,241,.2);border-radius:22px;color:#F0F1FF;font-size:13px;font-family:inherit;resize:none;min-height:40px;max-height:90px;line-height:1.4;transition:.2s}
+.cb-input:focus{outline:none;border-color:#6366F1}
+.cb-input::placeholder{color:#8B8FA8}
+.cb-send{width:38px;height:38px;flex-shrink:0;background:linear-gradient(135deg,#6366F1,#4F46E5);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.cb-send:hover{transform:scale(1.08)}
+.cb-send svg{width:16px;height:16px;fill:#fff}
+.cb-foot{padding:8px;text-align:center;font-size:10px;color:#8B8FA8;border-top:1px solid rgba(99,102,241,.1);flex-shrink:0}
+.cb-foot a{color:#818CF8;text-decoration:none}
+@media(max-width:420px){#chat-window{width:calc(100vw - 24px);right:12px;bottom:92px;height:70vh}#chat-fab{right:12px;bottom:16px}}
+</style>
+
+<button id="chat-fab" onclick="cbToggle()" aria-label="Falar com assistente">
+  <div class="cb-notif" id="cb-notif" style="display:none"></div>
+  <svg class="icon-chat" viewBox="0 0 24 24" fill="#fff">
+    <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
+  </svg>
+  <svg class="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+</button>
+
+<div id="chat-window">
+  <div class="cb-header">
+    <div class="cb-av">🎓</div>
+    <div class="cb-info">
+      <div class="cb-name">AcadêmicoFácil</div>
+      <div class="cb-status">Online agora · Resposta imediata</div>
+    </div>
+  </div>
+  <div class="cb-msgs" id="cb-msgs"></div>
+  <div class="cb-qr" id="cb-qr"></div>
+  <div class="cb-input-area">
+    <textarea class="cb-input" id="cb-input" placeholder="Digite sua dúvida..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();cbSend()}"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+    <button class="cb-send" onclick="cbSend()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div class="cb-foot">Powered by <a href="https://academicofacil.com.br">AcadêmicoFácil</a> · 🔒 Conversa segura</div>
+</div>
+
+<script>
+const CB_FAQ={
+  lauda:{k:['lauda','laudas','250 palavras','página a4'],a:'Uma lauda é uma página A4 padrão com margens de 2,5cm, espaçamento 1,5 e fonte 12. Equivale a aproximadamente **250 palavras** ou 25 linhas de texto corrido.'},
+  prazo:{k:['prazo','dias','urgente','rápido','entrega','demora','tempo'],a:'Nossos prazos:\n\n⚡ **Urgente** — 3 a 6 dias (+30%)\n🚀 **Rápido** — 7 a 14 dias (+15%)\n✅ **Normal** — 15+ dias\n\nAssim que o pagamento é confirmado, o consultor entra em contato em até 2 horas.'},
+  preco:{k:['preço','valor','quanto','custa','cobr'],a:'Nossos preços:\n\n📘 TCC Técnico — R$ 25/lauda\n🎓 TCC Graduação — R$ 35/lauda\n🏅 Pós/MBA — R$ 55/lauda\n📄 Artigo Científico — R$ 480\n🗂️ Formatação ABNT — R$ 12/lauda\n✏️ Revisão — R$ 180\n\nUse a calculadora no site para ver o total!'},
+  pagamento:{k:['pagamento','pagar','pix','cartão','boleto','parcel','forma'],a:'Aceitamos:\n\n💠 **Pix** — liberação imediata\n💳 **Cartão** — em até 12x via Mercado Pago\n\nApós confirmar o pagamento, você recebe o login em até 30 minutos.'},
+  plagio:{k:['plágio','originality','original','turnitin'],a:'Todos os trabalhos são 100% originais. Entregamos o **relatório do Originality.ai** comprovando a originalidade, sem custo adicional.'},
+  revisao:{k:['revisão','revisa','correção','ajuste','rodada'],a:'Revisões inclusas:\n\n📘 Técnico — 2 rodadas\n🎓 Graduação — 3 rodadas\n🏅 Pós/MBA — Ilimitadas\n\nSem custo extra em todas as rodadas.'},
+  abnt:{k:['abnt','norma','formatação','referência','sumário','capa'],a:'Todos os trabalhos saem com **formatação ABNT completa**: capa, sumário, referências e normas NBR 14724:2011.\n\nSó precisa da formatação? R$ 12/lauda.'},
+  seguranca:{k:['seguro','segurança','dados','lgpd','sigilo','privacidade'],a:'Sua privacidade é prioridade:\n\n🔒 Seguimos a **LGPD**\n🛡️ Conteúdo 100% confidencial\n✍️ Consultores assinam NDA antes de acessar seu projeto'},
+  funciona:{k:['como funciona','processo','etapa','passo','começo'],a:'Simples assim:\n\n1️⃣ Preencha o formulário no site\n2️⃣ Aprove o orçamento e pague\n3️⃣ Receba o login por e-mail em 30 min\n4️⃣ Acompanhe pelo chat com o consultor\n5️⃣ Receba em PDF e DOCX'},
+  contato:{k:['falar','contato','atendimento','humano','whatsapp','telefone'],a:'Quer falar com um consultor?\n\n💬 **WhatsApp**: clique no ícone verde no site\n📧 **E-mail**: contato@academicofacil.com.br\n\nOu acesse a plataforma e use o chat em tempo real.'}
+};
+const CB_QR_INIT=['💰 Quanto custa?','⏱️ Qual o prazo?','📋 Como funciona?','🔒 É seguro?','📝 O que é lauda?'];
+let cbOpen=false,cbCount=0,cbName='',cbAwaitName=false;
+
+function cbToggle(){
+  cbOpen=!cbOpen;
+  document.getElementById('chat-window').classList.toggle('open',cbOpen);
+  document.getElementById('chat-fab').classList.toggle('open',cbOpen);
+  document.getElementById('cb-notif').style.display='none';
+  if(cbOpen&&cbCount===0){
+    setTimeout(()=>cbTyping(()=>{
+      cbAdd('bot','👋 Olá! Sou o assistente do **AcadêmicoFácil**.\n\nComo posso te ajudar hoje?');
+      cbQR(CB_QR_INIT);
+    }),600);
+    cbCount++;
+  }
+}
+
+function cbAdd(from,text){
+  const msgs=document.getElementById('cb-msgs');
+  const div=document.createElement('div');
+  div.className='cbmsg '+from;
+  const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const fmt=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  div.innerHTML=`
+    ${from==='bot'?'<div class="cbmsg-av">🤖</div>':''}
+    <div>
+      <div class="cbmsg-b">${fmt}</div>
+      <div class="cbmsg-t">${t}</div>
+    </div>
+    ${from==='user'?'<div class="cbmsg-av" style="background:rgba(99,102,241,.3)">👤</div>':''}`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function cbTyping(cb){
+  const msgs=document.getElementById('cb-msgs');
+  const div=document.createElement('div');
+  div.className='cbmsg bot';div.id='cb-typing';
+  div.innerHTML='<div class="cbmsg-av">🤖</div><div class="cbmsg-b"><div class="cb-typing"><div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div></div></div>';
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{const t=document.getElementById('cb-typing');if(t)t.remove();cb();},900+Math.random()*600);
+}
+
+function cbQR(opts){
+  const qr=document.getElementById('cb-qr');
+  qr.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='cb-qrbtn';b.textContent=o;
+    b.onclick=()=>{qr.innerHTML='';cbProcess(o)};
+    qr.appendChild(b);
+  });
+}
+
+function cbSend(){
+  const inp=document.getElementById('cb-input');
+  const t=inp.value.trim();
+  if(!t)return;
+  inp.value='';inp.style.height='';
+  document.getElementById('cb-qr').innerHTML='';
+  cbProcess(t);
+}
+
+function cbProcess(text){
+  cbAdd('user',text);
+  const low=text.toLowerCase();
+
+  if(cbAwaitName){
+    cbName=text.split(' ')[0];cbAwaitName=false;
+    cbTyping(()=>{
+      cbAdd('bot',`Prazer, **${cbName}**! 😊\n\nMe conta sobre seu trabalho — qual o tipo e em qual curso?`);
+      cbQR(['📘 TCC Técnico','🎓 TCC Graduação','🏅 Pós/MBA','📄 Artigo Científico']);
+    });return;
+  }
+
+  // Saudações
+  if(/^(oi|olá|ola|bom dia|boa tarde|boa noite|hey|hello)/.test(low)){
+    cbTyping(()=>{
+      cbAdd('bot',`Olá! 👋 Seja bem-vindo ao **AcadêmicoFácil**!\n\nEstou aqui para tirar suas dúvidas. Como posso te ajudar?`);
+      cbQR(CB_QR_INIT);
+    });return;
+  }
+
+  // Agradecimentos
+  if(low.includes('obrigad')||low.includes('valeu')){
+    cbTyping(()=>cbAdd('bot','Por nada! 😊 Boa sorte no seu trabalho! Se precisar de mais ajuda, estou aqui. 🎓'));
+    return;
+  }
+
+  // Solicitar/contratar
+  if(low.includes('solicitar')||low.includes('contratar')||low.includes('quero fazer')||low.includes('preciso de ajuda')){
+    cbTyping(()=>{
+      cbAdd('bot','🚀 Ótimo! Clique abaixo para ir direto ao nosso formulário — rápido e sem compromisso!');
+      setTimeout(()=>{
+        const msgs=document.getElementById('cb-msgs');
+        const div=document.createElement('div');
+        div.className='cbmsg bot';
+        div.innerHTML=`<div class="cbmsg-av">🤖</div><div><a href="/dashboard" style="display:inline-block;margin-top:4px;padding:10px 22px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border-radius:100px;text-decoration:none;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(99,102,241,.4)">Solicitar assessoria →</a></div>`;
+        msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+      },200);
+    });return;
+  }
+
+  // FAQ match
+  let matched=null;
+  for(const faq of Object.values(CB_FAQ)){
+    if(faq.k.some(k=>low.includes(k))){matched=faq.a;break;}
+  }
+
+  if(!matched) matched=['Entendi! Pode me contar mais sobre seu trabalho?','Para te ajudar melhor, qual é seu curso e nível acadêmico?','Claro! Qual é o prazo da sua entrega?','Me conta mais detalhes e vou passar para um consultor!'][Math.floor(Math.random()*4)];
+
+  cbTyping(()=>{
+    cbAdd('bot',matched);
+    setTimeout(()=>{
+      if(low.includes('preço')||low.includes('valor')||low.includes('quanto'))
+        cbQR(['🧮 Calcular orçamento','⏱️ Qual o prazo?','💳 Como pagar?','✅ Solicitar agora']);
+      else if(low.includes('prazo')||low.includes('urgente'))
+        cbQR(['💰 Quanto custa?','✅ Solicitar agora','💬 Falar com consultor']);
+      else
+        cbQR(['✅ Solicitar agora','💬 Falar com consultor','❓ Outra dúvida']);
+    },400);
+  });
+}
+
+setTimeout(()=>{if(!cbOpen)document.getElementById('cb-notif').style.display='block';},4000);
+</script>
 
 <script>
 /* PARTICLES */
