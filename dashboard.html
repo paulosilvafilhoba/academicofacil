@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AcadêmicoFácil — Plataforma</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080F;--bg2:#0D0F1C;--bg3:#12152A;--surface:#161929;--surface2:#1C2035;
+  --border:rgba(99,102,241,0.15);--border2:rgba(99,102,241,0.3);
+  --indigo:#6366F1;--indigo2:#818CF8;--indigo-glow:rgba(99,102,241,0.2);
+  --cyan:#22D3EE;--green:#10B981;--gold:#F59E0B;--red:#EF4444;--orange:#F97316;
+  --text:#F0F1FF;--muted:#8B8FA8;--muted2:#5A5F7A;
+  --radius:12px;--radius-sm:8px;
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;line-height:1.2}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--indigo);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast-item{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 18px;font-size:13px;color:var(--text);max-width:320px;animation:slideIn .3s ease;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.toast-item.success{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.1)}
+.toast-item.error{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+
+/* LOGIN */
+#screen-login{align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+#screen-login::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse,rgba(99,102,241,0.12) 0%,transparent 70%);pointer-events:none}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;position:relative;z-index:1}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--cyan));border-radius:16px 16px 0 0}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--indigo),var(--cyan));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.login-title{font-size:22px;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.tab-row{display:flex;background:var(--bg2);border-radius:var(--radius-sm);padding:3px;margin-bottom:22px}
+.tab-btn{flex:1;padding:8px;border:none;background:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border-radius:6px;transition:.2s}
+.tab-btn.active{background:var(--surface2);color:var(--text)}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.fg input{width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;transition:.2s}
+.fg input:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-glow)}
+.fg input::placeholder{color:var(--muted2)}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:.2s;box-shadow:0 0 20px var(--indigo-glow)}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 0 32px rgba(99,102,241,.4)}
+.btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.login-link{text-align:center;margin-top:14px;font-size:12px;color:var(--muted)}
+.login-link span{color:var(--indigo2);cursor:pointer;text-decoration:underline}
+
+/* APP */
+#screen-app{flex-direction:row}
+.sidebar{width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow-y:auto}
+.sidebar-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.sidebar-logo-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px}
+.sidebar-badge{font-size:10px;background:rgba(99,102,241,.2);color:var(--indigo2);padding:2px 7px;border-radius:100px;font-weight:600;margin-left:auto}
+.s-section{padding:12px 12px 4px;font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:1px 8px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;color:var(--muted);font-size:13px;font-weight:500}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:rgba(99,102,241,.12);color:var(--indigo2)}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;min-width:18px;text-align:center}
+.sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--radius-sm)}
+.uavatar{width:34px;height:34px;border-radius:50%;background:rgba(99,102,241,.2);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--indigo2);flex-shrink:0}
+.uname{font-size:13px;font-weight:600}
+.urole{font-size:11px;color:var(--muted)}
+.logout-btn{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;transition:.2s}
+.logout-btn:hover{color:var(--red)}
+
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10}
+.topbar-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600}
+.content{padding:24px 28px;flex:1}
+.panel{display:none}
+.panel.active{display:block}
+
+/* COMPONENTS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.stat-val{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;white-space:nowrap}
+.badge-blue{background:rgba(99,102,241,.15);color:var(--indigo2)}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green)}
+.badge-gold{background:rgba(245,158,11,.15);color:var(--gold)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-gray{background:rgba(139,143,168,.1);color:var(--muted)}
+.badge-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+.bdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.progress-track{height:6px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--indigo),var(--cyan));border-radius:100px;transition:width .5s}
+
+/* STEPS */
+.steps-row{display:flex;gap:0;margin:16px 0}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;top:10px;left:50%;width:100%;height:1px;background:var(--border)}
+.step.done::after{background:var(--indigo)}
+.step-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:9px;z-index:1;position:relative}
+.step.done .step-dot{border-color:var(--indigo);background:var(--indigo);color:#fff}
+.step.curr .step-dot{border-color:var(--cyan);background:var(--cyan);color:var(--bg);animation:pdot 1.5s infinite}
+@keyframes pdot{0%,100%{box-shadow:0 0 0 0 rgba(34,211,238,.4)}50%{box-shadow:0 0 0 6px rgba(34,211,238,0)}}
+.step-lbl{font-size:10px;color:var(--muted);margin-top:5px;text-align:center}
+.step.done .step-lbl,.step.curr .step-lbl{color:var(--text)}
+
+/* CHAT */
+.chat-box{display:flex;flex-direction:column;height:460px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.chat-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.chat-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:78%;display:flex;flex-direction:column;gap:3px}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.them{align-self:flex-start}
+.msg-b{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg.me .msg-b{background:rgba(99,102,241,.22);border:1px solid rgba(99,102,241,.3);color:var(--text);border-bottom-right-radius:3px}
+.msg.them .msg-b{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:3px}
+.msg-t{font-size:10px;color:var(--muted2)}
+.chat-input-row{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end}
+.chat-inp{flex:1;padding:9px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;resize:none;min-height:38px;max-height:90px}
+.chat-inp:focus{outline:none;border-color:var(--indigo)}
+.chat-send{width:36px;height:36px;background:var(--indigo);border:none;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.chat-send:hover{background:#4F46E5}
+
+/* FILES */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:16px}
+.upload-zone:hover{border-color:var(--indigo);background:rgba(99,102,241,.04)}
+.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.file-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;transition:.2s;cursor:pointer}
+.file-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.file-name{font-size:12px;font-weight:600;margin:8px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-meta{font-size:11px;color:var(--muted)}
+.file-actions{display:flex;gap:6px;margin-top:10px}
+.file-btn{flex:1;padding:5px;background:rgba(99,102,241,.1);border:1px solid var(--border2);border-radius:6px;color:var(--indigo2);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:.2s}
+.file-btn:hover{background:rgba(99,102,241,.2)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;padding:9px 13px;border-bottom:1px solid var(--border)}
+td{padding:11px 13px;border-bottom:1px solid rgba(99,102,241,.06);font-size:13px;color:var(--muted)}
+td:first-child{color:var(--text);font-weight:500}
+tr:last-child td{border-bottom:none}
+
+/* PAYMENT MODAL */
+#pay-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+#pay-modal.open{display:flex}
+.pay-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:480px;position:relative}
+.pay-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--cyan));border-radius:16px 16px 0 0}
+.pay-title{font-size:18px;margin-bottom:6px}
+.pay-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.pay-amount{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;background:linear-gradient(90deg,var(--indigo2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:24px}
+.pay-methods{display:flex;gap:10px;margin-bottom:20px}
+.pay-method{flex:1;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-align:center;cursor:pointer;transition:.2s;font-size:13px;font-weight:500;color:var(--muted)}
+.pay-method:hover{border-color:var(--indigo);color:var(--text)}
+.pay-method.active{border-color:var(--indigo);background:rgba(99,102,241,.1);color:var(--indigo2)}
+.pay-method-icon{font-size:22px;display:block;margin-bottom:5px}
+.btn-pay{width:100%;padding:14px;background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:.2s;margin-top:4px}
+.btn-pay:hover{transform:translateY(-1px);box-shadow:0 0 24px var(--indigo-glow)}
+.btn-pay:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.pay-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px}
+.pay-close:hover{color:var(--text)}
+.pix-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;text-align:center;display:none}
+.pix-box.show{display:block}
+.pix-code{font-size:11px;color:var(--muted);word-break:break-all;background:var(--bg);padding:10px;border-radius:6px;margin:10px 0;font-family:monospace}
+.btn-copy{padding:8px 18px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:var(--cyan);border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-copy:hover{background:rgba(34,211,238,.2)}
+
+/* NOVO PEDIDO FORM */
+.new-order-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.nfg{margin-bottom:16px}
+.nfg label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.nfg input,.nfg select,.nfg textarea{width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;transition:.2s}
+.nfg input:focus,.nfg select:focus,.nfg textarea:focus{outline:none;border-color:var(--indigo)}
+.nfg select option{background:var(--bg2)}
+.price-preview{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin:16px 0}
+.price-preview .pp-label{font-size:13px;color:var(--muted)}
+.price-preview .pp-val{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;background:linear-gradient(90deg,var(--indigo2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.btn-primary{padding:12px 24px;background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s;box-shadow:0 0 16px var(--indigo-glow)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(99,102,241,.4)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-ghost{padding:12px 24px;background:transparent;border:1px solid var(--border2);color:var(--indigo2);border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
+.btn-ghost:hover{background:rgba(99,102,241,.1)}
+
+/* ADMIN */
+.order-row{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:9px;transition:.2s}
+.order-row:hover{border-color:var(--border2)}
+.or-info{flex:1}
+.or-title{font-size:13px;font-weight:600}
+.or-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.or-actions{display:flex;gap:7px}
+.or-btn{padding:5px 13px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;border:1px solid}
+.or-btn-p{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.or-btn-p:hover{background:#4F46E5}
+.or-btn-g{background:transparent;border-color:var(--border2);color:var(--indigo2)}
+.or-btn-g:hover{background:rgba(99,102,241,.1)}
+
+@media(max-width:768px){.sidebar{display:none}.content{padding:16px}.form-row-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <div style="width:32px;height:32px;background:linear-gradient(135deg,#6366F1,#22D3EE);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">🎓</div>
+    <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px">AcadêmicoFácil</span>
+  </div>
+  <div class="spinner"></div>
+  <p style="font-size:12px;color:#8B8FA8;margin-top:8px">Conectando...</p>
+</div>
+
+<div id="toast"></div>
+
+<!-- ===== LOGIN ===== -->
+<div id="screen-login" class="screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">🎓</div>
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px">AcadêmicoFácil</span>
+    </div>
+    <h2 class="login-title" id="login-title">Bem-vindo de volta</h2>
+    <p class="login-sub" id="login-sub">Acesse sua conta para acompanhar seu projeto</p>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="setTab('login',this)">Entrar</button>
+      <button class="tab-btn" onclick="setTab('register',this)">Criar conta</button>
+    </div>
+    <div id="login-form">
+      <div class="fg"><label>E-mail</label><input type="email" id="l-email" placeholder="seu@email.com"></div>
+      <div class="fg"><label>Senha</label><input type="password" id="l-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar na plataforma</button>
+      <p class="login-link"><span onclick="showForgot()">Esqueceu a senha?</span></p>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="fg"><label>Nome completo</label><input type="text" id="r-nome" placeholder="Seu nome"></div>
+      <div class="fg"><label>E-mail</label><input type="email" id="r-email" placeholder="seu@email.com"></div>
+      <div class="fg"><label>Senha</label><input type="password" id="r-senha" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn-login" id="btn-register" onclick="doRegister()">Criar minha conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="screen-app" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="width:28px;height:28px;font-size:14px">🎓</div>
+      <span class="sidebar-logo-text">AcadêmicoFácil</span>
+      <span class="sidebar-badge" id="sidebar-role-badge">Cliente</span>
+    </div>
+
+    <!-- CLIENT NAV -->
+    <div id="client-nav">
+      <div class="s-section">Minha área</div>
+      <div class="nav-item active" onclick="showP('painel',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Painel
+      </div>
+      <div class="nav-item" onclick="showP('meu-pedido',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Meu pedido
+      </div>
+      <div class="nav-item" onclick="showP('chat',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Chat
+        <span class="nav-badge" id="chat-badge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="showP('arquivos',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+        Arquivos
+      </div>
+      <div class="nav-item" onclick="showP('historico',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Histórico
+      </div>
+      <div class="nav-item" onclick="showP('novo-pedido',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo pedido
+      </div>
+    </div>
+
+    <!-- ADMIN NAV -->
+    <div id="admin-nav" style="display:none">
+      <div class="s-section">Administração</div>
+      <div class="nav-item active" onclick="showP('admin-overview',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Visão geral
+      </div>
+      <div class="nav-item" onclick="showP('admin-pedidos',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Pedidos
+        <span class="nav-badge" id="admin-orders-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="showP('admin-clientes',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Clientes
+      </div>
+      <div class="nav-item" onclick="showP('admin-financeiro',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Financeiro
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="uavatar" id="sb-avatar">?</div>
+        <div><div class="uname" id="sb-name">...</div><div class="urole" id="sb-role">...</div></div>
+        <button class="logout-btn" onclick="doLogout()" title="Sair">⏏</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Painel</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--muted)" id="topbar-date"></span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- PAINEL CLIENTE -->
+      <div id="panel-painel" class="panel active">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">📋 Pedidos ativos</div>
+            <div class="stat-val" id="stat-pedidos">0</div>
+            <div class="stat-sub">Em andamento</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">💰 Total investido</div>
+            <div class="stat-val" id="stat-total">R$ 0</div>
+            <div class="stat-sub">Todos os pedidos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">✅ Concluídos</div>
+            <div class="stat-val" id="stat-concluidos">0</div>
+            <div class="stat-sub">Trabalhos entregues</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Pedidos recentes</span></div>
+          <div id="recent-orders"><p style="color:var(--muted);font-size:13px">Nenhum pedido ainda. <span style="color:var(--indigo2);cursor:pointer" onclick="showP('novo-pedido',null)">Criar primeiro pedido →</span></p></div>
+        </div>
+      </div>
+
+      <!-- MEU PEDIDO -->
+      <div id="panel-meu-pedido" class="panel">
+        <div id="order-detail"><p style="color:var(--muted);font-size:13px;padding:20px 0">Nenhum pedido ativo.</p></div>
+      </div>
+
+      <!-- CHAT -->
+      <div id="panel-chat" class="panel">
+        <div class="chat-box">
+          <div class="chat-head">
+            <div class="chat-av" id="chat-av-name">?</div>
+            <div>
+              <div style="font-size:14px;font-weight:600" id="chat-consultant-name">Consultor</div>
+              <div style="font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px">
+                <span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block"></span>Online
+              </div>
+            </div>
+          </div>
+          <div class="chat-msgs" id="chat-messages">
+            <div style="text-align:center;padding:20px;font-size:13px;color:var(--muted)">Nenhuma mensagem ainda. Diga olá! 👋</div>
+          </div>
+          <div class="chat-input-row">
+            <textarea class="chat-inp" id="chat-input" placeholder="Digite sua mensagem..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+            <button class="chat-send" onclick="sendMessage()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARQUIVOS -->
+      <div id="panel-arquivos" class="panel">
+        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+          <div style="font-size:28px;margin-bottom:8px">📎</div>
+          <p style="font-size:13px;color:var(--muted)"><strong style="color:var(--indigo2)">Clique para enviar</strong> ou arraste um arquivo</p>
+          <p style="font-size:11px;color:var(--muted2);margin-top:4px">PDF, DOCX, XLSX — até 50MB</p>
+          <input type="file" id="file-input" style="display:none" onchange="uploadFile(this)">
+        </div>
+        <div id="files-list" class="files-grid"></div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div id="panel-historico" class="panel">
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Pedido</th><th>Serviço</th><th>Laudas</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
+              <tbody id="history-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Nenhum pedido ainda</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOVO PEDIDO -->
+      <div id="panel-novo-pedido" class="panel">
+        <div class="new-order-form">
+          <h3 style="margin-bottom:20px;font-size:17px">Solicitar novo serviço</h3>
+          <div class="form-row-2">
+            <div class="nfg">
+              <label>Tipo de serviço</label>
+              <select id="np-tipo" onchange="calcPreco()">
+                <option value="">Selecione</option>
+                <option value="tecnico">TCC Técnico — R$ 25/lauda</option>
+                <option value="graduacao">TCC Graduação — R$ 35/lauda</option>
+                <option value="pos">Pós / MBA — R$ 55/lauda</option>
+                <option value="artigo">Artigo Científico — R$ 480</option>
+                <option value="formatacao">Formatação ABNT — R$ 12/lauda</option>
+                <option value="revisao">Revisão Textual — R$ 180</option>
+              </select>
+            </div>
+            <div class="nfg">
+              <label>Número de laudas</label>
+              <input type="number" id="np-laudas" placeholder="Ex: 40" min="1" max="500" oninput="calcPreco()">
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="nfg">
+              <label>Prazo desejado</label>
+              <select id="np-prazo" onchange="calcPreco()">
+                <option value="normal">Normal — 15+ dias</option>
+                <option value="rapido">Rápido — 7 a 14 dias (+15%)</option>
+                <option value="urgente">Urgente — 3 a 6 dias (+30%)</option>
+              </select>
+            </div>
+            <div class="nfg">
+              <label>Instituição de ensino</label>
+              <input type="text" id="np-inst" placeholder="Ex: UNIP São Paulo">
+            </div>
+          </div>
+          <div class="nfg">
+            <label>Tema / Título do trabalho</label>
+            <input type="text" id="np-tema" placeholder="Ex: Gestão de pessoas na era digital">
+          </div>
+          <div class="nfg">
+            <label>Descrição e requisitos</label>
+            <textarea id="np-desc" rows="3" placeholder="Descreva o que precisa, orientações do professor, etc." style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;resize:vertical"></textarea>
+          </div>
+          <div class="price-preview">
+            <span class="pp-label">Valor estimado:</span>
+            <span class="pp-val" id="np-price">—</span>
+          </div>
+          <div style="display:flex;gap:12px">
+            <button class="btn-primary" id="btn-criar-pedido" onclick="criarPedido()">Solicitar e pagar →</button>
+            <button class="btn-ghost" onclick="showP('painel',null)">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN OVERVIEW -->
+      <div id="panel-admin-overview" class="panel">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">📋 Pedidos ativos</div><div class="stat-val" id="adm-pedidos">0</div><div class="stat-sub">Aguardando e em andamento</div></div>
+          <div class="stat-card"><div class="stat-label">💰 Receita total</div><div class="stat-val" id="adm-receita">R$ 0</div><div class="stat-sub">Todos os pagamentos</div></div>
+          <div class="stat-card"><div class="stat-label">👥 Clientes</div><div class="stat-val" id="adm-clientes">0</div><div class="stat-sub">Cadastrados</div></div>
+          <div class="stat-card"><div class="stat-label">✅ Concluídos</div><div class="stat-val" id="adm-concluidos">0</div><div class="stat-sub">Este mês</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Últimos pedidos</span></div>
+          <div id="adm-recent-orders"><p style="color:var(--muted);font-size:13px">Carregando...</p></div>
+        </div>
+      </div>
+
+      <!-- ADMIN PEDIDOS -->
+      <div id="panel-admin-pedidos" class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-size:16px">Todos os pedidos</h3>
+        </div>
+        <div id="adm-orders-list"><p style="color:var(--muted);font-size:13px">Carregando...</p></div>
+      </div>
+
+      <!-- ADMIN CLIENTES -->
+      <div id="panel-admin-clientes" class="panel">
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>E-mail</th><th>Pedidos</th><th>Total gasto</th><th>Cadastro</th></tr></thead>
+              <tbody id="adm-clients-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Carregando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN FINANCEIRO -->
+      <div id="panel-admin-financeiro" class="panel">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">💰 Receita total</div><div class="stat-val" id="fin-total">R$ 0</div></div>
+          <div class="stat-card"><div class="stat-label">📊 Ticket médio</div><div class="stat-val" id="fin-ticket">R$ 0</div></div>
+          <div class="stat-card"><div class="stat-label">🔢 Total de pedidos</div><div class="stat-val" id="fin-count">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Transações</span></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Pedido</th><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Pagamento</th><th>Data</th></tr></thead>
+              <tbody id="fin-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Carregando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div id="pay-modal">
+  <div class="pay-box">
+    <button class="pay-close" onclick="closePayModal()">✕</button>
+    <h3 class="pay-title">Finalizar pedido</h3>
+    <p class="pay-sub" id="pay-service-name">TCC de Graduação</p>
+    <div class="pay-amount" id="pay-amount-display">R$ 0</div>
+    <div class="pay-methods">
+      <div class="pay-method active" onclick="setPayMethod('pix',this)">
+        <span class="pay-method-icon">💠</span>Pix
+      </div>
+      <div class="pay-method" onclick="setPayMethod('card',this)">
+        <span class="pay-method-icon">💳</span>Cartão
+      </div>
+    </div>
+    <div id="pix-section" class="pix-box show">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Chave Pix para pagamento:</p>
+      <div class="pix-code" id="pix-key-display">profpaulofilho@gmail.com</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Após o pagamento, envie o comprovante no chat</p>
+      <button class="btn-copy" onclick="copyPix()">📋 Copiar chave Pix</button>
+    </div>
+    <div id="card-section" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Você será redirecionado ao Mercado Pago</p>
+      <p style="font-size:12px;color:var(--muted2)">Ambiente seguro · Cartão em até 12x</p>
+    </div>
+    <button class="btn-pay" id="btn-confirmar-pag" onclick="confirmarPagamento()">Confirmar pedido e pagar</button>
+  </div>
+</div>
+
+<script>
+// ============ FIREBASE CONFIG ============
+const firebaseConfig = {
+  apiKey: "AIzaSyAr8wl8rH_P0n6fEDhOVuqBif7YeTWmgsA",
+  authDomain: "academicofacil-87df6.firebaseapp.com",
+  projectId: "academicofacil-87df6",
+  storageBucket: "academicofacil-87df6.firebasestorage.app",
+  messagingSenderId: "854141046481",
+  appId: "1:854141046481:web:5cd46b7c7aeb9801cd3ff0"
+};
+
+// ============ MERCADO PAGO CONFIG ============
+const MP_PUBLIC_KEY = "APP_USR-8ee7e3db-6ea6-49f7-aa03-2b55266131ad";
+const MP_ACCESS_TOKEN = "APP_USR-7442952910996130-060823-3089ca544760aac547a8c50a6f82042f-98893269";
+const ADMIN_EMAIL = "profpaulofilho@gmail.com";
+const PIX_KEY = "profpaulofilho@gmail.com";
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// ============ STATE ============
+let currentUser = null;
+let isAdmin = false;
+let currentOrderId = null;
+let pendingOrder = null;
+let selectedPayMethod = 'pix';
+let unsubChat = null;
+
+// ============ INIT ============
+auth.onAuthStateChanged(async user => {
+  document.getElementById('loading').style.display = 'none';
+  if (user) {
+    currentUser = user;
+    isAdmin = user.email === ADMIN_EMAIL;
+    setupUI();
+    showScreen('app');
+  } else {
+    showScreen('login');
+  }
+});
+
+function setupUI() {
+  const name = currentUser.displayName || currentUser.email.split('@')[0];
+  const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-name').textContent = name;
+  document.getElementById('sb-role').textContent = isAdmin ? 'Administrador' : 'Cliente';
+  document.getElementById('sidebar-role-badge').textContent = isAdmin ? 'Admin' : 'Cliente';
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'});
+
+  if (isAdmin) {
+    document.getElementById('client-nav').style.display = 'none';
+    document.getElementById('admin-nav').style.display = 'block';
+    showP('admin-overview', null);
+    loadAdminData();
+  } else {
+    document.getElementById('client-nav').style.display = 'block';
+    document.getElementById('admin-nav').style.display = 'none';
+    showP('painel', null);
+    loadClientData();
+    loadFiles();
+    loadChat();
+  }
+}
+
+// ============ AUTH ============
+let loginMode = 'login';
+function setTab(mode, btn) {
+  loginMode = mode;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('login-form').style.display = mode==='login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = mode==='register' ? 'block' : 'none';
+  document.getElementById('login-title').textContent = mode==='login' ? 'Bem-vindo de volta' : 'Criar conta';
+  document.getElementById('login-sub').textContent = mode==='login' ? 'Acesse sua conta' : 'Preencha os dados abaixo';
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const senha = document.getElementById('l-senha').value;
+  if(!email||!senha){toast('Preencha e-mail e senha','error');return}
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+    toast('Login realizado!','success');
+  } catch(e) {
+    toast('E-mail ou senha incorretos','error');
+    btn.disabled = false; btn.textContent = 'Entrar na plataforma';
+  }
+}
+
+async function doRegister() {
+  const nome = document.getElementById('r-nome').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const senha = document.getElementById('r-senha').value;
+  if(!nome||!email||!senha){toast('Preencha todos os campos','error');return}
+  if(senha.length < 6){toast('Senha mínimo 6 caracteres','error');return}
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true; btn.textContent = 'Criando conta...';
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, senha);
+    await cred.user.updateProfile({displayName: nome});
+    await db.collection('users').doc(cred.user.uid).set({
+      name: nome, email, role: 'client',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('Conta criada com sucesso!','success');
+  } catch(e) {
+    let msg = 'Erro ao criar conta';
+    if(e.code==='auth/email-already-in-use') msg = 'Este e-mail já está cadastrado';
+    toast(msg,'error');
+    btn.disabled = false; btn.textContent = 'Criar minha conta';
+  }
+}
+
+function doLogout() {
+  if(unsubChat) unsubChat();
+  auth.signOut();
+  toast('Até logo!');
+}
+
+function showForgot() {
+  const email = prompt('Digite seu e-mail para recuperar a senha:');
+  if(email) {
+    auth.sendPasswordResetEmail(email)
+      .then(()=>toast('E-mail de recuperação enviado!','success'))
+      .catch(()=>toast('E-mail não encontrado','error'));
+  }
+}
+
+// ============ CLIENT DATA ============
+async function loadClientData() {
+  const snap = await db.collection('orders')
+    .where('clientId','==',currentUser.uid)
+    .orderBy('createdAt','desc').get();
+
+  let total = 0, ativos = 0, concluidos = 0;
+  const recentHTML = [];
+  const histRows = [];
+
+  snap.forEach(doc => {
+    const d = doc.data();
+    total += d.valor || 0;
+    if(d.status === 'concluido') concluidos++;
+    else if(d.status !== 'cancelado') ativos++;
+
+    const badge = getBadge(d.status);
+    recentHTML.push(`
+      <div class="order-row" onclick="showOrderDetail('${doc.id}')">
+        <div class="or-info">
+          <div class="or-title">${d.servico}</div>
+          <div class="or-sub">${d.laudas ? d.laudas+' laudas · ' : ''}${formatDate(d.createdAt)}</div>
+        </div>
+        ${badge}
+        <div class="or-actions">
+          <button class="or-btn or-btn-p" onclick="event.stopPropagation();showOrderDetail('${doc.id}')">Ver</button>
+        </div>
+      </div>`);
+
+    histRows.push(`<tr>
+      <td>#${doc.id.slice(-6).toUpperCase()}</td>
+      <td>${d.servico}</td>
+      <td>${d.laudas||'—'}</td>
+      <td style="color:var(--green)">R$ ${(d.valor||0).toLocaleString('pt-BR')}</td>
+      <td>${formatDate(d.createdAt)}</td>
+      <td>${badge}</td>
+    </tr>`);
+
+    if(!currentOrderId && d.status !== 'concluido') currentOrderId = doc.id;
+  });
+
+  document.getElementById('stat-pedidos').textContent = ativos;
+  document.getElementById('stat-total').textContent = 'R$ '+total.toLocaleString('pt-BR');
+  document.getElementById('stat-concluidos').textContent = concluidos;
+  document.getElementById('recent-orders').innerHTML = recentHTML.length ? recentHTML.join('') : '<p style="color:var(--muted);font-size:13px">Nenhum pedido ainda. <span style="color:var(--indigo2);cursor:pointer" onclick="showP(\'novo-pedido\',null)">Criar primeiro pedido →</span></p>';
+  document.getElementById('history-tbody').innerHTML = histRows.length ? histRows.join('') : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Nenhum pedido ainda</td></tr>';
+
+  if(currentOrderId) showOrderDetail(currentOrderId);
+}
+
+async function showOrderDetail(orderId) {
+  currentOrderId = orderId;
+  const doc = await db.collection('orders').doc(orderId).get();
+  if(!doc.exists) return;
+  const d = doc.data();
+  const steps = ['briefing','pagamento','pesquisa','escrita','revisao','entrega'];
+  const stepLabels = ['Briefing','Pagamento','Pesquisa','Escrita','Revisão','Entrega'];
+  const currIdx = steps.indexOf(d.etapa||'briefing');
+
+  let stepsHTML = steps.map((s,i) => `
+    <div class="step ${i<currIdx?'done':i===currIdx?'curr':''}">
+      <div class="step-dot">${i<currIdx?'✓':''}</div>
+      <div class="step-lbl">${stepLabels[i]}</div>
+    </div>`).join('');
+
+  const pct = Math.round(((currIdx+1)/steps.length)*100);
+
+  document.getElementById('order-detail').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">${d.servico}</span>
+        ${getBadge(d.status)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px">
+        <div style="background:var(--bg2);border-radius:8px;padding:10px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Valor total</div>
+          <div style="font-size:16px;font-weight:700;color:var(--green)">R$ ${(d.valor||0).toLocaleString('pt-BR')}</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:8px;padding:10px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Laudas</div>
+          <div style="font-size:16px;font-weight:700">${d.laudas||'—'}</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:8px;padding:10px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Pedido</div>
+          <div style="font-size:14px;font-weight:700">#${orderId.slice(-6).toUpperCase()}</div>
+        </div>
+      </div>
+      <div class="steps-row">${stepsHTML}</div>
+      <div class="progress-track" style="margin-top:16px"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px">
+        <span>${formatDate(d.createdAt)}</span><span>${pct}% concluído</span>
+      </div>
+      ${d.tema ? `<div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:8px;font-size:13px;color:var(--muted)"><strong style="color:var(--text)">Tema:</strong> ${d.tema}</div>` : ''}
+    </div>`;
+}
+
+// ============ CHAT ============
+function loadChat() {
+  const msgsDiv = document.getElementById('chat-messages');
+  if(unsubChat) unsubChat();
+
+  unsubChat = db.collection('chats')
+    .where('participants','array-contains',currentUser.uid)
+    .orderBy('createdAt','asc')
+    .onSnapshot(snap => {
+      if(snap.empty) return;
+      const msgs = [];
+      let unread = 0;
+      snap.forEach(doc => {
+        const m = doc.data();
+        const isMe = m.senderId === currentUser.uid;
+        if(!isMe && !m.read) unread++;
+        msgs.push(`
+          <div class="msg ${isMe?'me':'them'}">
+            <div class="msg-b">${m.text}</div>
+            <div class="msg-t">${formatTime(m.createdAt)}</div>
+          </div>`);
+      });
+      msgsDiv.innerHTML = msgs.join('') || '<div style="text-align:center;padding:20px;font-size:13px;color:var(--muted)">Nenhuma mensagem ainda 👋</div>';
+      msgsDiv.scrollTop = msgsDiv.scrollHeight;
+      if(unread > 0) {
+        document.getElementById('chat-badge').style.display = 'flex';
+        document.getElementById('chat-badge').textContent = unread;
+      }
+    });
+
+  document.getElementById('chat-av-name').textContent = isAdmin ? 'CL' : 'MS';
+  document.getElementById('chat-consultant-name').textContent = isAdmin ? 'Cliente' : 'Marcos Silva — Consultor';
+}
+
+async function sendMessage() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value = '';
+  try {
+    await db.collection('chats').add({
+      text,
+      senderId: currentUser.uid,
+      senderName: currentUser.displayName || currentUser.email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      read: false,
+      participants: [currentUser.uid, 'admin']
+    });
+  } catch(e) {
+    toast('Erro ao enviar mensagem','error');
+  }
+}
+
+// ============ FILES ============
+async function loadFiles() {
+  const snap = await db.collection('files')
+    .where('userId','==',currentUser.uid)
+    .orderBy('createdAt','desc').get();
+
+  let html = '';
+  snap.forEach(doc => {
+    const f = doc.data();
+    html += `
+      <div class="file-card">
+        <div style="font-size:26px">${getFileIcon(f.name)}</div>
+        <div class="file-name">${f.name}</div>
+        <div class="file-meta">${formatBytes(f.size)} · ${formatDate(f.createdAt)}</div>
+        <div class="file-actions">
+          <div class="file-btn" onclick="window.open('${f.url}','_blank')">⬇ Baixar</div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('files-list').innerHTML = html || '<p style="color:var(--muted);font-size:13px">Nenhum arquivo ainda.</p>';
+}
+
+async function uploadFile(input) {
+  const file = input.files[0];
+  if(!file) return;
+  toast('Enviando arquivo...');
+  try {
+    const ref = storage.ref(`files/${currentUser.uid}/${Date.now()}_${file.name}`);
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
+    await db.collection('files').add({
+      name: file.name, url, size: file.size,
+      userId: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('Arquivo enviado!','success');
+    loadFiles();
+  } catch(e) {
+    toast('Erro ao enviar arquivo','error');
+  }
+}
+
+// ============ NEW ORDER ============
+const precos = {
+  tecnico:{pl:25,fx:null},graduacao:{pl:35,fx:null},pos:{pl:55,fx:null},
+  artigo:{pl:null,fx:480},formatacao:{pl:12,fx:null},revisao:{pl:null,fx:180}
+};
+const nomeServico = {
+  tecnico:'TCC Técnico',graduacao:'TCC Graduação',pos:'Pós / MBA',
+  artigo:'Artigo Científico',formatacao:'Formatação ABNT',revisao:'Revisão Textual'
+};
+
+function calcPreco() {
+  const tipo = document.getElementById('np-tipo').value;
+  const laudas = parseInt(document.getElementById('np-laudas').value)||0;
+  const prazo = document.getElementById('np-prazo').value;
+  const el = document.getElementById('np-price');
+  if(!tipo){el.textContent='—';return}
+  const p = precos[tipo];
+  let total = p.fx || (p.pl && laudas > 0 ? p.pl*laudas : 0);
+  if(!total){el.textContent='—';return}
+  if(prazo==='rapido') total = Math.round(total*1.15);
+  if(prazo==='urgente') total = Math.round(total*1.30);
+  el.textContent = 'R$ '+total.toLocaleString('pt-BR');
+  return total;
+}
+
+function criarPedido() {
+  const tipo = document.getElementById('np-tipo').value;
+  const laudas = parseInt(document.getElementById('np-laudas').value)||0;
+  const prazo = document.getElementById('np-prazo').value;
+  const tema = document.getElementById('np-tema').value.trim();
+  const inst = document.getElementById('np-inst').value.trim();
+  const desc = document.getElementById('np-desc').value.trim();
+
+  if(!tipo){toast('Selecione o tipo de serviço','error');return}
+  const valor = calcPreco();
+  if(!valor){toast('Informe o número de laudas','error');return}
+
+  pendingOrder = {tipo, laudas, prazo, tema, inst, desc, valor, servico: nomeServico[tipo]};
+  document.getElementById('pay-service-name').textContent = nomeServico[tipo] + (laudas ? ` — ${laudas} laudas` : '');
+  document.getElementById('pay-amount-display').textContent = 'R$ '+valor.toLocaleString('pt-BR');
+  openPayModal();
+}
+
+// ============ PAYMENT ============
+function openPayModal() { document.getElementById('pay-modal').classList.add('open') }
+function closePayModal() { document.getElementById('pay-modal').classList.remove('open') }
+
+function setPayMethod(method, el) {
+  selectedPayMethod = method;
+  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pix-section').classList.toggle('show', method==='pix');
+  document.getElementById('card-section').style.display = method==='card' ? 'block' : 'none';
+}
+
+function copyPix() {
+  navigator.clipboard.writeText(PIX_KEY).then(()=>toast('Chave Pix copiada!','success'));
+}
+
+async function confirmarPagamento() {
+  if(!pendingOrder) return;
+  const btn = document.getElementById('btn-confirmar-pag');
+  btn.disabled = true; btn.textContent = 'Processando...';
+
+  try {
+    if(selectedPayMethod === 'card') {
+      // Mercado Pago Checkout Pro
+      const resp = await fetch('https://api.mercadopago.com/checkout/preferences', {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+MP_ACCESS_TOKEN
+        },
+        body: JSON.stringify({
+          items:[{
+            title: pendingOrder.servico,
+            quantity: 1,
+            unit_price: pendingOrder.valor,
+            currency_id: 'BRL'
+          }],
+          payer: { email: currentUser.email },
+          back_urls: {
+            success: 'https://academicofacil.com.br/dashboard?status=success',
+            failure: 'https://academicofacil.com.br/dashboard?status=failure',
+            pending: 'https://academicofacil.com.br/dashboard?status=pending'
+          },
+          auto_return: 'approved',
+          statement_descriptor: 'ACADEMICOFACIL',
+          external_reference: currentUser.uid
+        })
+      });
+      const data = await resp.json();
+      if(data.init_point) {
+        await salvarPedido('aguardando_pagamento');
+        window.open(data.init_point, '_blank');
+        closePayModal();
+        toast('Redirecionando para o Mercado Pago...','success');
+      } else {
+        throw new Error('Erro no Mercado Pago');
+      }
+    } else {
+      // PIX — salva pedido e instrui enviar comprovante
+      await salvarPedido('aguardando_comprovante');
+      closePayModal();
+      toast('Pedido criado! Envie o comprovante Pix no chat.','success');
+      showP('chat', null);
+      setTimeout(()=>{
+        db.collection('chats').add({
+          text: `✅ Pedido criado! Valor: R$ ${pendingOrder.valor.toLocaleString('pt-BR')} — Chave Pix: ${PIX_KEY}\n\nApós o pagamento, envie o comprovante aqui para liberarmos seu projeto.`,
+          senderId: 'system',
+          senderName: 'Sistema',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false,
+          participants: [currentUser.uid, 'admin']
+        });
+      }, 500);
+    }
+    loadClientData();
+  } catch(e) {
+    toast('Erro ao processar pagamento. Tente novamente.','error');
+    btn.disabled = false; btn.textContent = 'Confirmar pedido e pagar';
+  }
+}
+
+async function salvarPedido(status) {
+  const ref = await db.collection('orders').add({
+    clientId: currentUser.uid,
+    clientEmail: currentUser.email,
+    clientName: currentUser.displayName || currentUser.email,
+    servico: pendingOrder.servico,
+    tipo: pendingOrder.tipo,
+    laudas: pendingOrder.laudas,
+    prazo: pendingOrder.prazo,
+    tema: pendingOrder.tema,
+    inst: pendingOrder.inst,
+    desc: pendingOrder.desc,
+    valor: pendingOrder.valor,
+    status: status,
+    etapa: 'briefing',
+    pagamento: selectedPayMethod,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  currentOrderId = ref.id;
+  pendingOrder = null;
+  return ref.id;
+}
+
+// ============ ADMIN ============
+async function loadAdminData() {
+  const snap = await db.collection('orders').orderBy('createdAt','desc').get();
+  let receita=0, ativos=0, concluidos=0;
+  let recentHTML = '', ordersHTML = '', finRows = '';
+
+  const clientIds = new Set();
+
+  snap.forEach(doc => {
+    const d = doc.data();
+    receita += (d.status==='concluido'||d.status==='pago') ? d.valor||0 : 0;
+    if(d.status==='concluido') concluidos++;
+    else if(d.status!=='cancelado') ativos++;
+    clientIds.add(d.clientId);
+
+    const badge = getBadge(d.status);
+    const row = `
+      <div class="order-row">
+        <div class="or-info">
+          <div class="or-title">${d.servico} — ${d.clientName||d.clientEmail}</div>
+          <div class="or-sub">${d.laudas?d.laudas+' laudas · ':''}R$ ${(d.valor||0).toLocaleString('pt-BR')} · ${formatDate(d.createdAt)}</div>
+        </div>
+        ${badge}
+        <div class="or-actions">
+          <button class="or-btn or-btn-g" onclick="updateOrderStatus('${doc.id}')">Atualizar</button>
+          <button class="or-btn or-btn-p">Ver</button>
+        </div>
+      </div>`;
+    recentHTML += row;
+    ordersHTML += row;
+
+    finRows += `<tr>
+      <td>#${doc.id.slice(-6).toUpperCase()}</td>
+      <td>${d.clientName||d.clientEmail||'—'}</td>
+      <td>${d.servico}</td>
+      <td style="color:var(--green)">R$ ${(d.valor||0).toLocaleString('pt-BR')}</td>
+      <td><span class="badge badge-${d.pagamento==='pix'?'green':'blue'}">${d.pagamento||'pix'}</span></td>
+      <td>${formatDate(d.createdAt)}</td>
+    </tr>`;
+  });
+
+  document.getElementById('adm-pedidos').textContent = ativos;
+  document.getElementById('adm-receita').textContent = 'R$ '+receita.toLocaleString('pt-BR');
+  document.getElementById('adm-clientes').textContent = clientIds.size;
+  document.getElementById('adm-concluidos').textContent = concluidos;
+  document.getElementById('admin-orders-badge').textContent = ativos;
+  document.getElementById('fin-total').textContent = 'R$ '+receita.toLocaleString('pt-BR');
+  document.getElementById('fin-count').textContent = snap.size;
+  document.getElementById('fin-ticket').textContent = snap.size ? 'R$ '+Math.round(receita/(snap.size||1)).toLocaleString('pt-BR') : 'R$ 0';
+
+  document.getElementById('adm-recent-orders').innerHTML = recentHTML || '<p style="color:var(--muted);font-size:13px">Nenhum pedido ainda</p>';
+  document.getElementById('adm-orders-list').innerHTML = ordersHTML || '<p style="color:var(--muted);font-size:13px">Nenhum pedido ainda</p>';
+  document.getElementById('fin-tbody').innerHTML = finRows || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sem transações</td></tr>';
+
+  loadAdminClients();
+}
+
+async function loadAdminClients() {
+  const snap = await db.collection('users').get();
+  let rows = '';
+  snap.forEach(doc => {
+    const d = doc.data();
+    rows += `<tr>
+      <td>${d.name||'—'}</td>
+      <td style="color:var(--muted)">${d.email}</td>
+      <td>—</td><td>—</td>
+      <td>${formatDate(d.createdAt)}</td>
+    </tr>`;
+  });
+  document.getElementById('adm-clients-tbody').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Nenhum cliente ainda</td></tr>';
+}
+
+async function updateOrderStatus(orderId) {
+  const status = prompt('Novo status:\n1. aguardando\n2. em_andamento\n3. revisao\n4. concluido\n5. cancelado\n\nDigite o status:');
+  if(!status) return;
+  const map = {'1':'aguardando','2':'em_andamento','3':'revisao','4':'concluido','5':'cancelado'};
+  const novoStatus = map[status] || status;
+  const etapaMap = {'aguardando':'briefing','em_andamento':'escrita','revisao':'revisao','concluido':'entrega'};
+  await db.collection('orders').doc(orderId).update({
+    status: novoStatus,
+    etapa: etapaMap[novoStatus] || 'briefing'
+  });
+  toast('Status atualizado!','success');
+  loadAdminData();
+}
+
+// ============ HELPERS ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function showP(id, navEl) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const panel = document.getElementById('panel-'+id);
+  if(panel) panel.classList.add('active');
+  if(navEl) {
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    navEl.classList.add('active');
+  }
+  const titles = {
+    'painel':'Painel','meu-pedido':'Meu pedido','chat':'Chat',
+    'arquivos':'Arquivos','historico':'Histórico','novo-pedido':'Novo pedido',
+    'admin-overview':'Visão geral','admin-pedidos':'Pedidos',
+    'admin-clientes':'Clientes','admin-financeiro':'Financeiro'
+  };
+  document.getElementById('topbar-title').textContent = titles[id]||'';
+  if(id==='chat') {
+    document.getElementById('chat-badge').style.display='none';
+    loadChat();
+  }
+}
+
+function getBadge(status) {
+  const map = {
+    'aguardando': '<span class="badge badge-gold"><span class="bdot"></span>Aguardando</span>',
+    'aguardando_pagamento': '<span class="badge badge-gold"><span class="bdot"></span>Aguard. pagto</span>',
+    'aguardando_comprovante': '<span class="badge badge-gold"><span class="bdot"></span>Aguard. Pix</span>',
+    'em_andamento': '<span class="badge badge-orange"><span class="bdot"></span>Em andamento</span>',
+    'revisao': '<span class="badge badge-blue"><span class="bdot"></span>Revisão</span>',
+    'concluido': '<span class="badge badge-green"><span class="bdot"></span>Concluído</span>',
+    'cancelado': '<span class="badge badge-red"><span class="bdot"></span>Cancelado</span>',
+    'pago': '<span class="badge badge-green"><span class="bdot"></span>Pago</span>'
+  };
+  return map[status] || `<span class="badge badge-gray">${status||'—'}</span>`;
+}
+
+function getFileIcon(name) {
+  if(!name) return '📄';
+  const ext = name.split('.').pop().toLowerCase();
+  if(['pdf'].includes(ext)) return '📋';
+  if(['doc','docx'].includes(ext)) return '📝';
+  if(['xls','xlsx'].includes(ext)) return '📊';
+  if(['jpg','jpeg','png','gif'].includes(ext)) return '🖼️';
+  return '📄';
+}
+
+function formatDate(ts) {
+  if(!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('pt-BR');
+}
+
+function formatTime(ts) {
+  if(!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function formatBytes(b) {
+  if(!b) return '—';
+  if(b<1024) return b+' B';
+  if(b<1048576) return Math.round(b/1024)+' KB';
+  return (b/1048576).toFixed(1)+' MB';
+}
+
+function toast(msg, type='') {
+  const el = document.createElement('div');
+  el.className = 'toast-item'+(type?' '+type:'');
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(()=>el.remove(), 3500);
+}
+</script>
+</body>
+</html>
