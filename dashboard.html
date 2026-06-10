@@ -1423,59 +1423,39 @@ function openPayModal() {
 }
 function closePayModal() { document.getElementById('pay-modal').classList.remove('open') }
 
+async function getIdToken() {
+  try { return await currentUser.getIdToken(true); } catch { return null; }
+}
+
 async function gerarQRPix() {
   const img = document.getElementById('pix-qr-img');
   document.getElementById('pix-key-display').textContent = PIX_KEY;
-
-  // Mostra loading enquanto gera
-  img.src = '';
-  img.style.opacity = '0.3';
-  const wrap = img.parentElement;
-  wrap.style.position = 'relative';
-
+  img.src = ''; img.style.opacity = '0.3';
   try {
-    // Chama a Edge Function para criar preferência MP com QR Code real
+    const idToken = await getIdToken();
     const resp = await fetch('/api/criar-preferencia', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
       body: JSON.stringify({
-        servico: pendingOrder?.servico || 'Assessoria Acadêmica',
-        valor: pendingOrder?.valor || 0,
-        email: currentUser?.email || '',
-        uid: currentUser?.uid || ''
+        tipo_servico: pendingOrder?.tipo,
+        laudas: pendingOrder?.laudas,
+        prazo: pendingOrder?.prazo,
+        metodo: 'pix'
       })
     });
     const data = await resp.json();
-
-    // Se retornou init_point, tenta pegar QR Code via API do MP
-    if(data.init_point) {
-      // Tenta gerar QR Code Pix real via MP /v1/payments (cobranças)
-      const pixResp = await fetch('/api/criar-preferencia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          servico: pendingOrder?.servico || 'Assessoria Acadêmica',
-          valor: pendingOrder?.valor || 0,
-          email: currentUser?.email || '',
-          uid: currentUser?.uid || '',
-          tipo: 'pix'
-        })
-      });
-      const pixData = await pixResp.json();
-
-      if(pixData.qr_code_base64) {
-        // QR Code real do MP
-        img.src = 'data:image/png;base64,' + pixData.qr_code_base64;
-        img.style.opacity = '1';
-        if(pixData.qr_code) {
-          document.getElementById('pix-key-display').textContent = pixData.qr_code;
-        }
-        return;
+    if(data.qr_code_base64) {
+      img.src = 'data:image/png;base64,' + data.qr_code_base64;
+      img.style.opacity = '1';
+      if(data.qr_code) document.getElementById('pix-key-display').textContent = data.qr_code;
+      if(data.valor) {
+        document.getElementById('pay-amount-display').textContent = 'R$ ' + data.valor.toLocaleString('pt-BR');
+        if(pendingOrder) pendingOrder.valorConfirmado = data.valor;
       }
+      return;
     }
-    throw new Error('sem qr code');
+    throw new Error('sem qr_code_base64');
   } catch(e) {
-    // Fallback: QR Code visual com a chave Pix (funciona via "Pix por chave")
     const texto = encodeURIComponent(PIX_KEY);
     img.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${texto}&bgcolor=ffffff&color=000000&margin=8`;
     img.style.opacity = '1';
@@ -1503,15 +1483,15 @@ async function abrirMercadoPago() {
   const btn = document.getElementById('btn-mp');
   btn.disabled = true; btn.textContent = 'Gerando link...';
   try {
-    // Chama a Edge Function no servidor — o Access Token nunca fica exposto no browser
+    const idToken = await getIdToken();
     const resp = await fetch('/api/criar-preferencia', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
       body: JSON.stringify({
-        servico: pendingOrder.servico,
-        valor: pendingOrder.valor,
-        email: currentUser.email,
-        uid: currentUser.uid
+        tipo_servico: pendingOrder.tipo,
+        laudas: pendingOrder.laudas,
+        prazo: pendingOrder.prazo,
+        metodo: 'cartao'
       })
     });
     const data = await resp.json();

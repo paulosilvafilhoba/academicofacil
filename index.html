@@ -1064,8 +1064,10 @@ body.dark-mode footer{background:#03040A}
 <style>
 #agente-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9995;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 #agente-modal.open{display:flex}
-.am-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:520px;position:relative;overflow:hidden;max-height:90vh;overflow-y:auto}
-.am-header{padding:28px 28px 20px;position:relative}
+.am-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:520px;position:relative;overflow:hidden;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.am-box::-webkit-scrollbar{width:4px}
+.am-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.am-header{padding:28px 28px 20px;position:relative;border-radius:18px 18px 0 0}
 .am-close{position:absolute;top:16px;right:16px;width:32px;height:32px;background:var(--bg2);border:none;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:.2s}
 .am-close:hover{background:var(--border);color:var(--text)}
 .am-body{padding:0 28px 28px}
