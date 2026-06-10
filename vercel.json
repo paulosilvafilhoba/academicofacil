@@ -1,7 +1,8 @@
 {
   "rewrites": [
-    { "source": "/dashboard", "destination": "/plataforma_completa.html" },
-    { "source": "/plataforma", "destination": "/plataforma_completa.html" }
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/privacidade", "destination": "/privacidade.html" },
+    { "source": "/termos", "destination": "/termos.html" }
   ],
   "cleanUrls": true,
   "trailingSlash": false
