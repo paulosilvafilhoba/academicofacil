@@ -1419,21 +1419,68 @@ function confirmarResumo() {
 // ============ PAYMENT ============
 function openPayModal() {
   document.getElementById('pay-modal').classList.add('open');
-  // Gera QR Code do Pix automaticamente
   gerarQRPix();
 }
 function closePayModal() { document.getElementById('pay-modal').classList.remove('open') }
 
-function gerarQRPix() {
-  const chave = PIX_KEY;
-  const valor = pendingOrder ? pendingOrder.valor : 0;
-  const nome = 'AcademicoFacil';
-  const cidade = 'Brasil';
-  // Usa API gratuita de QR Code com texto da chave Pix
-  const texto = encodeURIComponent(`Pix: ${chave} | Valor: R$${valor} | ${nome}`);
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${texto}&bgcolor=ffffff&color=000000&margin=8`;
-  document.getElementById('pix-qr-img').src = qrUrl;
-  document.getElementById('pix-key-display').textContent = chave;
+async function gerarQRPix() {
+  const img = document.getElementById('pix-qr-img');
+  document.getElementById('pix-key-display').textContent = PIX_KEY;
+
+  // Mostra loading enquanto gera
+  img.src = '';
+  img.style.opacity = '0.3';
+  const wrap = img.parentElement;
+  wrap.style.position = 'relative';
+
+  try {
+    // Chama a Edge Function para criar preferência MP com QR Code real
+    const resp = await fetch('/api/criar-preferencia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        servico: pendingOrder?.servico || 'Assessoria Acadêmica',
+        valor: pendingOrder?.valor || 0,
+        email: currentUser?.email || '',
+        uid: currentUser?.uid || ''
+      })
+    });
+    const data = await resp.json();
+
+    // Se retornou init_point, tenta pegar QR Code via API do MP
+    if(data.init_point) {
+      // Tenta gerar QR Code Pix real via MP /v1/payments (cobranças)
+      const pixResp = await fetch('/api/criar-preferencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          servico: pendingOrder?.servico || 'Assessoria Acadêmica',
+          valor: pendingOrder?.valor || 0,
+          email: currentUser?.email || '',
+          uid: currentUser?.uid || '',
+          tipo: 'pix'
+        })
+      });
+      const pixData = await pixResp.json();
+
+      if(pixData.qr_code_base64) {
+        // QR Code real do MP
+        img.src = 'data:image/png;base64,' + pixData.qr_code_base64;
+        img.style.opacity = '1';
+        if(pixData.qr_code) {
+          document.getElementById('pix-key-display').textContent = pixData.qr_code;
+        }
+        return;
+      }
+    }
+    throw new Error('sem qr code');
+  } catch(e) {
+    // Fallback: QR Code visual com a chave Pix (funciona via "Pix por chave")
+    const texto = encodeURIComponent(PIX_KEY);
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${texto}&bgcolor=ffffff&color=000000&margin=8`;
+    img.style.opacity = '1';
+    document.getElementById('pix-key-display').textContent = PIX_KEY;
+  }
 }
 
 function setPayMethod(method, el) {
