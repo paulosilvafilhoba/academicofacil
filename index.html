@@ -1110,6 +1110,12 @@ body.dark-mode footer{background:#03040A}
         <h3 style="font-size:20px;color:#fff;margin:0 0 4px;font-family:'Space Grotesk',sans-serif">Agente corporativo</h3>
         <p style="font-size:13px;color:rgba(255,255,255,.75);margin:0">Preencha seu perfil — configuramos em até 24h</p>
       </div>
+      <div class="am-header" id="am-header-combo" style="display:none;background:linear-gradient(135deg,#1e1270,#4F46E5,#059669)">
+        <button class="am-close" onclick="fecharModalAgente()">✕</button>
+        <div style="font-size:32px;margin-bottom:8px">⚡</div>
+        <h3 style="font-size:20px;color:#fff;margin:0 0 4px;font-family:'Space Grotesk',sans-serif">Agente Combo — Educacional + Corporativo</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,.75);margin:0">O melhor dos dois mundos — configuramos em até 24h</p>
+      </div>
 
       <div class="am-body">
         <div class="am-field"><label>Nome completo</label><input type="text" id="am-nome" placeholder="Seu nome"></div>
@@ -1183,8 +1189,6 @@ function abrirModalAgente(tipo){
   document.getElementById('agente-modal').classList.add('open');
   document.getElementById('am-success').style.display='none';
   document.getElementById('am-form-wrap').style.display='block';
-  document.getElementById('am-header-edu').style.display = tipo==='edu'?'block':'none';
-  document.getElementById('am-header-corp').style.display = tipo==='corp'?'block':'none';
   selTipo(tipo);
 }
 function fecharModalAgente(){document.getElementById('agente-modal').classList.remove('open')}
@@ -1194,8 +1198,9 @@ function selTipo(t){
   ['edu','corp','combo'].forEach(x=>{
     document.getElementById('am-t-'+x).classList.toggle('sel',x===t);
   });
-  document.getElementById('am-header-edu').style.display = t==='edu'?'block':'none';
-  document.getElementById('am-header-corp').style.display = (t==='corp'||t==='combo')?'block':'none';
+  document.getElementById('am-header-edu').style.display   = t==='edu'   ? 'block' : 'none';
+  document.getElementById('am-header-corp').style.display  = t==='corp'  ? 'block' : 'none';
+  document.getElementById('am-header-combo').style.display = t==='combo' ? 'block' : 'none';
 }
 
 function selPlano(p){
