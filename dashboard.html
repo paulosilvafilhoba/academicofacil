@@ -976,7 +976,7 @@ const firebaseConfig = {
 
 // ============ MERCADO PAGO CONFIG ============
 const MP_PUBLIC_KEY = "APP_USR-8ee7e3db-6ea6-49f7-aa03-2b55266131ad";
-const MP_ACCESS_TOKEN = "APP_USR-7442952910996130-060823-3089ca544760aac547a8c50a6f82042f-98893269";
+// Access Token removido do frontend por segurança — processado pela Edge Function /api/criar-preferencia
 const ADMIN_EMAIL = "paulosilvafilhoba@gmail.com";
 const PIX_KEY = "profpaulofilho@gmail.com";
 
@@ -1456,32 +1456,30 @@ async function abrirMercadoPago() {
   const btn = document.getElementById('btn-mp');
   btn.disabled = true; btn.textContent = 'Gerando link...';
   try {
-    const resp = await fetch('https://api.mercadopago.com/checkout/preferences', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+MP_ACCESS_TOKEN},
+    // Chama a Edge Function no servidor — o Access Token nunca fica exposto no browser
+    const resp = await fetch('/api/criar-preferencia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        items:[{title:pendingOrder.servico,quantity:1,unit_price:pendingOrder.valor,currency_id:'BRL'}],
-        payer:{email:currentUser.email},
-        back_urls:{
-          success:'https://academicofacil.com.br/dashboard?status=success',
-          failure:'https://academicofacil.com.br/dashboard?status=failure',
-          pending:'https://academicofacil.com.br/dashboard?status=pending'
-        },
-        auto_return:'approved',
-        statement_descriptor:'ACADEMICOFACIL',
-        external_reference:currentUser.uid
+        servico: pendingOrder.servico,
+        valor: pendingOrder.valor,
+        email: currentUser.email,
+        uid: currentUser.uid
       })
     });
     const data = await resp.json();
-    if(data.init_point){
+    if(data.init_point) {
       await salvarPedido('aguardando_pagamento');
-      window.open(data.init_point,'_blank');
+      window.open(data.init_point, '_blank');
       closePayModal();
       toast('Redirecionando para o Mercado Pago...','success');
       loadClientData();
-    } else { throw new Error(); }
+    } else {
+      throw new Error(data.error || 'Sem link de pagamento');
+    }
   } catch(e) {
     toast('Erro ao gerar link. Tente o Pix.','error');
+    console.error(e);
     btn.disabled = false; btn.textContent = 'Pagar no Mercado Pago';
   }
 }
