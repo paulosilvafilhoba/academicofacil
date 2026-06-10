@@ -396,7 +396,6 @@ body.dark-mode footer{background:#03040A}
       <div class="hero-btns">
         <a href="/dashboard" class="btn-glow">Solicitar assessoria agora →</a>
         <a href="#como-funciona" class="btn-outline">Ver como funciona →</a>
-        <a href="#agentes" class="btn-outline">🤖 Agente de IA personalizado, monte o seu →</a>
       </div>
     </div>
 
@@ -1172,6 +1171,69 @@ body.dark-mode footer{background:#03040A}
     </div>
   </div>
 </div>
+
+<!-- ========== BOTÃO FLUTUANTE AGENTE ========== -->
+<button id="agente-fab" onclick="abrirModalAgente('edu')"
+  style="position:fixed;bottom:170px;right:28px;z-index:9996;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;padding:13px 20px 13px 16px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(99,102,241,.5);transition:.3s;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;animation:agente-pulse 3s ease-in-out infinite">
+  <span style="font-size:20px">🤖</span>
+  <span id="agente-fab-txt">Criar meu agente IA<br><span style="font-size:11px;opacity:.85;font-weight:400">Personalizado para você</span></span>
+</button>
+<style>
+@keyframes agente-pulse{0%,100%{box-shadow:0 4px 24px rgba(99,102,241,.5)}50%{box-shadow:0 4px 36px rgba(99,102,241,.75),0 0 0 6px rgba(99,102,241,.1)}}
+</style>
+<script>
+let _fabCol=false;
+window.addEventListener('scroll',()=>{
+  const el=document.getElementById('agente-fab');
+  const tx=document.getElementById('agente-fab-txt');
+  if(!el)return;
+  if(window.scrollY>600&&!_fabCol){_fabCol=true;tx.style.display='none';el.style.padding='16px';el.style.borderRadius='50%';}
+  else if(window.scrollY<=600&&_fabCol){_fabCol=false;tx.style.display='';el.style.padding='13px 20px 13px 16px';el.style.borderRadius='100px';}
+});
+
+let _tipoSel='edu',_planoSel='completo';
+
+function abrirModalAgente(tipo){
+  document.getElementById('agente-modal').classList.add('open');
+  document.getElementById('am-success').style.display='none';
+  document.getElementById('am-form-wrap').style.display='block';
+  document.getElementById('am-header-edu').style.display = tipo==='edu'?'block':'none';
+  document.getElementById('am-header-corp').style.display = tipo==='corp'?'block':'none';
+  selTipo(tipo);
+}
+function fecharModalAgente(){document.getElementById('agente-modal').classList.remove('open')}
+
+function selTipo(t){
+  _tipoSel=t;
+  ['edu','corp','combo'].forEach(x=>{
+    document.getElementById('am-t-'+x).classList.toggle('sel',x===t);
+  });
+  document.getElementById('am-header-edu').style.display = t==='edu'?'block':'none';
+  document.getElementById('am-header-corp').style.display = (t==='corp'||t==='combo')?'block':'none';
+}
+
+function selPlano(p){
+  _planoSel=p;
+  ['basico','completo','premium'].forEach(x=>{
+    document.getElementById('am-p-'+x).classList.toggle('sel',x===p);
+  });
+}
+
+function enviarFormAgente(){
+  const nome=document.getElementById('am-nome').value.trim();
+  const email=document.getElementById('am-email').value.trim();
+  const zap=document.getElementById('am-zap').value.trim();
+  const area=document.getElementById('am-area').value.trim();
+  const tarefas=document.getElementById('am-tarefas').value.trim();
+  if(!nome||!email){alert('Preencha nome e e-mail para continuar.');return;}
+  const msg=`🤖 *Novo interesse — Agente personalizado*\n\nNome: ${nome}\nE-mail: ${email}\nWhatsApp: ${zap||'não informado'}\nTipo: ${_tipoSel}\nPlano: ${_planoSel}\nÁrea: ${area}\nTarefas: ${tarefas}`;
+  const url=`https://wa.me/5571920031180?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+  document.getElementById('am-form-wrap').style.display='none';
+  document.getElementById('am-success').style.display='block';
+}
+document.getElementById('agente-modal').addEventListener('click',function(e){if(e.target===this)fecharModalAgente()});
+</script>
 
 <!-- WHATSAPP FLUTUANTE COM CTA FORTE -->
 <a href="https://wa.me/5571920031180?text=Olá!%20Preciso%20de%20orientação%20para%20meu%20trabalho%20acadêmico.%20Podem%20me%20enviar%20uma%20estimativa%3F"
