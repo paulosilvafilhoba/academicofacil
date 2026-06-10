@@ -309,6 +309,23 @@ tr:last-child td{border-bottom:none}
 .or-btn-p:hover{background:#4F46E5}
 .or-btn-g{background:transparent;border-color:var(--border2);color:var(--indigo2)}
 .or-btn-g:hover{background:rgba(99,102,241,.1)}
+.or-btn-del{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35);color:var(--red)}
+.or-btn-del:hover{background:rgba(239,68,68,.22);border-color:var(--red)}
+/* MODAL STATUS */
+#status-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+#status-modal.open{display:flex}
+.status-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:400px;overflow:hidden}
+.status-box-header{padding:20px 24px 16px;border-bottom:1px solid var(--border)}
+.status-box-header h3{font-size:16px;margin-bottom:4px}
+.status-box-header p{font-size:12px;color:var(--muted)}
+.status-opts{padding:16px 24px;display:flex;flex-direction:column;gap:8px}
+.status-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:.15s;background:var(--bg2)}
+.status-opt:hover{border-color:var(--indigo);background:rgba(99,102,241,.06)}
+.status-opt.selected{border-color:var(--indigo);background:rgba(99,102,241,.1)}
+.status-opt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-opt-label{font-size:13px;font-weight:600;color:var(--text)}
+.status-opt-sub{font-size:11px;color:var(--muted);margin-left:auto}
+.status-box-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
 
 @media(max-width:768px){.sidebar{display:none}.content{padding:16px}.form-row-2{grid-template-columns:1fr}}
 </style>
@@ -793,6 +810,47 @@ tr:last-child td{border-bottom:none}
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STATUS PEDIDO -->
+<div id="status-modal">
+  <div class="status-box">
+    <div class="status-box-header">
+      <h3>Atualizar status do pedido</h3>
+      <p id="status-modal-sub">Selecione o novo status</p>
+    </div>
+    <div class="status-opts">
+      <div class="status-opt" onclick="selectStatus('aguardando',this)">
+        <span class="status-opt-dot" style="background:#F59E0B"></span>
+        <span class="status-opt-label">Aguardando</span>
+        <span class="status-opt-sub">Pagamento pendente</span>
+      </div>
+      <div class="status-opt" onclick="selectStatus('em_andamento',this)">
+        <span class="status-opt-dot" style="background:#6366F1"></span>
+        <span class="status-opt-label">Em andamento</span>
+        <span class="status-opt-sub">Consultor trabalhando</span>
+      </div>
+      <div class="status-opt" onclick="selectStatus('revisao',this)">
+        <span class="status-opt-dot" style="background:#22D3EE"></span>
+        <span class="status-opt-label">Revisão</span>
+        <span class="status-opt-sub">Aguardando feedback</span>
+      </div>
+      <div class="status-opt" onclick="selectStatus('concluido',this)">
+        <span class="status-opt-dot" style="background:#10B981"></span>
+        <span class="status-opt-label">Concluído</span>
+        <span class="status-opt-sub">Trabalho entregue</span>
+      </div>
+      <div class="status-opt" onclick="selectStatus('cancelado',this)">
+        <span class="status-opt-dot" style="background:#EF4444"></span>
+        <span class="status-opt-label">Cancelado</span>
+        <span class="status-opt-sub">Pedido encerrado</span>
+      </div>
+    </div>
+    <div class="status-box-footer">
+      <button class="btn-ghost" onclick="closeStatusModal()">Cancelar</button>
+      <button class="btn-primary" id="btn-confirmar-status" onclick="confirmarStatus()" disabled>Confirmar →</button>
     </div>
   </div>
 </div>
@@ -1520,16 +1578,18 @@ async function loadAdminData() {
     clientIds.add(d.clientId);
 
     const badge = getBadge(d.status);
+    const isCancelado = d.status === 'cancelado';
     const row = `
-      <div class="order-row">
+      <div class="order-row" id="order-row-${doc.id}">
         <div class="or-info">
           <div class="or-title">${d.servico} — ${d.clientName||d.clientEmail}</div>
           <div class="or-sub">${d.laudas?d.laudas+' laudas · ':''}R$ ${(d.valor||0).toLocaleString('pt-BR')} · ${formatDate(d.createdAt)}</div>
         </div>
         ${badge}
         <div class="or-actions">
-          <button class="or-btn or-btn-g" onclick="updateOrderStatus('${doc.id}')">Atualizar</button>
-          <button class="or-btn or-btn-p">Ver</button>
+          <button class="or-btn or-btn-g" onclick="openStatusModal('${doc.id}','${d.status}')">Atualizar</button>
+          ${isCancelado ? `<button class="or-btn or-btn-del" onclick="excluirPedido('${doc.id}')">🗑 Excluir</button>` : ''}
+          <button class="or-btn or-btn-p" onclick="verPedidoAdmin('${doc.id}')">Ver</button>
         </div>
       </div>`;
     recentHTML += row;
@@ -1576,19 +1636,77 @@ async function loadAdminClients() {
   document.getElementById('adm-clients-tbody').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Nenhum cliente ainda</td></tr>';
 }
 
-async function updateOrderStatus(orderId) {
-  const status = prompt('Novo status:\n1. aguardando\n2. em_andamento\n3. revisao\n4. concluido\n5. cancelado\n\nDigite o status:');
-  if(!status) return;
-  const map = {'1':'aguardando','2':'em_andamento','3':'revisao','4':'concluido','5':'cancelado'};
-  const novoStatus = map[status] || status;
-  const etapaMap = {'aguardando':'briefing','em_andamento':'escrita','revisao':'revisao','concluido':'entrega'};
-  await db.collection('orders').doc(orderId).update({
-    status: novoStatus,
-    etapa: etapaMap[novoStatus] || 'briefing'
-  });
-  toast('Status atualizado!','success');
-  loadAdminData();
+// ============ STATUS MODAL ============
+let _statusOrderId = null;
+let _statusSelected = null;
+
+function openStatusModal(orderId, currentStatus) {
+  _statusOrderId = orderId;
+  _statusSelected = null;
+  // Marca o status atual
+  document.querySelectorAll('.status-opt').forEach(opt => opt.classList.remove('selected'));
+  document.getElementById('btn-confirmar-status').disabled = true;
+  document.getElementById('status-modal-sub').textContent = `Status atual: ${currentStatus || '—'}`;
+  document.getElementById('status-modal').classList.add('open');
 }
+
+function closeStatusModal() {
+  document.getElementById('status-modal').classList.remove('open');
+  _statusOrderId = null;
+  _statusSelected = null;
+}
+
+function selectStatus(status, el) {
+  document.querySelectorAll('.status-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  _statusSelected = status;
+  document.getElementById('btn-confirmar-status').disabled = false;
+}
+
+async function confirmarStatus() {
+  if(!_statusOrderId || !_statusSelected) return;
+  const etapaMap = {'aguardando':'briefing','em_andamento':'escrita','revisao':'revisao','concluido':'entrega','cancelado':'cancelado'};
+  try {
+    await db.collection('orders').doc(_statusOrderId).update({
+      status: _statusSelected,
+      etapa: etapaMap[_statusSelected] || 'briefing'
+    });
+    toast('Status atualizado para: ' + _statusSelected,'success');
+    closeStatusModal();
+    loadAdminData();
+  } catch(e) {
+    toast('Erro ao atualizar status','error');
+  }
+}
+
+// ============ EXCLUIR PEDIDO ============
+async function excluirPedido(orderId) {
+  const confirmar = confirm('⚠️ Excluir este pedido permanentemente?\n\nEsta ação não pode ser desfeita.');
+  if(!confirmar) return;
+  try {
+    await db.collection('orders').doc(orderId).delete();
+    // Remove visualmente sem recarregar tudo
+    const rowEl = document.getElementById('order-row-' + orderId);
+    if(rowEl) {
+      rowEl.style.transition = 'opacity .3s, transform .3s';
+      rowEl.style.opacity = '0';
+      rowEl.style.transform = 'translateX(20px)';
+      setTimeout(() => rowEl.remove(), 300);
+    }
+    toast('Pedido excluído com sucesso','success');
+    loadAdminData();
+  } catch(e) {
+    toast('Erro ao excluir pedido','error');
+    console.error(e);
+  }
+}
+
+// ============ VER PEDIDO ADMIN ============
+function verPedidoAdmin(orderId) {
+  toast('Pedido #' + orderId.slice(-6).toUpperCase() + ' — Em breve detalhes completos aqui.','');
+}
+
+
 
 // ============ HELPERS ============
 function showScreen(id) {
