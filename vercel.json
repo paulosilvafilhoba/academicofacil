@@ -2,7 +2,8 @@
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/privacidade", "destination": "/privacidade.html" },
-    { "source": "/termos", "destination": "/termos.html" }
+    { "source": "/termos", "destination": "/termos.html" },
+    { "source": "/agentes", "destination": "/agentes.html" }
   ],
   "cleanUrls": true,
   "trailingSlash": false,
@@ -12,7 +13,7 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "https://academicofacil.com.br" },
         { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
     }
   ]

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentes de IA Personalizados — AcadêmicoFácil</title>
+<meta name="description" content="Crie seu assistente de IA personalizado para estudos ou trabalho. Agente educacional e corporativo com IA avançada. Pagamento único, sem mensalidade.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F8F9FF;--surface:#FFFFFF;--surface2:#F0F2FF;
+  --border:rgba(99,102,241,0.12);--border2:rgba(99,102,241,0.25);
+  --indigo:#6366F1;--indigo2:#4F46E5;--indigo3:#818CF8;
+  --cyan:#22D3EE;--green:#10B981;--gold:#F59E0B;
+  --text:#0F0E2A;--muted:#6B6A8A;--muted2:#A8A7BF;
+  --radius:16px;--radius-sm:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:700}
+
+/* NAV */
+nav{background:rgba(248,249,255,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 6%;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:var(--text)}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--indigo),var(--cyan));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-back{padding:9px 20px;border-radius:100px;border:1.5px solid var(--border2);color:var(--indigo);font-size:13px;font-weight:600;text-decoration:none;transition:.2s;display:flex;align-items:center;gap:6px}
+.nav-back:hover{background:rgba(99,102,241,.06)}
+
+/* HERO */
+.hero{padding:80px 6% 60px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(99,102,241,.08) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,.08);border:1px solid var(--border2);color:var(--indigo2);padding:6px 18px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:24px}
+.badge-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 0 0 6px rgba(16,185,129,0)}}
+.hero h1{font-size:clamp(36px,5vw,64px);color:var(--text);line-height:1.1;letter-spacing:-.025em;margin-bottom:16px}
+.hero h1 .grad{background:linear-gradient(90deg,var(--indigo),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:580px;margin:0 auto 40px;line-height:1.75}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-solid{padding:14px 32px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:.2s;box-shadow:0 4px 20px rgba(99,102,241,.3);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-solid:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.4)}
+.btn-ghost{padding:14px 32px;border:2px solid var(--border2);color:var(--indigo2);border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;cursor:pointer;background:transparent;transition:.2s;text-decoration:none}
+.btn-ghost:hover{background:rgba(99,102,241,.05)}
+
+/* STATS */
+.stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;margin:48px 0;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:700px;margin:40px auto}
+.stat{text-align:center}
+.stat-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;background:linear-gradient(90deg,var(--indigo),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* COMPARATIVO */
+.compare-section{padding:60px 6%;background:var(--surface)}
+.section-eyebrow{font-size:11px;font-weight:700;color:var(--indigo2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;text-align:center}
+.section-title{font-size:clamp(26px,3.5vw,42px);text-align:center;margin-bottom:10px;letter-spacing:-.02em}
+.section-sub{font-size:16px;color:var(--muted);text-align:center;margin-bottom:44px;max-width:560px;margin-left:auto;margin-right:auto}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:800px;margin:0 auto}
+.compare-card{border-radius:var(--radius);padding:24px;border:1.5px solid}
+.compare-bad{border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.02)}
+.compare-good{border-color:rgba(99,102,241,.25);background:rgba(99,102,241,.02)}
+.compare-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.compare-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:13px;color:var(--muted)}
+.compare-item.good{color:var(--text)}
+
+/* AGENTES CARDS */
+.agents-section{padding:72px 6%}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;max-width:1100px;margin:0 auto}
+
+.agent-card{border-radius:20px;overflow:hidden;border:1.5px solid var(--border);background:var(--surface);transition:.25s;cursor:pointer}
+.agent-card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(99,102,241,.12);border-color:rgba(99,102,241,.3)}
+
+.agent-header{padding:32px 28px 24px;position:relative;overflow:hidden}
+.agent-header-edu{background:linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%)}
+.agent-header-corp{background:linear-gradient(135deg,#ECFDF5 0%,#D1FAE5 100%)}
+.ah-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:16px}
+.ah-icon-edu{background:linear-gradient(135deg,var(--indigo),var(--cyan))}
+.ah-icon-corp{background:linear-gradient(135deg,#059669,#22D3EE)}
+.ah-deco{position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;opacity:.15}
+.ah-deco-edu{background:var(--indigo)}
+.ah-deco-corp{background:#059669}
+.agent-name{font-size:22px;color:var(--text);margin-bottom:4px}
+.agent-tagline{font-size:13px;color:var(--muted)}
+
+.agent-body{padding:20px 28px 24px}
+.feature-list{margin-bottom:20px}
+.feature-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)}
+.feature-item:last-child{border-bottom:none}
+.feature-check{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;color:#fff}
+.fc-edu{background:var(--indigo)}
+.fc-corp{background:#059669}
+
+.agent-price-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:16px}
+.price-from{font-size:11px;color:var(--muted);display:block;margin-bottom:2px}
+.price-val{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:var(--text)}
+.price-unit{font-size:13px;color:var(--muted);font-weight:400}
+.btn-agent-edu{padding:12px 22px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
+.btn-agent-corp{padding:12px 22px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
+.btn-agent-edu:hover,.btn-agent-corp:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+
+/* PLANOS */
+.plans-section{padding:72px 6%;background:var(--surface)}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:0 auto}
+.plan-card{border-radius:var(--radius);border:1.5px solid var(--border);padding:28px 24px;background:var(--bg);position:relative;transition:.2s}
+.plan-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.plan-card.featured{border-color:var(--indigo);background:var(--surface);box-shadow:0 0 0 1px var(--indigo)}
+.plan-best{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--indigo),var(--cyan));color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
+.plan-name{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.plan-price{font-family:'Space Grotesk',sans-serif;font-size:38px;font-weight:700;color:var(--text);line-height:1}
+.plan-cycle{font-size:12px;color:var(--muted);margin:4px 0 16px}
+.plan-features{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.pf{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text)}
+.pf-dot{width:16px;height:16px;border-radius:50%;background:rgba(99,102,241,.12);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--indigo);flex-shrink:0;margin-top:2px}
+.btn-plan{width:100%;padding:12px;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s;border:1.5px solid}
+.btn-plan-outline{background:transparent;border-color:var(--border2);color:var(--indigo2)}
+.btn-plan-outline:hover{background:rgba(99,102,241,.05)}
+.btn-plan-solid{background:linear-gradient(135deg,var(--indigo),var(--indigo2));border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3)}
+.btn-plan-solid:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,102,241,.4)}
+
+/* HOW IT WORKS */
+.how-section{padding:72px 6%}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;max-width:1000px;margin:0 auto}
+.step-card{text-align:center;padding:28px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.step-num{font-family:'Space Grotesk',sans-serif;font-size:42px;font-weight:700;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(34,211,238,.15));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.step-icon{font-size:28px;margin-bottom:10px}
+.step-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* NOME DO AGENTE */
+.name-section{padding:72px 6%;background:linear-gradient(135deg,#1A0F4F 0%,#2D1580 50%,#4F46E5 100%);text-align:center;position:relative;overflow:hidden}
+.name-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/svg%3E")}
+.name-section h2{font-size:clamp(28px,4vw,48px);color:#fff;margin-bottom:12px;letter-spacing:-.02em;position:relative}
+.name-section p{font-size:16px;color:rgba(255,255,255,.7);max-width:500px;margin:0 auto 36px;position:relative}
+.name-input-wrap{display:flex;gap:10px;max-width:480px;margin:0 auto;position:relative}
+.name-input{flex:1;padding:16px 20px;border-radius:100px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:500;backdrop-filter:blur(10px);transition:.2s;outline:none}
+.name-input::placeholder{color:rgba(255,255,255,.45)}
+.name-input:focus{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.15)}
+.name-btn{padding:16px 28px;background:#fff;color:var(--indigo2);border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:.2s;white-space:nowrap}
+.name-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.name-preview{margin-top:20px;font-size:14px;color:rgba(255,255,255,.6);position:relative}
+.name-preview strong{color:#fff;font-family:'Space Grotesk',sans-serif;font-size:18px}
+
+/* AREAS */
+.areas-section{padding:60px 6%;background:var(--surface)}
+.areas-tags{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:0 auto}
+.area-tag{padding:8px 18px;background:var(--bg);border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--text);transition:.2s;cursor:default}
+.area-tag:hover{border-color:var(--border2);background:rgba(99,102,241,.04)}
+
+/* DEPOIMENTOS */
+.testimonials{padding:72px 6%;background:var(--bg)}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1000px;margin:0 auto}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.testi-agent-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-bottom:14px}
+.tab-edu{background:rgba(99,102,241,.08);color:var(--indigo2)}
+.tab-corp{background:rgba(5,150,105,.08);color:#059669}
+.testi-text{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:16px}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.tav-edu{background:linear-gradient(135deg,var(--indigo),var(--cyan))}
+.tav-corp{background:linear-gradient(135deg,#059669,#22D3EE)}
+.testi-name{font-size:13px;font-weight:600;color:var(--text)}
+.testi-role{font-size:11px;color:var(--muted)}
+
+/* CTA FINAL */
+.cta-final{padding:80px 6%;text-align:center;background:linear-gradient(135deg,#F8F9FF,#EEF2FF)}
+.cta-final h2{font-size:clamp(28px,4vw,48px);margin-bottom:16px;letter-spacing:-.02em}
+.cta-final p{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto 36px}
+
+/* FOOTER */
+footer{background:var(--text);padding:24px 6%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer .fl{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:rgba(255,255,255,.9)}
+footer .fr{font-size:12px;color:rgba(255,255,255,.4)}
+footer a{color:rgba(255,255,255,.6);text-decoration:none}
+
+/* MODAL COMPLETO */
+#modal{position:fixed;inset:0;background:rgba(15,14,42,.65);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
+#modal.open{display:flex}
+.modal-box{background:var(--surface);border-radius:20px;width:100%;max-width:500px;overflow:hidden;box-shadow:0 32px 80px rgba(15,14,42,.2);max-height:90vh;overflow-y:auto}
+.modal-box::-webkit-scrollbar{width:4px}
+.modal-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.modal-header-edu{background:linear-gradient(135deg,#2D1580,#6366F1);padding:28px;position:relative}
+.modal-header-corp{background:linear-gradient(135deg,#064E3B,#059669);padding:28px;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;width:30px;height:30px;background:rgba(255,255,255,.15);border:none;border-radius:50%;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:rgba(255,255,255,.25)}
+.modal-emoji{font-size:36px;margin-bottom:10px}
+.modal-header-title{font-size:22px;color:#fff;margin-bottom:4px}
+.modal-header-sub{font-size:13px;color:rgba(255,255,255,.75)}
+.modal-body{padding:24px 28px}
+.mf{margin-bottom:16px}
+.mf label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+.mf input,.mf select,.mf textarea{width:100%;padding:12px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;transition:.2s}
+.mf input:focus,.mf select:focus,.mf textarea:focus{outline:none;border-color:var(--indigo)}
+.mf textarea{resize:vertical;min-height:80px}
+.name-field-special{background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(34,211,238,.03));border:1.5px solid rgba(99,102,241,.2) !important;border-radius:var(--radius-sm)}
+.name-field-special:focus{border-color:var(--indigo) !important;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.plan-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.ps-opt{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 8px;cursor:pointer;transition:.15s;text-align:center}
+.ps-opt:hover{border-color:var(--border2)}
+.ps-opt.sel{border-color:var(--indigo);background:rgba(99,102,241,.05)}
+.ps-price{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--indigo2)}
+.ps-name{font-size:12px;font-weight:600;color:var(--text);display:block;margin-top:2px}
+.ps-desc{font-size:10px;color:var(--muted);display:block;margin-top:2px}
+.btn-submit{width:100%;padding:15px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:.2s;letter-spacing:.01em;box-shadow:0 4px 16px rgba(99,102,241,.3)}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,102,241,.4)}
+.modal-success{display:none;text-align:center;padding:40px 28px}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:700;margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7}
+.btn-close-success{padding:12px 28px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;cursor:pointer}
+
+@media(max-width:768px){
+  .compare-grid{grid-template-columns:1fr}
+  .plans-grid{grid-template-columns:1fr}
+  .name-input-wrap{flex-direction:column}
+  .hero-cta{flex-direction:column;align-items:center}
+  nav{padding:0 4%}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo"><div class="logo-icon">🎓</div> AcadêmicoFácil</a>
+  <a href="/" class="nav-back">← Voltar ao site</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span class="badge-dot"></span> Inteligência artificial personalizada</div>
+  <h1>Seu assistente de IA<br>com <span class="grad">nome, memória<br>e propósito</span></h1>
+  <p class="hero-sub">Diferente do ChatGPT genérico — treinado para o seu perfil, nomeado por você, pronto para as suas tarefas. Pagamento único, sem mensalidade.</p>
+  <div class="hero-cta">
+    <button class="btn-solid" onclick="abrirModal('edu')">🎓 Agente educacional →</button>
+    <button class="btn-ghost" onclick="abrirModal('corp')">💼 Agente corporativo →</button>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-val">R$0/mês</div><div class="stat-label">Sem mensalidade</div></div>
+  <div class="stat"><div class="stat-val">24h</div><div class="stat-label">Configuração</div></div>
+  <div class="stat"><div class="stat-val">100%</div><div class="stat-label">Personalizado</div></div>
+  <div class="stat"><div class="stat-val">30 dias</div><div class="stat-label">Suporte incluso</div></div>
+</div>
+
+<!-- COMPARATIVO -->
+<section class="compare-section" id="por-que">
+  <div class="section-eyebrow">Por que escolher</div>
+  <h2 class="section-title">Diferente do ChatGPT genérico</h2>
+  <p class="section-sub">Um agente personalizado não é só um chat — é um assistente que conhece você</p>
+  <div class="compare-grid">
+    <div class="compare-card compare-bad">
+      <div class="compare-title" style="color:#EF4444">❌ ChatGPT / IA genérica</div>
+      <div class="compare-item">Não conhece seu curso ou cargo</div>
+      <div class="compare-item">Respostas genéricas para qualquer pessoa</div>
+      <div class="compare-item">Não segue normas ABNT da sua instituição</div>
+      <div class="compare-item">R$ 100/mês — R$ 1.200/ano</div>
+      <div class="compare-item">Você precisa reexplicar tudo toda sessão</div>
+    </div>
+    <div class="compare-card compare-good">
+      <div class="compare-title" style="color:var(--indigo2)">✅ Seu agente personalizado</div>
+      <div class="compare-item good">✓ Configurado com seu perfil e contexto</div>
+      <div class="compare-item good">✓ Respostas adaptadas ao seu nível</div>
+      <div class="compare-item good">✓ Segue normas ABNT e da sua instituição</div>
+      <div class="compare-item good">✓ R$ 197 a R$ 797 — pagamento único</div>
+      <div class="compare-item good">✓ Você nomeia e ele te conhece</div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTES -->
+<section class="agents-section" id="agentes">
+  <div class="section-eyebrow">Escolha o seu</div>
+  <h2 class="section-title" style="text-align:center;margin-bottom:10px">Dois agentes, um propósito</h2>
+  <p class="section-sub">Cada um treinado para um contexto específico — ou os dois juntos no Combo</p>
+  <div class="agents-grid">
+
+    <!-- EDUCACIONAL -->
+    <div class="agent-card" onclick="abrirModal('edu')">
+      <div class="agent-header agent-header-edu">
+        <div class="ah-deco ah-deco-edu"></div>
+        <div class="ah-icon ah-icon-edu">🎓</div>
+        <h3 class="agent-name">Agente educacional</h3>
+        <p class="agent-tagline">Para estudantes, pesquisadores e professores</p>
+      </div>
+      <div class="agent-body">
+        <div class="feature-list">
+          <div class="feature-item"><span class="feature-check fc-edu">✓</span>Explica conceitos da sua área com seu contexto</div>
+          <div class="feature-item"><span class="feature-check fc-edu">✓</span>Revisa e melhora textos acadêmicos</div>
+          <div class="feature-item"><span class="feature-check fc-edu">✓</span>Formata referências ABNT automaticamente</div>
+          <div class="feature-item"><span class="feature-check fc-edu">✓</span>Simula perguntas da banca examinadora</div>
+          <div class="feature-item"><span class="feature-check fc-edu">✓</span>Cria resumos e mapas mentais de artigos</div>
+          <div class="feature-item"><span class="feature-check fc-edu">✓</span>Sugere cronograma de estudo personalizado</div>
+        </div>
+        <div class="agent-price-row">
+          <div><span class="price-from">a partir de</span><span class="price-val">R$ 197</span> <span class="price-unit">único</span></div>
+          <button class="btn-agent-edu" onclick="event.stopPropagation();abrirModal('edu')">Quero o meu →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CORPORATIVO -->
+    <div class="agent-card" onclick="abrirModal('corp')">
+      <div class="agent-header agent-header-corp">
+        <div class="ah-deco ah-deco-corp"></div>
+        <div class="ah-icon ah-icon-corp">💼</div>
+        <h3 class="agent-name">Agente corporativo</h3>
+        <p class="agent-tagline">Para profissionais, gestores e equipes</p>
+      </div>
+      <div class="agent-body">
+        <div class="feature-list">
+          <div class="feature-item"><span class="feature-check fc-corp">✓</span>Redige e-mails e relatórios no tom da empresa</div>
+          <div class="feature-item"><span class="feature-check fc-corp">✓</span>Resume reuniões e documentos extensos</div>
+          <div class="feature-item"><span class="feature-check fc-corp">✓</span>Cria apresentações e roteiros de reunião</div>
+          <div class="feature-item"><span class="feature-check fc-corp">✓</span>Organiza tarefas, prioridades e follow-ups</div>
+          <div class="feature-item"><span class="feature-check fc-corp">✓</span>Analisa dados e gera insights em texto claro</div>
+          <div class="feature-item"><span class="feature-check fc-corp">✓</span>Cria processos, checklists e documentação</div>
+        </div>
+        <div class="agent-price-row">
+          <div><span class="price-from">a partir de</span><span class="price-val">R$ 197</span> <span class="price-unit">único</span></div>
+          <button class="btn-agent-corp" onclick="event.stopPropagation();abrirModal('corp')">Quero o meu →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section class="plans-section" id="planos">
+  <div class="section-eyebrow">Planos</div>
+  <h2 class="section-title">Transparente. Sem surpresas.</h2>
+  <p class="section-sub">Pagamento único — sem assinatura mensal</p>
+  <div class="plans-grid">
+
+    <div class="plan-card">
+      <div class="plan-name">Básico</div>
+      <div class="plan-price">R$ 197</div>
+      <div class="plan-cycle">pagamento único</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-dot">✓</span>1 tipo de tarefa configurado</div>
+        <div class="pf"><span class="pf-dot">✓</span>Perfil básico personalizado</div>
+        <div class="pf"><span class="pf-dot">✓</span>Acesso via link exclusivo</div>
+        <div class="pf"><span class="pf-dot">✓</span>15 dias de suporte</div>
+        <div class="pf"><span class="pf-dot">✓</span>Nome personalizado</div>
+      </div>
+      <button class="btn-plan btn-plan-outline" onclick="abrirModalComPlano('basico')">Começar →</button>
+    </div>
+
+    <div class="plan-card featured">
+      <div class="plan-best">⭐ Mais escolhido</div>
+      <div class="plan-name">Completo</div>
+      <div class="plan-price">R$ 397</div>
+      <div class="plan-cycle">pagamento único</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-dot">✓</span>3 tipos de tarefa configurados</div>
+        <div class="pf"><span class="pf-dot">✓</span>Perfil detalhado + documentos</div>
+        <div class="pf"><span class="pf-dot">✓</span>Link + integração WhatsApp</div>
+        <div class="pf"><span class="pf-dot">✓</span>30 dias de suporte</div>
+        <div class="pf"><span class="pf-dot">✓</span>1 ajuste após entrega</div>
+        <div class="pf"><span class="pf-dot">✓</span>Nome personalizado</div>
+      </div>
+      <button class="btn-plan btn-plan-solid" onclick="abrirModalComPlano('completo')">Começar →</button>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name">Premium</div>
+      <div class="plan-price">R$ 797</div>
+      <div class="plan-cycle">pagamento único</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-dot">✓</span>Tarefas ilimitadas</div>
+        <div class="pf"><span class="pf-dot">✓</span>Treinamento com seus PDFs</div>
+        <div class="pf"><span class="pf-dot">✓</span>WhatsApp + web + empresa</div>
+        <div class="pf"><span class="pf-dot">✓</span>60 dias de suporte</div>
+        <div class="pf"><span class="pf-dot">✓</span>Ajustes ilimitados</div>
+        <div class="pf"><span class="pf-dot">✓</span>Nome personalizado</div>
+      </div>
+      <button class="btn-plan btn-plan-outline" onclick="abrirModalComPlano('premium')">Começar →</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="how-section" id="como-funciona">
+  <div class="section-eyebrow">Processo</div>
+  <h2 class="section-title" style="text-align:center;margin-bottom:44px">Pronto em 24 horas</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-icon">📝</div>
+      <div class="step-title">Preencha seu perfil</div>
+      <div class="step-desc">Conta seu curso, cargo, área e as 3 principais tarefas que quer ajuda</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-icon">✍️</div>
+      <div class="step-title">Nomeie seu agente</div>
+      <div class="step-desc">Escolha um nome para ele — fica mais pessoal e fácil de usar no dia a dia</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-icon">⚙️</div>
+      <div class="step-title">Configuramos para você</div>
+      <div class="step-desc">Nossa equipe configura o agente com seu perfil em até 24 horas</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-icon">🚀</div>
+      <div class="step-title">Comece a usar</div>
+      <div class="step-desc">Recebe o link exclusivo e já pode usar imediatamente pelo celular ou computador</div>
+    </div>
+  </div>
+</section>
+
+<!-- NOMEIE SEU AGENTE -->
+<section class="name-section" id="nome">
+  <h2>Qual será o nome<br>do seu agente?</h2>
+  <p>Dar um nome torna a experiência mais pessoal. Pode ser o que quiser — seu agente vai responder por ele.</p>
+  <div class="name-input-wrap">
+    <input class="name-input" id="agente-nome-input" type="text" placeholder="Ex: Sofia, Max, Athena, Atlas..." maxlength="30" oninput="atualizarPreview(this.value)">
+    <button class="name-btn" onclick="confirmarNome()">Criar meu agente →</button>
+  </div>
+  <div class="name-preview" id="nome-preview" style="display:none">
+    Olá! Eu sou <strong id="nome-preview-val"></strong> — seu assistente personalizado. 👋
+  </div>
+</section>
+
+<!-- ÁREAS -->
+<section class="areas-section">
+  <div class="section-eyebrow">Cobertura</div>
+  <h2 class="section-title" style="text-align:center;margin-bottom:8px">Atendemos todas as áreas</h2>
+  <p class="section-sub" style="margin-bottom:28px">Educacional ou corporativo — configuramos para o seu contexto</p>
+  <div class="areas-tags">
+    <span class="area-tag">🏥 Saúde e Enfermagem</span>
+    <span class="area-tag">⚙️ Engenharia</span>
+    <span class="area-tag">💼 Administração</span>
+    <span class="area-tag">⚖️ Direito</span>
+    <span class="area-tag">🧠 Psicologia</span>
+    <span class="area-tag">📚 Pedagogia</span>
+    <span class="area-tag">💹 Finanças</span>
+    <span class="area-tag">💻 TI e Tecnologia</span>
+    <span class="area-tag">🌿 Meio Ambiente</span>
+    <span class="area-tag">🎨 Marketing e Comunicação</span>
+    <span class="area-tag">🏗️ Arquitetura</span>
+    <span class="area-tag">🔬 Ciências Biológicas</span>
+    <span class="area-tag">📊 Contabilidade</span>
+    <span class="area-tag">🤝 Serviço Social</span>
+    <span class="area-tag">🏦 RH e Gestão de Pessoas</span>
+    <span class="area-tag">+ outras áreas</span>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="testimonials">
+  <div class="section-eyebrow">Quem já usa</div>
+  <h2 class="section-title" style="text-align:center;margin-bottom:44px">O que dizem nossos clientes</h2>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-agent-badge tab-edu">🎓 Agente educacional</div>
+      <p class="testi-text">"Nomeei ela de 'Minerva' e desde então é como ter uma orientadora particular. Ela já conhece meu curso, minha instituição e o estilo da minha orientadora. Economizo horas toda semana."</p>
+      <div class="testi-author"><div class="testi-av tav-edu">JS</div><div><div class="testi-name">Julia Santos</div><div class="testi-role">Mestranda em Administração · UFBA</div></div></div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-agent-badge tab-corp">💼 Agente corporativo</div>
+      <p class="testi-text">"Chamei de 'Atlas' e ele já sabe o tom da nossa empresa, os clientes principais e os processos. Redigi um relatório de 30 páginas em 2 horas com a ajuda dele. Impensável antes."</p>
+      <div class="testi-author"><div class="testi-av tav-corp">RM</div><div><div class="testi-name">Rafael Melo</div><div class="testi-role">Gerente de Operações · Salvador</div></div></div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-agent-badge tab-edu">🎓 Agente educacional</div>
+      <p class="testi-text">"Coloquei o nome 'Hermes' e uso todo dia para revisar meus artigos antes de submeter. Ele sabe as normas da revista e o nível de rigor exigido. Minha taxa de aprovação melhorou muito."</p>
+      <div class="testi-author"><div class="testi-av tav-edu">CP</div><div><div class="testi-name">Carlos Pinto</div><div class="testi-role">Professor universitário · Recife</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <h2>Pronto para criar<br>seu assistente?</h2>
+  <p>Pague uma vez, use para sempre. Configurado em até 24 horas.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button class="btn-solid" onclick="abrirModal('edu')">🎓 Criar agente educacional</button>
+    <button class="btn-solid" style="background:linear-gradient(135deg,#059669,#047857)" onclick="abrirModal('corp')">💼 Criar agente corporativo</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fl"><div class="logo-icon" style="width:28px;height:28px;font-size:14px">🎓</div> AcadêmicoFácil</div>
+  <div class="fr">© 2026 · <a href="/privacidade">Privacidade</a> · <a href="/termos">Termos</a> · <a href="/">Voltar ao site</a></div>
+</footer>
+
+<!-- MODAL -->
+<div id="modal">
+  <div class="modal-box">
+    <div id="modal-form-wrap">
+      <div id="modal-header-edu" class="modal-header-edu" style="display:none">
+        <button class="modal-close" onclick="fecharModal()">✕</button>
+        <div class="modal-emoji">🎓</div>
+        <h3 class="modal-header-title">Agente educacional</h3>
+        <p class="modal-header-sub">Preencha seu perfil — configuramos em até 24h</p>
+      </div>
+      <div id="modal-header-corp" class="modal-header-corp" style="display:none">
+        <button class="modal-close" onclick="fecharModal()">✕</button>
+        <div class="modal-emoji">💼</div>
+        <h3 class="modal-header-title">Agente corporativo</h3>
+        <p class="modal-header-sub">Preencha seu perfil — configuramos em até 24h</p>
+      </div>
+      <div id="modal-header-combo" style="display:none;background:linear-gradient(135deg,#1e1270,#4F46E5,#059669);padding:28px;position:relative">
+        <button class="modal-close" onclick="fecharModal()">✕</button>
+        <div class="modal-emoji">⚡</div>
+        <h3 class="modal-header-title" style="color:#fff">Combo — Edu + Corporativo</h3>
+        <p class="modal-header-sub" style="color:rgba(255,255,255,.75)">O melhor dos dois mundos</p>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- NOME DO AGENTE — destaque especial -->
+        <div class="mf">
+          <label>✨ Nome do seu agente (você escolhe!)</label>
+          <input type="text" id="m-agente-nome" class="name-field-special" placeholder="Ex: Sofia, Max, Athena, Atlas, Nexus..." maxlength="30" oninput="previewNomeModal(this.value)">
+          <div id="m-nome-preview" style="font-size:12px;color:var(--indigo2);margin-top:6px;display:none">
+            👋 Olá! Serei <strong id="m-nome-val"></strong>, seu assistente personalizado.
+          </div>
+        </div>
+
+        <div class="mf"><label>Seu nome</label><input type="text" id="m-nome" placeholder="Seu nome completo"></div>
+        <div class="mf"><label>E-mail</label><input type="email" id="m-email" placeholder="seu@email.com"></div>
+        <div class="mf"><label>WhatsApp</label><input type="tel" id="m-zap" placeholder="(71) 9 0000-0000"></div>
+
+        <!-- TIPO -->
+        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Tipo de agente</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+          <div id="mt-edu" class="ps-opt sel" onclick="selTipoModal('edu')">
+            <div style="font-size:20px;margin-bottom:4px">🎓</div>
+            <span class="ps-name">Educacional</span>
+            <span class="ps-desc">Estudos</span>
+          </div>
+          <div id="mt-corp" class="ps-opt" onclick="selTipoModal('corp')">
+            <div style="font-size:20px;margin-bottom:4px">💼</div>
+            <span class="ps-name">Corporativo</span>
+            <span class="ps-desc">Trabalho</span>
+          </div>
+          <div id="mt-combo" class="ps-opt" onclick="selTipoModal('combo')">
+            <div style="font-size:20px;margin-bottom:4px">⚡</div>
+            <span class="ps-name">Combo</span>
+            <span class="ps-desc">Os dois</span>
+          </div>
+        </div>
+
+        <div class="mf"><label>Sua área / curso / cargo</label><input type="text" id="m-area" placeholder="Ex: Enfermagem, Engenharia, Gerente de RH..."></div>
+        <div class="mf"><label>Instituição ou empresa</label><input type="text" id="m-inst" placeholder="Opcional"></div>
+        <div class="mf">
+          <label>3 principais tarefas que quer ajuda</label>
+          <textarea id="m-tarefas" placeholder="Descreva o que você mais precisa que o agente faça por você..."></textarea>
+        </div>
+
+        <!-- PLANO -->
+        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Plano escolhido</label>
+        <div class="plan-selector">
+          <div id="mp-basico" class="ps-opt" onclick="selPlanoModal('basico')">
+            <div class="ps-price">R$ 197</div>
+            <span class="ps-name">Básico</span>
+            <span class="ps-desc">1 tarefa · 15d</span>
+          </div>
+          <div id="mp-completo" class="ps-opt sel" onclick="selPlanoModal('completo')">
+            <div class="ps-price">R$ 397</div>
+            <span class="ps-name">Completo ⭐</span>
+            <span class="ps-desc">3 tarefas · 30d</span>
+          </div>
+          <div id="mp-premium" class="ps-opt" onclick="selPlanoModal('premium')">
+            <div class="ps-price">R$ 797</div>
+            <span class="ps-name">Premium</span>
+            <span class="ps-desc">Ilimitado · 60d</span>
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="enviarFormModal()">Criar meu agente personalizado →</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">Entraremos em contato pelo WhatsApp em até 24h</p>
+      </div>
+    </div>
+
+    <div class="modal-success" id="modal-success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title" id="success-nome">Pedido recebido!</div>
+      <p class="success-sub">Entraremos em contato pelo WhatsApp em até <strong>24 horas</strong> para configurar seu agente personalizado.</p>
+      <button class="btn-close-success" onclick="fecharModal()">Perfeito!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let _tipo = 'edu', _plano = 'completo', _nomeAgente = '';
+
+function abrirModal(tipo) {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-form-wrap').style.display = 'block';
+  document.getElementById('modal-success').style.display = 'none';
+  selTipoModal(tipo);
+  // Pré-preencher nome se já digitou na seção
+  const nomeSection = document.getElementById('agente-nome-input').value;
+  if(nomeSection) document.getElementById('m-agente-nome').value = nomeSection;
+}
+
+function abrirModalComPlano(plano) {
+  abrirModal('edu');
+  selPlanoModal(plano);
+}
+
+function fecharModal() { document.getElementById('modal').classList.remove('open'); }
+
+function selTipoModal(t) {
+  _tipo = t;
+  ['edu','corp','combo'].forEach(x => {
+    document.getElementById('mt-'+x).classList.toggle('sel', x===t);
+  });
+  document.getElementById('modal-header-edu').style.display   = t==='edu'   ? 'block' : 'none';
+  document.getElementById('modal-header-corp').style.display  = t==='corp'  ? 'block' : 'none';
+  document.getElementById('modal-header-combo').style.display = t==='combo' ? 'block' : 'none';
+}
+
+function selPlanoModal(p) {
+  _plano = p;
+  ['basico','completo','premium'].forEach(x => {
+    document.getElementById('mp-'+x).classList.toggle('sel', x===p);
+  });
+}
+
+function previewNomeModal(val) {
+  _nomeAgente = val;
+  const el = document.getElementById('m-nome-preview');
+  const ev = document.getElementById('m-nome-val');
+  if(val.trim()) {
+    el.style.display = 'block';
+    ev.textContent = val.trim();
+  } else { el.style.display = 'none'; }
+}
+
+function atualizarPreview(val) {
+  const prev = document.getElementById('nome-preview');
+  const pval = document.getElementById('nome-preview-val');
+  if(val.trim()) {
+    prev.style.display = 'block';
+    pval.textContent = val.trim();
+  } else { prev.style.display = 'none'; }
+}
+
+function confirmarNome() {
+  const nome = document.getElementById('agente-nome-input').value.trim();
+  if(!nome) { document.getElementById('agente-nome-input').focus(); return; }
+  abrirModal('edu');
+  document.getElementById('m-agente-nome').value = nome;
+  previewNomeModal(nome);
+}
+
+function enviarFormModal() {
+  const nome = document.getElementById('m-nome').value.trim();
+  const email = document.getElementById('m-email').value.trim();
+  const zap = document.getElementById('m-zap').value.trim();
+  const area = document.getElementById('m-area').value.trim();
+  const tarefas = document.getElementById('m-tarefas').value.trim();
+  const nomeAgente = document.getElementById('m-agente-nome').value.trim();
+
+  if(!nome || !email) { alert('Preencha nome e e-mail para continuar.'); return; }
+
+  const nomeAgMsg = nomeAgente ? `\nNome do agente: *${nomeAgente}*` : '';
+  const msg = `🤖 *Interesse — Agente personalizado*${nomeAgMsg}\n\nCliente: ${nome}\nE-mail: ${email}\nWhatsApp: ${zap||'não informado'}\nTipo: ${_tipo}\nPlano: ${_plano}\nÁrea: ${area}\n\nTarefas:\n${tarefas}`;
+
+  window.open(`https://wa.me/5571920031180?text=${encodeURIComponent(msg)}`, '_blank');
+
+  document.getElementById('modal-form-wrap').style.display = 'none';
+  const tituloSucesso = nomeAgente ? `${nomeAgente} está a caminho! 🎉` : 'Pedido recebido! 🎉';
+  document.getElementById('success-nome').textContent = tituloSucesso;
+  document.getElementById('modal-success').style.display = 'block';
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if(e.target === document.getElementById('modal')) fecharModal();
+});
+</script>
+</body>
+</html>
