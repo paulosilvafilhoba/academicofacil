@@ -7,6 +7,22 @@
 <meta name="description" content="Crie seu assistente de IA personalizado para estudos ou trabalho. Agente educacional e corporativo com IA avançada. Pagamento único, sem mensalidade.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAr8wl8rH_P0n6fEDhOVuqBif7YeTWmgsA",
+  authDomain:"academicofacil-87df6.firebaseapp.com",
+  projectId:"academicofacil-87df6",
+  storageBucket:"academicofacil-87df6.firebasestorage.app",
+  messagingSenderId:"854141046481",
+  appId:"1:854141046481:web:5cd46b7c7aeb9801cd3ff0"
+});
+const db = firebase.firestore();
+const auth = firebase.auth();
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -382,32 +398,32 @@ footer a{color:rgba(255,255,255,.6);text-decoration:none}
 
 <!-- COMO FUNCIONA -->
 <section class="how-section" id="como-funciona">
-  <div class="section-eyebrow">Processo</div>
-  <h2 class="section-title" style="text-align:center;margin-bottom:44px">Pronto em 24 horas</h2>
+  <div class="section-eyebrow">Como funciona</div>
+  <h2 class="section-title" style="text-align:center;margin-bottom:44px">Do pedido à entrega</h2>
   <div class="steps-grid">
     <div class="step-card">
       <div class="step-num">01</div>
       <div class="step-icon">📝</div>
       <div class="step-title">Preencha seu perfil</div>
-      <div class="step-desc">Conta seu curso, cargo, área e as 3 principais tarefas que quer ajuda</div>
+      <div class="step-desc">Conte sua área, tarefas e nomeie seu agente. Enviaremos a solicitação à nossa equipe.</div>
     </div>
     <div class="step-card">
       <div class="step-num">02</div>
-      <div class="step-icon">✍️</div>
-      <div class="step-title">Nomeie seu agente</div>
-      <div class="step-desc">Escolha um nome para ele — fica mais pessoal e fácil de usar no dia a dia</div>
+      <div class="step-icon">🔍</div>
+      <div class="step-title">Analisamos e fazemos a proposta</div>
+      <div class="step-desc">Nossa equipe avalia seu perfil e envia uma proposta personalizada com escopo e valor.</div>
     </div>
     <div class="step-card">
       <div class="step-num">03</div>
-      <div class="step-icon">⚙️</div>
-      <div class="step-title">Configuramos para você</div>
-      <div class="step-desc">Nossa equipe configura o agente com seu perfil em até 24 horas</div>
+      <div class="step-icon">✅</div>
+      <div class="step-title">Você aceita e paga</div>
+      <div class="step-desc">Aprovou a proposta? Pague com Pix ou cartão diretamente no site — seguro e rápido.</div>
     </div>
     <div class="step-card">
       <div class="step-num">04</div>
-      <div class="step-icon">🚀</div>
-      <div class="step-title">Comece a usar</div>
-      <div class="step-desc">Recebe o link exclusivo e já pode usar imediatamente pelo celular ou computador</div>
+      <div class="step-icon">🤖</div>
+      <div class="step-title">Criamos e treinamos</div>
+      <div class="step-desc">Configuramos e treinamos seu agente. Entregamos o link exclusivo em até 24h após o pagamento.</div>
     </div>
   </div>
 </section>
@@ -489,107 +505,565 @@ footer a{color:rgba(255,255,255,.6);text-decoration:none}
   <div class="fr">© 2026 · <a href="/privacidade">Privacidade</a> · <a href="/termos">Termos</a> · <a href="/">Voltar ao site</a></div>
 </footer>
 
-<!-- MODAL -->
+<!-- ===== MODAL PRINCIPAL ===== -->
 <div id="modal">
   <div class="modal-box">
-    <div id="modal-form-wrap">
+
+    <!-- STEP 1: FORMULÁRIO DE PERFIL -->
+    <div id="modal-step-1">
       <div id="modal-header-edu" class="modal-header-edu" style="display:none">
         <button class="modal-close" onclick="fecharModal()">✕</button>
-        <div class="modal-emoji">🎓</div>
-        <h3 class="modal-header-title">Agente educacional</h3>
-        <p class="modal-header-sub">Preencha seu perfil — configuramos em até 24h</p>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:32px">🎓</div>
+          <div>
+            <h3 class="modal-header-title">Agente educacional</h3>
+            <p class="modal-header-sub">Preencha seu perfil para receber a proposta</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:16px">
+          <div style="height:3px;flex:1;background:#fff;border-radius:100px;opacity:.9"></div>
+          <div style="height:3px;flex:1;background:rgba(255,255,255,.3);border-radius:100px"></div>
+          <div style="height:3px;flex:1;background:rgba(255,255,255,.3);border-radius:100px"></div>
+        </div>
       </div>
       <div id="modal-header-corp" class="modal-header-corp" style="display:none">
         <button class="modal-close" onclick="fecharModal()">✕</button>
-        <div class="modal-emoji">💼</div>
-        <h3 class="modal-header-title">Agente corporativo</h3>
-        <p class="modal-header-sub">Preencha seu perfil — configuramos em até 24h</p>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:32px">💼</div>
+          <div>
+            <h3 class="modal-header-title">Agente corporativo</h3>
+            <p class="modal-header-sub">Preencha seu perfil para receber a proposta</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:16px">
+          <div style="height:3px;flex:1;background:#fff;border-radius:100px;opacity:.9"></div>
+          <div style="height:3px;flex:1;background:rgba(255,255,255,.3);border-radius:100px"></div>
+          <div style="height:3px;flex:1;background:rgba(255,255,255,.3);border-radius:100px"></div>
+        </div>
       </div>
-      <div id="modal-header-combo" style="display:none;background:linear-gradient(135deg,#1e1270,#4F46E5,#059669);padding:28px;position:relative">
+      <div id="modal-header-combo" style="display:none;background:linear-gradient(135deg,#1e1270,#4F46E5,#059669);padding:24px;position:relative;border-radius:18px 18px 0 0">
         <button class="modal-close" onclick="fecharModal()">✕</button>
-        <div class="modal-emoji">⚡</div>
-        <h3 class="modal-header-title" style="color:#fff">Combo — Edu + Corporativo</h3>
-        <p class="modal-header-sub" style="color:rgba(255,255,255,.75)">O melhor dos dois mundos</p>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:32px">⚡</div>
+          <div>
+            <h3 class="modal-header-title">Agente Combo</h3>
+            <p class="modal-header-sub" style="color:rgba(255,255,255,.75)">Educacional + Corporativo</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:16px">
+          <div style="height:3px;flex:1;background:#fff;border-radius:100px;opacity:.9"></div>
+          <div style="height:3px;flex:1;background:rgba(255,255,255,.3);border-radius:100px"></div>
+          <div style="height:3px;flex:1;background:rgba(255,255,255,.3);border-radius:100px"></div>
+        </div>
       </div>
 
       <div class="modal-body">
-
-        <!-- NOME DO AGENTE — destaque especial -->
+        <!-- Nome do agente -->
         <div class="mf">
-          <label>✨ Nome do seu agente (você escolhe!)</label>
-          <input type="text" id="m-agente-nome" class="name-field-special" placeholder="Ex: Sofia, Max, Athena, Atlas, Nexus..." maxlength="30" oninput="previewNomeModal(this.value)">
+          <label>✨ Nome do seu agente</label>
+          <input type="text" id="m-agente-nome" class="name-field-special" placeholder="Ex: Sofia, Max, Athena, Atlas..." maxlength="30" oninput="previewNomeModal(this.value)">
           <div id="m-nome-preview" style="font-size:12px;color:var(--indigo2);margin-top:6px;display:none">
             👋 Olá! Serei <strong id="m-nome-val"></strong>, seu assistente personalizado.
           </div>
         </div>
 
-        <div class="mf"><label>Seu nome</label><input type="text" id="m-nome" placeholder="Seu nome completo"></div>
-        <div class="mf"><label>E-mail</label><input type="email" id="m-email" placeholder="seu@email.com"></div>
-        <div class="mf"><label>WhatsApp</label><input type="tel" id="m-zap" placeholder="(71) 9 0000-0000"></div>
+        <!-- Dados pessoais -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="mf"><label>Nome completo *</label><input type="text" id="m-nome" placeholder="Seu nome"></div>
+          <div class="mf"><label>E-mail *</label><input type="email" id="m-email" placeholder="seu@email.com"></div>
+        </div>
+        <div class="mf"><label>WhatsApp *</label><input type="tel" id="m-zap" placeholder="(71) 9 0000-0000"></div>
 
-        <!-- TIPO -->
+        <!-- Tipo -->
         <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Tipo de agente</label>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
-          <div id="mt-edu" class="ps-opt sel" onclick="selTipoModal('edu')">
-            <div style="font-size:20px;margin-bottom:4px">🎓</div>
-            <span class="ps-name">Educacional</span>
-            <span class="ps-desc">Estudos</span>
-          </div>
-          <div id="mt-corp" class="ps-opt" onclick="selTipoModal('corp')">
-            <div style="font-size:20px;margin-bottom:4px">💼</div>
-            <span class="ps-name">Corporativo</span>
-            <span class="ps-desc">Trabalho</span>
-          </div>
-          <div id="mt-combo" class="ps-opt" onclick="selTipoModal('combo')">
-            <div style="font-size:20px;margin-bottom:4px">⚡</div>
-            <span class="ps-name">Combo</span>
-            <span class="ps-desc">Os dois</span>
-          </div>
+          <div id="mt-edu" class="ps-opt sel" onclick="selTipoModal('edu')"><div style="font-size:20px;margin-bottom:4px">🎓</div><span class="ps-name">Educacional</span><span class="ps-desc">Estudos e pesquisa</span></div>
+          <div id="mt-corp" class="ps-opt" onclick="selTipoModal('corp')"><div style="font-size:20px;margin-bottom:4px">💼</div><span class="ps-name">Corporativo</span><span class="ps-desc">Trabalho e gestão</span></div>
+          <div id="mt-combo" class="ps-opt" onclick="selTipoModal('combo')"><div style="font-size:20px;margin-bottom:4px">⚡</div><span class="ps-name">Combo</span><span class="ps-desc">Os dois</span></div>
         </div>
 
-        <div class="mf"><label>Sua área / curso / cargo</label><input type="text" id="m-area" placeholder="Ex: Enfermagem, Engenharia, Gerente de RH..."></div>
-        <div class="mf"><label>Instituição ou empresa</label><input type="text" id="m-inst" placeholder="Opcional"></div>
+        <!-- Contexto -->
+        <div class="mf"><label>Seu curso, cargo ou área de atuação *</label><input type="text" id="m-area" placeholder="Ex: Enfermagem, Engenharia, Gerente de RH..."></div>
+        <div class="mf"><label>Instituição ou empresa</label><input type="text" id="m-inst" placeholder="Opcional — ajuda a personalizar melhor"></div>
+
+        <!-- Tarefas -->
         <div class="mf">
-          <label>3 principais tarefas que quer ajuda</label>
-          <textarea id="m-tarefas" placeholder="Descreva o que você mais precisa que o agente faça por você..."></textarea>
+          <label>Quais são as 3 principais tarefas que quer que o agente faça? *</label>
+          <textarea id="m-tarefas" rows="4" placeholder="Ex: Revisar meus textos antes da entrega, formatar referências ABNT, resumir artigos científicos que preciso ler..."></textarea>
         </div>
 
-        <!-- PLANO -->
-        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Plano escolhido</label>
-        <div class="plan-selector">
-          <div id="mp-basico" class="ps-opt" onclick="selPlanoModal('basico')">
-            <div class="ps-price">R$ 197</div>
-            <span class="ps-name">Básico</span>
-            <span class="ps-desc">1 tarefa · 15d</span>
-          </div>
-          <div id="mp-completo" class="ps-opt sel" onclick="selPlanoModal('completo')">
-            <div class="ps-price">R$ 397</div>
-            <span class="ps-name">Completo ⭐</span>
-            <span class="ps-desc">3 tarefas · 30d</span>
-          </div>
-          <div id="mp-premium" class="ps-opt" onclick="selPlanoModal('premium')">
-            <div class="ps-price">R$ 797</div>
-            <span class="ps-name">Premium</span>
-            <span class="ps-desc">Ilimitado · 60d</span>
+        <!-- Expectativa -->
+        <div class="mf">
+          <label>Alguma expectativa ou detalhe importante?</label>
+          <textarea id="m-obs" rows="2" placeholder="Ex: Precisa falar de forma informal, minha área é muito técnica, quero usar no celular..."></textarea>
+        </div>
+
+        <!-- Referência de plano -->
+        <div class="mf">
+          <label>Qual plano te interessa? (Nossa equipe vai confirmar o melhor para você)</label>
+          <div class="plan-selector">
+            <div id="mp-basico" class="ps-opt" onclick="selPlanoModal('basico')"><div class="ps-price">R$ 197</div><span class="ps-name">Básico</span><span class="ps-desc">1 tarefa · 15d suporte</span></div>
+            <div id="mp-completo" class="ps-opt sel" onclick="selPlanoModal('completo')"><div class="ps-price">R$ 397</div><span class="ps-name">Completo ⭐</span><span class="ps-desc">3 tarefas · 30d suporte</span></div>
+            <div id="mp-premium" class="ps-opt" onclick="selPlanoModal('premium')"><div class="ps-price">R$ 797</div><span class="ps-name">Premium</span><span class="ps-desc">Ilimitado · 60d suporte</span></div>
           </div>
         </div>
 
-        <button class="btn-submit" onclick="enviarFormModal()">Criar meu agente personalizado →</button>
-        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">Entraremos em contato pelo WhatsApp em até 24h</p>
+        <button class="btn-submit" id="btn-enviar-perfil" onclick="enviarPerfil()">Enviar meu perfil e aguardar proposta →</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">📋 Analisamos em até 24h e enviamos a proposta pelo WhatsApp</p>
       </div>
     </div>
 
-    <div class="modal-success" id="modal-success">
-      <div class="success-icon">🎉</div>
-      <div class="success-title" id="success-nome">Pedido recebido!</div>
-      <p class="success-sub">Entraremos em contato pelo WhatsApp em até <strong>24 horas</strong> para configurar seu agente personalizado.</p>
-      <button class="btn-close-success" onclick="fecharModal()">Perfeito!</button>
+    <!-- STEP 2: AGUARDANDO ANÁLISE -->
+    <div id="modal-step-2" style="display:none;text-align:center;padding:48px 28px">
+      <div style="font-size:56px;margin-bottom:16px">📋</div>
+      <h3 style="font-size:20px;font-family:'Space Grotesk',sans-serif;margin-bottom:8px;color:var(--text)">Perfil enviado com sucesso!</h3>
+      <p style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto 6px;line-height:1.7">Nossa equipe vai analisar seu perfil e enviar a proposta personalizada.</p>
+      <p id="step2-protocolo" style="font-size:12px;font-weight:700;color:var(--indigo2);margin:0 0 24px"></p>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;text-align:left;margin-bottom:24px">
+        <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">O que acontece agora:</p>
+        <div style="font-size:13px;color:var(--muted);line-height:2.2">
+          <div>✅ Perfil registrado no sistema</div>
+          <div>🔍 Análise pela nossa equipe (até 24h)</div>
+          <div>📱 Proposta enviada pelo WhatsApp</div>
+          <div>💳 Você aprova e paga</div>
+          <div>🤖 Agente criado e entregue</div>
+        </div>
+      </div>
+      <button class="btn-close-success" onclick="fecharModal()">Entendido!</button>
     </div>
+
+  </div>
+</div>
+
+<!-- ===== TELA DE PROPOSTA (acessada via link) ===== -->
+<div id="proposta-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:500;overflow-y:auto">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px">
+
+    <div style="text-align:center;margin-bottom:32px">
+      <a href="/agentes" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);font-size:13px;margin-bottom:24px">← Voltar</a>
+      <div style="font-size:48px;margin-bottom:12px">🤖</div>
+      <h2 style="font-size:24px;font-family:'Space Grotesk',sans-serif;margin-bottom:6px">Sua proposta chegou!</h2>
+      <p style="font-size:14px;color:var(--muted)">Leia com atenção e aceite para prosseguir</p>
+    </div>
+
+    <!-- Dados do agente -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+        <div id="prop-icon" style="width:48px;height:48px;background:linear-gradient(135deg,var(--indigo),var(--cyan));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px">🎓</div>
+        <div>
+          <p id="prop-agente-nome" style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0"></p>
+          <p id="prop-tipo" style="font-size:12px;color:var(--muted);margin:0"></p>
+        </div>
+      </div>
+      <div id="prop-rows"></div>
+    </div>
+
+    <!-- Proposta do Paulo -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px">📝 Proposta da equipe</p>
+      <div id="prop-texto" style="font-size:14px;color:var(--text);line-height:1.8;white-space:pre-line"></div>
+    </div>
+
+    <!-- Valor, cupom e botão -->
+    <div style="background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(34,211,238,.03));border:1.5px solid rgba(99,102,241,.2);border-radius:var(--radius);padding:24px;margin-bottom:16px">
+      
+      <!-- Valor original + desconto -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <p style="font-size:12px;color:var(--muted);margin:0 0 2px">Valor total</p>
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <p id="prop-valor" style="font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;color:var(--text);margin:0"></p>
+            <p id="prop-valor-original" style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:500;color:var(--muted);margin:0;text-decoration:line-through;display:none"></p>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin:2px 0 0">pagamento único · sem mensalidade</p>
+        </div>
+        <div id="prop-plano-badge" style="background:rgba(99,102,241,.1);color:var(--indigo2);font-size:12px;font-weight:700;padding:6px 16px;border-radius:100px"></div>
+      </div>
+
+      <!-- Campo de cupom -->
+      <div style="margin-bottom:16px">
+        <div style="display:flex;gap:8px;margin-bottom:6px">
+          <input id="cupom-input" type="text" placeholder="Tem um cupom? Digite aqui"
+            style="flex:1;padding:11px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:.2s"
+            oninput="this.value=this.value.toUpperCase()"
+            onfocus="this.style.borderColor='var(--indigo)'"
+            onblur="this.style.borderColor='var(--border)'">
+          <button onclick="aplicarCupom()" style="padding:11px 18px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--indigo2);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap">Aplicar</button>
+        </div>
+        <div id="cupom-msg" style="font-size:12px;font-weight:600;display:none;padding:6px 12px;border-radius:var(--radius-sm)"></div>
+      </div>
+
+      <button class="btn-submit" id="btn-aceitar-pagar" onclick="aceitarProposta()">✅ Aceitar proposta e pagar →</button>
+    </div>
+
+    <div style="text-align:center">
+      <a href="https://wa.me/5571920031180" target="_blank" style="font-size:13px;color:var(--muted);text-decoration:none">💬 Tem dúvidas? Fale no WhatsApp antes de pagar</a>
+    </div>
+
   </div>
 </div>
 
 <script>
-let _tipo = 'edu', _plano = 'completo', _nomeAgente = '';
+let _tipo = 'edu', _plano = 'completo', _pedidoAtual = null;
+
+// ============ TOAST ============
+function toast(msg, tipo) {
+  const cores = { success:'#10B981', error:'#EF4444', '':'#6366F1' };
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:${cores[tipo]||cores['']};color:#fff;padding:12px 24px;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;z-index:9999;transition:.3s;opacity:0;box-shadow:0 4px 20px rgba(0,0,0,.2);white-space:nowrap`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+  setTimeout(() => { t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 3800);
+}
+
+// ============ MODAL ============
+function abrirModal(tipo) {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-step-1').style.display = 'block';
+  document.getElementById('modal-step-2').style.display = 'none';
+  selTipoModal(tipo);
+  const n = document.getElementById('agente-nome-input').value;
+  if(n) { document.getElementById('m-agente-nome').value = n; previewNomeModal(n); }
+}
+function abrirModalComPlano(plano) { abrirModal('edu'); selPlanoModal(plano); }
+function fecharModal() { document.getElementById('modal').classList.remove('open'); }
+
+function selTipoModal(t) {
+  _tipo = t;
+  ['edu','corp','combo'].forEach(x => document.getElementById('mt-'+x).classList.toggle('sel', x===t));
+  document.getElementById('modal-header-edu').style.display   = t==='edu'   ? 'block' : 'none';
+  document.getElementById('modal-header-corp').style.display  = t==='corp'  ? 'block' : 'none';
+  document.getElementById('modal-header-combo').style.display = t==='combo' ? 'block' : 'none';
+}
+function selPlanoModal(p) {
+  _plano = p;
+  ['basico','completo','premium'].forEach(x => document.getElementById('mp-'+x).classList.toggle('sel', x===p));
+}
+function previewNomeModal(val) {
+  const el = document.getElementById('m-nome-preview');
+  document.getElementById('m-nome-val').textContent = val.trim();
+  el.style.display = val.trim() ? 'block' : 'none';
+}
+function atualizarPreview(val) {
+  const prev = document.getElementById('nome-preview');
+  document.getElementById('nome-preview-val').textContent = val.trim();
+  prev.style.display = val.trim() ? 'block' : 'none';
+}
+function confirmarNome() {
+  const n = document.getElementById('agente-nome-input').value.trim();
+  if(!n) { document.getElementById('agente-nome-input').focus(); return; }
+  abrirModal('edu');
+  document.getElementById('m-agente-nome').value = n;
+  previewNomeModal(n);
+}
+document.getElementById('modal').addEventListener('click', e => {
+  if(e.target === document.getElementById('modal')) fecharModal();
+});
+
+// ============ ENVIAR PERFIL (Step 1) ============
+async function enviarPerfil() {
+  const nome      = document.getElementById('m-nome').value.trim();
+  const email     = document.getElementById('m-email').value.trim();
+  const zap       = document.getElementById('m-zap').value.trim();
+  const area      = document.getElementById('m-area').value.trim();
+  const inst      = document.getElementById('m-inst').value.trim();
+  const tarefas   = document.getElementById('m-tarefas').value.trim();
+  const obs       = document.getElementById('m-obs').value.trim();
+  const nomeAg    = document.getElementById('m-agente-nome').value.trim();
+
+  if(!nome)    { toast('Preencha seu nome completo','error'); return; }
+  if(!email)   { toast('Preencha seu e-mail','error'); return; }
+  if(!zap)     { toast('Preencha seu WhatsApp — usaremos para enviar a proposta','error'); return; }
+  if(!area)    { toast('Informe sua área ou curso','error'); return; }
+  if(!tarefas) { toast('Descreva as tarefas que o agente deve fazer','error'); return; }
+
+  const btn = document.getElementById('btn-enviar-perfil');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  try {
+    // Login anônimo para gravar no Firestore
+    let uid = 'anonimo-' + Date.now();
+    try { const c = await auth.signInAnonymously(); uid = c.user.uid; } catch {}
+
+    // Salvar no Firestore com status aguardando_analise
+    const ref = await db.collection('agent_requests').add({
+      uid, nome, email, whatsapp: zap,
+      nomeAgente: nomeAg || null,
+      tipo: _tipo,
+      planoSugerido: _plano,
+      area, instituicao: inst,
+      tarefas, observacoes: obs,
+      status: 'aguardando_analise',
+      proposta: null,
+      valorProposta: null,
+      origem: 'landing_agentes',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    _pedidoAtual = ref.id;
+
+    // Mostrar step 2
+    document.getElementById('modal-step-1').style.display = 'none';
+    document.getElementById('modal-step-2').style.display = 'block';
+    document.getElementById('step2-protocolo').textContent = `Protocolo: #${ref.id.slice(-6).toUpperCase()}`;
+
+    toast('Perfil enviado! Aguarde nossa análise.', 'success');
+
+  } catch(e) {
+    console.error(e);
+    // Fallback WhatsApp
+    const msg = `🤖 *Solicitação de Agente IA*\n\nNome: ${nome}\nE-mail: ${email}\nWhatsApp: ${zap}\nNome do agente: ${nomeAg||'não definido'}\nTipo: ${_tipo} | Plano ref: ${_plano}\nÁrea: ${area}\n\nTarefas:\n${tarefas}\n\nObs: ${obs}`;
+    window.open(`https://wa.me/5571920031180?text=${encodeURIComponent(msg)}`, '_blank');
+    toast('Redirecionando para WhatsApp...', '');
+    document.getElementById('modal-step-1').style.display = 'none';
+    document.getElementById('modal-step-2').style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar meu perfil e aguardar proposta →';
+  }
+}
+
+// ============ CUPONS ============
+const CUPONS = {
+  'TESTE@FILHODOATOMO': { desconto: 100, label: '100% de desconto (Modo teste)', teste: true },
+  'ACADEMICO@10':       { desconto: 10,  label: '10% de desconto', teste: false },
+  'ACADEMICO@20':       { desconto: 20,  label: '20% de desconto', teste: false },
+  'ACADEMICO@30':       { desconto: 30,  label: '30% de desconto', teste: false },
+  'ACADEMICO@40':       { desconto: 40,  label: '40% de desconto', teste: false },
+};
+
+// Cupons ativos — carregados do Firestore (admin controla pelo dashboard)
+let CUPONS_ATIVOS = {
+  'TESTE@FILHODOATOMO': true, // padrão local — Firestore sobrescreve
+  'ACADEMICO@10': false,
+  'ACADEMICO@20': false,
+  'ACADEMICO@30': false,
+  'ACADEMICO@40': false,
+};
+
+// Carrega config de cupons do Firestore ao abrir a tela de proposta
+async function carregarCuponsAtivos() {
+  try {
+    const snap = await db.collection('config').doc('cupons').get();
+    if(snap.exists) Object.assign(CUPONS_ATIVOS, snap.data());
+  } catch(e) { /* usa valores padrão */ }
+}
+
+let _valorOriginal = 0;
+let _valorFinal    = 0;
+let _cupomAplicado = null;
+
+function aplicarCupom() {
+  const codigo = document.getElementById('cupom-input').value.trim().toUpperCase();
+  const msg    = document.getElementById('cupom-msg');
+
+  if(!codigo) { mostrarMsgCupom('Digite o código do cupom', 'erro'); return; }
+
+  const cupom  = CUPONS[codigo];
+  const ativo  = CUPONS_ATIVOS[codigo];
+
+  if(!cupom)  { mostrarMsgCupom('Cupom inválido. Verifique o código.', 'erro'); return; }
+  if(!ativo)  { mostrarMsgCupom('Este cupom não está disponível no momento.', 'erro'); return; }
+
+  _cupomAplicado = { codigo, ...cupom };
+
+  const desconto = Math.round(_valorOriginal * cupom.desconto / 100);
+  _valorFinal    = _valorOriginal - desconto;
+
+  // Atualizar UI
+  const elValor    = document.getElementById('prop-valor');
+  const elOriginal = document.getElementById('prop-valor-original');
+
+  if(cupom.desconto === 100) {
+    elValor.textContent    = 'R$ 0,00';
+    elValor.style.color    = 'var(--green)';
+  } else {
+    elValor.textContent = `R$ ${_valorFinal.toLocaleString('pt-BR')}`;
+    elValor.style.color = 'var(--indigo2)';
+  }
+
+  elOriginal.textContent = `R$ ${_valorOriginal.toLocaleString('pt-BR')}`;
+  elOriginal.style.display = 'block';
+
+  mostrarMsgCupom(`✅ ${cupom.label} aplicado!${cupom.teste ? ' (modo teste — nenhuma cobrança real)' : ''}`, 'ok');
+
+  // Botão especial para modo teste
+  const btn = document.getElementById('btn-aceitar-pagar');
+  if(cupom.desconto === 100) {
+    btn.textContent = '🧪 Confirmar (modo teste — grátis) →';
+    btn.style.background = 'linear-gradient(135deg,#10B981,#059669)';
+  } else {
+    btn.textContent = `✅ Pagar R$ ${_valorFinal.toLocaleString('pt-BR')} com desconto →`;
+  }
+}
+
+function mostrarMsgCupom(texto, tipo) {
+  const el = document.getElementById('cupom-msg');
+  el.textContent    = texto;
+  el.style.display  = 'block';
+  el.style.background = tipo === 'ok'
+    ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)';
+  el.style.color = tipo === 'ok'
+    ? 'var(--green)' : '#EF4444';
+}
+
+
+// Exibida quando cliente acessa ?proposta=ID
+async function carregarProposta(pedidoId) {
+  document.getElementById('proposta-screen').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  await carregarCuponsAtivos(); // carrega estado dos cupons do Firestore
+
+  try {
+    const snap = await db.collection('agent_requests').doc(pedidoId).get();
+    if(!snap.exists) { alert('Proposta não encontrada.'); return; }
+    const d = snap.data();
+
+    _pedidoAtual = pedidoId;
+
+    // Ícone por tipo
+    const icons = { edu:'🎓', corp:'💼', combo:'⚡' };
+    const tipos  = { edu:'Agente educacional', corp:'Agente corporativo', combo:'Agente Combo' };
+    const cores  = { edu:'linear-gradient(135deg,#6366F1,#22D3EE)', corp:'linear-gradient(135deg,#059669,#22D3EE)', combo:'linear-gradient(135deg,#6366F1,#059669)' };
+
+    document.getElementById('prop-icon').style.background = cores[d.tipo] || cores.edu;
+    document.getElementById('prop-icon').textContent = icons[d.tipo] || '🤖';
+    document.getElementById('prop-agente-nome').textContent = d.nomeAgente || 'Seu agente';
+    document.getElementById('prop-tipo').textContent = tipos[d.tipo] || '';
+
+    // Linhas de dados
+    const rows = [
+      ['Cliente', d.nome],
+      ['Área / Curso', d.area],
+      d.instituicao ? ['Instituição', d.instituicao] : null,
+      ['Tarefas solicitadas', d.tarefas],
+    ].filter(Boolean);
+    document.getElementById('prop-rows').innerHTML = rows.map(([l,v]) => `
+      <div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="color:var(--muted);min-width:120px;flex-shrink:0">${l}</span>
+        <span style="color:var(--text);flex:1">${v||'—'}</span>
+      </div>`).join('');
+
+    // Proposta
+    document.getElementById('prop-texto').textContent = d.proposta || 'Proposta em elaboração...';
+
+    // Valor
+    const valor = d.valorProposta || 0;
+    _valorOriginal = valor;
+    _valorFinal    = valor;
+    _cupomAplicado = null;
+    document.getElementById('prop-valor').textContent = `R$ ${valor.toLocaleString('pt-BR')}`;
+    document.getElementById('prop-valor').style.color = 'var(--text)';
+    document.getElementById('prop-valor-original').style.display = 'none';
+    document.getElementById('cupom-msg').style.display = 'none';
+    document.getElementById('cupom-input').value = '';
+
+    // Plano badge
+    const planos = { basico:'Plano Básico', completo:'Plano Completo', premium:'Plano Premium' };
+    document.getElementById('prop-plano-badge').textContent = planos[d.plano||d.planoSugerido] || 'Plano Personalizado';
+
+    // Desabilitar botão se já pago
+    if(d.status === 'pago') {
+      document.getElementById('btn-aceitar-pagar').textContent = '✅ Pagamento confirmado';
+      document.getElementById('btn-aceitar-pagar').disabled = true;
+      document.getElementById('btn-aceitar-pagar').style.background = '#10B981';
+    }
+
+  } catch(e) { console.error(e); }
+}
+
+async function aceitarProposta() {
+  if(!_pedidoAtual) return;
+  const btn = document.getElementById('btn-aceitar-pagar');
+
+  // ============ MODO TESTE (cupom 100%) ============
+  if(_cupomAplicado?.teste || _cupomAplicado?.desconto === 100) {
+    btn.disabled = true; btn.textContent = 'Processando modo teste...';
+    try {
+      await db.collection('agent_requests').doc(_pedidoAtual).update({
+        status:        'pago',
+        cupomUsado:    _cupomAplicado.codigo,
+        valorPago:     0,
+        modoteste:     true,
+        pagoEm:        firebase.firestore.FieldValue.serverTimestamp()
+      });
+      btn.textContent    = '✅ Confirmado (modo teste)';
+      btn.style.background = '#10B981';
+      toast('🧪 Modo teste ativado! Pedido registrado como pago.', 'success');
+    } catch(e) {
+      console.error(e);
+      toast('Erro ao registrar. Tente novamente.', 'error');
+      btn.disabled = false; btn.textContent = '🧪 Confirmar (modo teste — grátis) →';
+    }
+    return;
+  }
+
+  // ============ PAGAMENTO REAL (com ou sem desconto) ============
+  btn.disabled = true; btn.textContent = 'Gerando pagamento...';
+
+  try {
+    const snap = await db.collection('agent_requests').doc(_pedidoAtual).get();
+    const d = snap.data();
+    const valorFinal = _valorFinal > 0 ? _valorFinal : (d.valorProposta || 0);
+
+    let idToken = null;
+    try { idToken = await auth.currentUser?.getIdToken(true); } catch {}
+
+    const resp = await fetch('/api/criar-preferencia', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(idToken ? { 'Authorization': 'Bearer ' + idToken } : {})
+      },
+      body: JSON.stringify({
+        tipo_servico: 'agente_' + (d.tipo || 'edu'),
+        laudas: 1,
+        prazo: 'normal',
+        metodo: 'cartao',
+        valor_fixo: valorFinal,
+        email: d.email,
+        uid: d.uid || _pedidoAtual
+      })
+    });
+
+    const data = await resp.json();
+
+    if(data.init_point) {
+      await db.collection('agent_requests').doc(_pedidoAtual).update({
+        status:      'aguardando_pagamento',
+        cupomUsado:  _cupomAplicado?.codigo || null,
+        valorPago:   valorFinal,
+        aceitoEm:    firebase.firestore.FieldValue.serverTimestamp()
+      });
+      window.location.href = data.init_point;
+    } else {
+      throw new Error('Sem link de pagamento');
+    }
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao gerar pagamento. Fale pelo WhatsApp.', 'error');
+    btn.disabled = false;
+    btn.textContent = '✅ Aceitar proposta e pagar →';
+  }
+}
+
+// Verificar se há ?proposta=ID na URL
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const propId = params.get('proposta');
+  if(propId) {
+    window.addEventListener('load', () => carregarProposta(propId));
+  }
+  // Retorno do MP
+  const status = params.get('status');
+  if(status === 'success') {
+    const pedId = params.get('ref');
+    if(pedId) db.collection('agent_requests').doc(pedId).update({ status: 'pago', pagoEm: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+    setTimeout(() => toast('✅ Pagamento confirmado! Entraremos em contato em breve.','success'), 800);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+</script>
 
 function abrirModal(tipo) {
   document.getElementById('modal').classList.add('open');
@@ -652,30 +1126,17 @@ function confirmarNome() {
   previewNomeModal(nome);
 }
 
-function enviarFormModal() {
-  const nome = document.getElementById('m-nome').value.trim();
-  const email = document.getElementById('m-email').value.trim();
-  const zap = document.getElementById('m-zap').value.trim();
-  const area = document.getElementById('m-area').value.trim();
-  const tarefas = document.getElementById('m-tarefas').value.trim();
-  const nomeAgente = document.getElementById('m-agente-nome').value.trim();
-
-  if(!nome || !email) { alert('Preencha nome e e-mail para continuar.'); return; }
-
-  const nomeAgMsg = nomeAgente ? `\nNome do agente: *${nomeAgente}*` : '';
-  const msg = `🤖 *Interesse — Agente personalizado*${nomeAgMsg}\n\nCliente: ${nome}\nE-mail: ${email}\nWhatsApp: ${zap||'não informado'}\nTipo: ${_tipo}\nPlano: ${_plano}\nÁrea: ${area}\n\nTarefas:\n${tarefas}`;
-
-  window.open(`https://wa.me/5571920031180?text=${encodeURIComponent(msg)}`, '_blank');
-
-  document.getElementById('modal-form-wrap').style.display = 'none';
-  const tituloSucesso = nomeAgente ? `${nomeAgente} está a caminho! 🎉` : 'Pedido recebido! 🎉';
-  document.getElementById('success-nome').textContent = tituloSucesso;
-  document.getElementById('modal-success').style.display = 'block';
+// ============ TOAST ============
+function toast(msg, tipo) {
+  const t = document.createElement('div');
+  const cores = { success:'#10B981', error:'#EF4444', '':'#6366F1' };
+  t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:${cores[tipo]||cores['']};color:#fff;padding:12px 24px;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;z-index:9999;transition:.3s;opacity:0;box-shadow:0 4px 20px rgba(0,0,0,.2)`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+  setTimeout(() => { t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 3500);
 }
 
-document.getElementById('modal').addEventListener('click', e => {
-  if(e.target === document.getElementById('modal')) fecharModal();
-});
-</script>
+
 </body>
 </html>

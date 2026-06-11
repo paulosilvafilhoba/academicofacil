@@ -602,7 +602,7 @@ tr:last-child td{border-bottom:none}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Clientes
       </div>
-      <div class="nav-item" onclick="showP('admin-financeiro',this)">
+      <div class="nav-item" onclick="showP('admin-financeiro',this);loadFinanceiro();carregarCuponsConfig()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         Financeiro
       </div>
@@ -832,6 +832,92 @@ tr:last-child td{border-bottom:none}
               <thead><tr><th>Pedido</th><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Pagamento</th><th>Data</th></tr></thead>
               <tbody id="fin-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Carregando...</td></tr></tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- GERENCIAR CUPONS -->
+        <div class="card" style="margin-top:20px">
+          <div class="card-header">
+            <span class="card-title">🎟️ Cupons de desconto</span>
+            <span style="font-size:11px;color:var(--muted)">Habilite ou desabilite individualmente</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0">
+
+            <!-- Cupom teste -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+                  <span style="font-family:var(--font-mono,monospace);font-size:13px;font-weight:700;background:rgba(99,102,241,.1);color:var(--indigo2);padding:3px 10px;border-radius:6px">TESTE@FILHODOATOMO</span>
+                  <span style="font-size:11px;background:rgba(239,68,68,.1);color:#EF4444;padding:2px 8px;border-radius:100px;font-weight:600">TESTE — 100%</span>
+                </div>
+                <span style="font-size:12px;color:var(--muted)">Modo teste — nenhuma cobrança real. Use para validar o fluxo.</span>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-left:16px">
+                <input type="checkbox" id="cupom-toggle-teste" checked onchange="salvarCupomConfig('TESTE@FILHODOATOMO',this.checked)" style="width:16px;height:16px;accent-color:var(--indigo)">
+                <span style="font-size:12px;color:var(--muted)" id="cupom-label-teste">Ativo</span>
+              </label>
+            </div>
+
+            <!-- Cupom 10% -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+                  <span style="font-family:var(--font-mono,monospace);font-size:13px;font-weight:700;background:rgba(16,185,129,.08);color:var(--green);padding:3px 10px;border-radius:6px">ACADEMICO@10</span>
+                  <span style="font-size:11px;background:rgba(16,185,129,.1);color:var(--green);padding:2px 8px;border-radius:100px;font-weight:600">10% OFF</span>
+                </div>
+                <span style="font-size:12px;color:var(--muted)">Desconto de 10% no valor da proposta</span>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-left:16px">
+                <input type="checkbox" id="cupom-toggle-10" onchange="salvarCupomConfig('ACADEMICO@10',this.checked)" style="width:16px;height:16px;accent-color:var(--indigo)">
+                <span style="font-size:12px;color:var(--muted)" id="cupom-label-10">Inativo</span>
+              </label>
+            </div>
+
+            <!-- Cupom 20% -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+                  <span style="font-family:var(--font-mono,monospace);font-size:13px;font-weight:700;background:rgba(16,185,129,.08);color:var(--green);padding:3px 10px;border-radius:6px">ACADEMICO@20</span>
+                  <span style="font-size:11px;background:rgba(16,185,129,.1);color:var(--green);padding:2px 8px;border-radius:100px;font-weight:600">20% OFF</span>
+                </div>
+                <span style="font-size:12px;color:var(--muted)">Desconto de 20% no valor da proposta</span>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-left:16px">
+                <input type="checkbox" id="cupom-toggle-20" onchange="salvarCupomConfig('ACADEMICO@20',this.checked)" style="width:16px;height:16px;accent-color:var(--indigo)">
+                <span style="font-size:12px;color:var(--muted)" id="cupom-label-20">Inativo</span>
+              </label>
+            </div>
+
+            <!-- Cupom 30% -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+                  <span style="font-family:var(--font-mono,monospace);font-size:13px;font-weight:700;background:rgba(16,185,129,.08);color:var(--green);padding:3px 10px;border-radius:6px">ACADEMICO@30</span>
+                  <span style="font-size:11px;background:rgba(16,185,129,.1);color:var(--green);padding:2px 8px;border-radius:100px;font-weight:600">30% OFF</span>
+                </div>
+                <span style="font-size:12px;color:var(--muted)">Desconto de 30% no valor da proposta</span>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-left:16px">
+                <input type="checkbox" id="cupom-toggle-30" onchange="salvarCupomConfig('ACADEMICO@30',this.checked)" style="width:16px;height:16px;accent-color:var(--indigo)">
+                <span style="font-size:12px;color:var(--muted)" id="cupom-label-30">Inativo</span>
+              </label>
+            </div>
+
+            <!-- Cupom 40% -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+                  <span style="font-family:var(--font-mono,monospace);font-size:13px;font-weight:700;background:rgba(16,185,129,.08);color:var(--green);padding:3px 10px;border-radius:6px">ACADEMICO@40</span>
+                  <span style="font-size:11px;background:rgba(16,185,129,.1);color:var(--green);padding:2px 8px;border-radius:100px;font-weight:600">40% OFF</span>
+                </div>
+                <span style="font-size:12px;color:var(--muted)">Desconto de 40% no valor da proposta</span>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-left:16px">
+                <input type="checkbox" id="cupom-toggle-40" onchange="salvarCupomConfig('ACADEMICO@40',this.checked)" style="width:16px;height:16px;accent-color:var(--indigo)">
+                <span style="font-size:12px;color:var(--muted)" id="cupom-label-40">Inativo</span>
+              </label>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1798,6 +1884,56 @@ async function confirmarStatus() {
   } catch(e) {
     toast('Erro ao atualizar status','error');
   }
+}
+
+// ============ CUPONS — ADMIN ============
+async function salvarCupomConfig(codigo, ativo) {
+  try {
+    await db.collection('config').doc('cupons').set(
+      { [codigo]: ativo },
+      { merge: true }
+    );
+    // Atualiza label
+    const map = {
+      'TESTE@FILHODOATOMO': 'teste',
+      'ACADEMICO@10': '10',
+      'ACADEMICO@20': '20',
+      'ACADEMICO@30': '30',
+      'ACADEMICO@40': '40'
+    };
+    const id = map[codigo];
+    if(id) {
+      const label = document.getElementById('cupom-label-' + id);
+      if(label) label.textContent = ativo ? 'Ativo' : 'Inativo';
+    }
+    toast(`Cupom ${codigo} ${ativo ? 'ativado' : 'desativado'}`, 'success');
+  } catch(e) {
+    toast('Erro ao salvar configuração', 'error');
+    console.error(e);
+  }
+}
+
+async function carregarCuponsConfig() {
+  try {
+    const snap = await db.collection('config').doc('cupons').get();
+    if(!snap.exists) return;
+    const d = snap.data();
+    const map = {
+      'TESTE@FILHODOATOMO': 'teste',
+      'ACADEMICO@10': '10',
+      'ACADEMICO@20': '20',
+      'ACADEMICO@30': '30',
+      'ACADEMICO@40': '40'
+    };
+    Object.entries(map).forEach(([codigo, id]) => {
+      const cb    = document.getElementById('cupom-toggle-' + id);
+      const label = document.getElementById('cupom-label-' + id);
+      if(cb && d[codigo] !== undefined) {
+        cb.checked       = d[codigo];
+        if(label) label.textContent = d[codigo] ? 'Ativo' : 'Inativo';
+      }
+    });
+  } catch(e) { console.error(e); }
 }
 
 // ============ EXCLUIR PEDIDO ============
