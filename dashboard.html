@@ -32,11 +32,11 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;line-height:1
 html,body{height:100%;margin:0;padding:0}
 
 /* TOAST */
-#toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast-item{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 18px;font-size:13px;color:var(--text);max-width:320px;animation:slideIn .3s ease;box-shadow:0 4px 24px rgba(0,0,0,.4)}
-.toast-item.success{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.1)}
-.toast-item.error{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1)}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+#toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);bottom:auto;right:auto;z-index:2147483647;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast-item{background:#1F2433;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;font-size:14px;font-weight:600;color:#fff;max-width:360px;min-width:240px;text-align:center;animation:slideIn .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.45);pointer-events:auto}
+.toast-item.success{border-color:rgba(16,185,129,.6);background:#10B981;color:#fff}
+.toast-item.error{border-color:rgba(239,68,68,.6);background:#EF4444;color:#fff}
+@keyframes slideIn{from{transform:translateY(-24px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* SCREENS */
 .screen{display:none;min-height:100vh}
@@ -830,7 +830,7 @@ tr:last-child td{border-bottom:none}
         <div class="card">
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>Nome</th><th>E-mail</th><th>Pedidos</th><th>Total gasto</th><th>Cadastro</th></tr></thead>
+              <thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Cadastro</th><th>Ações</th></tr></thead>
               <tbody id="adm-clients-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Carregando...</td></tr></tbody>
             </table>
           </div>
@@ -889,8 +889,8 @@ tr:last-child td{border-bottom:none}
               <input type="text" id="promo-desc-admin" placeholder="10% de desconto no primeiro trabalho. Solicite agora →" style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
             </div>
 
-            <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;line-height:1.6">
-              💡 <strong>Como funciona:</strong> O desconto <strong>não é aplicado automaticamente</strong> no pagamento — é um sinal visual para o cliente. Você aplica o desconto manualmente ao enviar a proposta no painel de pedidos, informando o valor já com desconto.
+            <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:#065F46;line-height:1.6">
+              ✅ <strong>Como funciona:</strong> Quando ativa, a promoção exibe um banner grande no painel do cliente e o desconto é <strong>aplicado automaticamente no pagamento</strong> (Pix e cartão), apenas para clientes sem nenhum pedido anterior. A validação acontece no servidor — o cliente não consegue forjar o desconto. Ao concluir o primeiro pedido, a promoção deixa de valer para aquele cliente.
             </div>
 
             <button onclick="salvarPromoConfig()" style="padding:10px 20px;background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;align-self:flex-start">Salvar configuração</button>
@@ -1120,6 +1120,10 @@ tr:last-child td{border-bottom:none}
         <span class="resumo-value"><span class="resumo-file-tag" id="rs-arquivo">—</span></span>
       </div>
     </div>
+    <div class="resumo-row" id="rs-row-desconto" style="display:none;padding:12px 24px;background:rgba(245,158,11,.08);border-top:1px solid rgba(245,158,11,.2)">
+      <span class="resumo-label" style="color:#D97706">🎁 Promoção</span>
+      <span class="resumo-value" id="rs-desconto" style="color:#D97706;font-weight:700">—</span>
+    </div>
     <div class="resumo-total">
       <span class="resumo-total-label">Total a pagar</span>
       <span class="resumo-total-value" id="rs-total">R$ 0</span>
@@ -1219,6 +1223,7 @@ let currentOrderId = null;
 let pendingOrder = null;
 let selectedPayMethod = 'pix';
 let unsubChat = null;
+let promoAtiva = null; // {ativo, desconto, titulo, descricao} quando cliente elegível
 
 // ============ INIT ============
 // Fallback: se Firebase não responder em 8s, mostrar login
@@ -1264,7 +1269,7 @@ function setupUI() {
     loadClientData();
     loadFiles();
     loadChat();
-    verificarPrimeiroTrabalho(user.uid); // verificar desconto
+    verificarPrimeiroTrabalho(currentUser.uid); // verificar desconto
   }
   window.dispatchEvent(new Event('af-auth-ready'));
 }
@@ -1379,7 +1384,12 @@ async function doLogin() {
     await auth.signInWithEmailAndPassword(email, senha);
     toast('Login realizado!','success');
   } catch(e) {
-    toast('E-mail ou senha incorretos','error');
+    let msg = 'E-mail ou senha incorretos';
+    if(e.code==='auth/invalid-email') msg = 'E-mail inválido';
+    else if(e.code==='auth/user-disabled') msg = 'Conta desativada';
+    else if(e.code==='auth/network-request-failed') msg = 'Sem conexão. Verifique sua internet';
+    else if(e.code==='auth/too-many-requests') msg = 'Muitas tentativas. Aguarde alguns minutos';
+    toast(msg,'error');
     btn.disabled = false; btn.textContent = 'Entrar na plataforma';
   }
 }
@@ -1394,15 +1404,23 @@ async function doRegister() {
   btn.disabled = true; btn.textContent = 'Criando conta...';
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, senha);
-    await cred.user.updateProfile({displayName: nome});
-    await db.collection('users').doc(cred.user.uid).set({
-      name: nome, email, role: 'client',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // Atualizar perfil (não bloqueia se falhar)
+    try { await cred.user.updateProfile({displayName: nome}); } catch(e){ console.warn('updateProfile falhou', e); }
+    // Gravar no Firestore (não bloqueia o login se as regras falharem)
+    try {
+      await db.collection('users').doc(cred.user.uid).set({
+        name: nome, email, role: 'client',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch(e){ console.warn('Firestore users.set falhou', e); }
     toast('Conta criada com sucesso!','success');
+    // onAuthStateChanged assume a partir daqui — não resetamos o botão pois a tela vai trocar
   } catch(e) {
     let msg = 'Erro ao criar conta';
     if(e.code==='auth/email-already-in-use') msg = 'Este e-mail já está cadastrado';
+    else if(e.code==='auth/invalid-email') msg = 'E-mail inválido';
+    else if(e.code==='auth/weak-password') msg = 'Senha muito fraca (mínimo 6 caracteres)';
+    else if(e.code==='auth/network-request-failed') msg = 'Sem conexão. Verifique sua internet';
     toast(msg,'error');
     btn.disabled = false; btn.textContent = 'Criar minha conta';
   }
@@ -1684,16 +1702,36 @@ function criarPedido() {
   const desc = document.getElementById('np-desc').value.trim();
 
   if(!tipo){toast('Selecione o tipo de serviço','error');return}
-  const valor = calcPreco();
-  if(!valor){toast('Informe o número de laudas','error');return}
+  const valorCheio = calcPreco();
+  if(!valorCheio){toast('Informe o número de laudas','error');return}
 
-  pendingOrder = {tipo, laudas, prazo, tema, inst, desc, valor, servico: nomeServico[tipo], arquivo: pendingFile ? pendingFile.name : null};
+  // Aplicar desconto da promoção, se elegível
+  let valor = valorCheio;
+  let descontoPct = 0;
+  let descontoValor = 0;
+  if(promoAtiva && promoAtiva.ativo && promoAtiva.desconto > 0) {
+    descontoPct = promoAtiva.desconto;
+    descontoValor = Math.round(valorCheio * descontoPct / 100);
+    valor = valorCheio - descontoValor;
+  }
+
+  pendingOrder = {tipo, laudas, prazo, tema, inst, desc, valor, valorCheio, descontoPct, descontoValor, servico: nomeServico[tipo], arquivo: pendingFile ? pendingFile.name : null};
 
   // Preencher modal de resumo
   document.getElementById('rs-servico').textContent = nomeServico[tipo];
   document.getElementById('rs-laudas').textContent = laudas ? `${laudas} laudas` : 'Fixo';
   document.getElementById('rs-prazo').textContent = prazoLabel[prazo] || prazo;
-  document.getElementById('rs-total').textContent = 'R$ '+valor.toLocaleString('pt-BR');
+
+  // Linha de desconto
+  const rowDesc = document.getElementById('rs-row-desconto');
+  if(descontoPct > 0) {
+    document.getElementById('rs-desconto').textContent = `-${descontoPct}% (−R$ ${descontoValor.toLocaleString('pt-BR')})`;
+    rowDesc.style.display = 'flex';
+    document.getElementById('rs-total').innerHTML = `<span style="font-size:15px;color:var(--muted);text-decoration:line-through;-webkit-text-fill-color:var(--muted);margin-right:8px">R$ ${valorCheio.toLocaleString('pt-BR')}</span>R$ ${valor.toLocaleString('pt-BR')}`;
+  } else {
+    rowDesc.style.display = 'none';
+    document.getElementById('rs-total').textContent = 'R$ '+valor.toLocaleString('pt-BR');
+  }
 
   // Campos opcionais
   const showInst = !!inst;
@@ -1748,7 +1786,8 @@ async function gerarQRPix() {
         tipo_servico: pendingOrder?.tipo,
         laudas: pendingOrder?.laudas,
         prazo: pendingOrder?.prazo,
-        metodo: 'pix'
+        metodo: 'pix',
+        aplicar_promo: !!(pendingOrder && pendingOrder.descontoPct > 0)
       })
     });
     const data = await resp.json();
@@ -1799,7 +1838,8 @@ async function abrirMercadoPago() {
         tipo_servico: pendingOrder.tipo,
         laudas: pendingOrder.laudas,
         prazo: pendingOrder.prazo,
-        metodo: 'cartao'
+        metodo: 'cartao',
+        aplicar_promo: !!(pendingOrder && pendingOrder.descontoPct > 0)
       })
     });
     const data = await resp.json();
@@ -1885,6 +1925,10 @@ async function salvarPedido(status) {
     inst: pendingOrder.inst,
     desc: pendingOrder.desc,
     valor: pendingOrder.valor,
+    valorCheio: pendingOrder.valorCheio || pendingOrder.valor,
+    descontoPct: pendingOrder.descontoPct || 0,
+    descontoValor: pendingOrder.descontoValor || 0,
+    promoAplicada: (pendingOrder.descontoPct || 0) > 0,
     status: status,
     etapa: 'briefing',
     pagamento: selectedPayMethod,
@@ -1961,14 +2005,37 @@ async function loadAdminClients() {
   let rows = '';
   snap.forEach(doc => {
     const d = doc.data();
+    const isAdmin = d.role === 'admin';
+    const isMe = currentUser && doc.id === currentUser.uid;
+    const papel = isAdmin
+      ? '<span style="background:rgba(99,102,241,.15);color:var(--indigo);padding:2px 10px;border-radius:100px;font-size:11px;font-weight:700">Admin</span>'
+      : '<span style="background:rgba(148,163,184,.15);color:var(--muted);padding:2px 10px;border-radius:100px;font-size:11px;font-weight:600">Cliente</span>';
+    const acoes = (isAdmin || isMe)
+      ? '<span style="color:var(--muted);font-size:12px">—</span>'
+      : `<button class="or-btn or-btn-del" onclick="excluirUsuario('${doc.id}','${escapeHtml((d.name||d.email||'usuário').replace(/'/g,"\\'"))}')">🗑 Excluir</button>`;
     rows += `<tr>
-      <td>${d.name||'—'}</td>
-      <td style="color:var(--muted)">${d.email}</td>
-      <td>—</td><td>—</td>
+      <td>${escapeHtml(d.name||'—')}</td>
+      <td style="color:var(--muted)">${escapeHtml(d.email||'—')}</td>
+      <td>${papel}</td>
       <td>${formatDate(d.createdAt)}</td>
+      <td>${acoes}</td>
     </tr>`;
   });
   document.getElementById('adm-clients-tbody').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Nenhum cliente ainda</td></tr>';
+}
+
+async function excluirUsuario(uid, nome) {
+  if(!isAdmin) { toast('Apenas administradores podem excluir usuários','error'); return; }
+  if(uid === currentUser.uid) { toast('Você não pode excluir sua própria conta','error'); return; }
+  if(!confirm(`Excluir o usuário "${nome}"?\n\nIsto remove o cadastro da plataforma. O acesso de login (Firebase Auth) precisa ser removido manualmente no Console do Firebase → Authentication.`)) return;
+  try {
+    await db.collection('users').doc(uid).delete();
+    toast('Usuário removido da plataforma','success');
+    loadAdminClients();
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao excluir usuário','error');
+  }
 }
 
 // ============ STATUS MODAL ============
@@ -2097,6 +2164,7 @@ async function verificarPrimeiroTrabalho(uid) {
     if(jafez) {
       // Já fez trabalho — limpar promo do localStorage
       localStorage.removeItem('af-promo-config');
+      promoAtiva = null;
       return;
     }
 
@@ -2105,38 +2173,58 @@ async function verificarPrimeiroTrabalho(uid) {
     if(!promoSnap.exists) { localStorage.removeItem('af-promo-config'); return; }
 
     const promo = promoSnap.data();
-    if(!promo.ativo) { localStorage.removeItem('af-promo-config'); return; }
+    if(!promo.ativo) { localStorage.removeItem('af-promo-config'); promoAtiva = null; return; }
 
-    // Salvar no localStorage para exibir no index.html
-    localStorage.setItem('af-promo-config', JSON.stringify({
+    // Guardar globalmente para aplicar desconto no pagamento
+    promoAtiva = {
       ativo: true,
       desconto: promo.desconto,
       titulo: promo.titulo || 'Promoção de boas-vindas!',
       descricao: promo.descricao || `${promo.desconto}% de desconto no seu primeiro trabalho.`
-    }));
+    };
 
-    // Mostrar banner no dashboard
-    mostrarBannerPromo(promo);
+    // Salvar no localStorage para exibir no index.html
+    localStorage.setItem('af-promo-config', JSON.stringify(promoAtiva));
+
+    // Mostrar banner grande no dashboard
+    mostrarBannerPromo(promoAtiva);
   } catch(e) { console.error(e); }
 }
 
 function mostrarBannerPromo(promo) {
-  // Criar banner no topo do conteúdo principal
+  // Criar banner grande e chamativo no topo do conteúdo principal
   const existente = document.getElementById('dashboard-promo-banner');
-  if(existente) return;
+  if(existente) existente.remove();
 
   const banner = document.createElement('div');
   banner.id = 'dashboard-promo-banner';
-  banner.style.cssText = 'background:linear-gradient(90deg,rgba(245,158,11,.1),rgba(99,102,241,.08));border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer';
+  banner.style.cssText = 'position:relative;background:linear-gradient(120deg,#F59E0B 0%,#F97316 45%,#6366F1 110%);border-radius:16px;padding:22px 24px;margin-bottom:22px;overflow:hidden;cursor:pointer;box-shadow:0 12px 40px rgba(245,158,11,.35);animation:promoPulse 2.6s ease-in-out infinite';
   banner.onclick = () => showP('novo-pedido', document.querySelector('.nav-item[onclick*="novo-pedido"]'));
   banner.innerHTML = `
-    <span style="font-size:22px">🎁</span>
-    <div style="flex:1">
-      <p style="font-size:13px;font-weight:700;color:#92400E;margin:0">${escapeHtml(promo.titulo||'Promoção de boas-vindas!')}</p>
-      <p style="font-size:12px;color:#B45309;margin:0">${escapeHtml(promo.descricao||`${promo.desconto}% de desconto no primeiro trabalho`)} — Solicite agora →</p>
+    <div style="position:absolute;top:-40px;right:-20px;font-size:140px;opacity:.12;transform:rotate(-12deg);pointer-events:none">🎁</div>
+    <div style="position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <div style="font-size:46px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))">🎉</div>
+      <div style="flex:1;min-width:200px">
+        <div style="display:inline-block;background:rgba(255,255,255,.25);color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px;margin-bottom:6px">Oferta exclusiva</div>
+        <p style="font-size:22px;font-weight:800;color:#fff;margin:0 0 4px;text-shadow:0 1px 4px rgba(0,0,0,.2)">${escapeHtml(promo.titulo||'Promoção de boas-vindas!')}</p>
+        <p style="font-size:14px;color:rgba(255,255,255,.92);margin:0;font-weight:500">${escapeHtml(promo.descricao||`${promo.desconto}% de desconto no seu primeiro trabalho`)}</p>
+      </div>
+      <div style="text-align:center">
+        <div style="background:#fff;color:#F97316;font-size:34px;font-weight:900;line-height:1;padding:12px 18px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.2)">${promo.desconto}%<div style="font-size:12px;font-weight:800;letter-spacing:.1em;color:#F59E0B">OFF</div></div>
+      </div>
+      <div style="width:100%;display:flex;justify-content:flex-end;margin-top:4px">
+        <span style="background:#fff;color:#1F2433;font-size:14px;font-weight:800;padding:10px 22px;border-radius:100px;box-shadow:0 4px 14px rgba(0,0,0,.18)">Solicitar agora com desconto →</span>
+      </div>
     </div>
-    <span style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap">${promo.desconto}% OFF</span>
-    <button onclick="event.stopPropagation();this.parentElement.remove()" style="background:none;border:none;font-size:16px;cursor:pointer;color:#B45309;padding:2px 6px">✕</button>`;
+    <button onclick="event.stopPropagation();document.getElementById('dashboard-promo-banner').remove()" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,.25);border:none;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>`;
+
+  // Injetar keyframes uma única vez
+  if(!document.getElementById('promo-kf')) {
+    const st = document.createElement('style');
+    st.id = 'promo-kf';
+    st.textContent = '@keyframes promoPulse{0%,100%{box-shadow:0 12px 40px rgba(245,158,11,.35)}50%{box-shadow:0 12px 52px rgba(249,115,22,.55)}}';
+    document.head.appendChild(st);
+  }
 
   const content = document.querySelector('.content');
   if(content) content.insertBefore(banner, content.firstChild);
