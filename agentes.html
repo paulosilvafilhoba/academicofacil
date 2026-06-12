@@ -291,7 +291,7 @@ footer a{color:rgba(255,255,255,.6);text-decoration:none}
   <div class="agents-grid">
 
     <!-- EDUCACIONAL -->
-    <div class="agent-card" onclick="abrirModal('edu')">
+    <div class="agent-card" onclick="window.location.href='/agentes/educacional'">
       <div class="agent-header agent-header-edu">
         <div class="ah-deco ah-deco-edu"></div>
         <div class="ah-icon ah-icon-edu">🎓</div>
@@ -309,13 +309,13 @@ footer a{color:rgba(255,255,255,.6);text-decoration:none}
         </div>
         <div class="agent-price-row">
           <div><span class="price-from">a partir de</span><span class="price-val">R$ 197</span> <span class="price-unit">único</span></div>
-          <button class="btn-agent-edu" onclick="event.stopPropagation();abrirModal('edu')">Quero o meu →</button>
+          <a href="/agentes/educacional" class="btn-agent-edu" onclick="event.stopPropagation()" style="text-decoration:none;display:inline-flex;align-items:center">Conhecer →</a>
         </div>
       </div>
     </div>
 
     <!-- CORPORATIVO -->
-    <div class="agent-card" onclick="abrirModal('corp')">
+    <div class="agent-card" onclick="window.location.href='/agentes/corporativo'">
       <div class="agent-header agent-header-corp">
         <div class="ah-deco ah-deco-corp"></div>
         <div class="ah-icon ah-icon-corp">💼</div>
@@ -333,7 +333,7 @@ footer a{color:rgba(255,255,255,.6);text-decoration:none}
         </div>
         <div class="agent-price-row">
           <div><span class="price-from">a partir de</span><span class="price-val">R$ 197</span> <span class="price-unit">único</span></div>
-          <button class="btn-agent-corp" onclick="event.stopPropagation();abrirModal('corp')">Quero o meu →</button>
+          <a href="/agentes/corporativo" class="btn-agent-corp" onclick="event.stopPropagation()" style="text-decoration:none;display:inline-flex;align-items:center">Conhecer →</a>
         </div>
       </div>
     </div>
@@ -1064,7 +1064,7 @@ async function aceitarProposta() {
   }
 })();
 </script>
-
+<script>
 function abrirModal(tipo) {
   document.getElementById('modal').classList.add('open');
   document.getElementById('modal-form-wrap').style.display = 'block';
@@ -1136,7 +1136,6 @@ function toast(msg, tipo) {
   requestAnimationFrame(() => { t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
   setTimeout(() => { t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 3500);
 }
-
-
+</script>
 </body>
 </html>

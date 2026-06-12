@@ -1987,6 +1987,12 @@ async function confirmarStatus() {
   }
 }
 
+// ============ FINANCEIRO ============
+function loadFinanceiro() {
+  // Reutiliza loadAdminData que já carrega dados financeiros
+  loadAdminData();
+}
+
 // ============ PROMOÇÃO PRIMEIRO TRABALHO ============
 async function verificarPrimeiroTrabalho(uid) {
   try {
