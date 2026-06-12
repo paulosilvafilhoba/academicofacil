@@ -75,11 +75,16 @@ function sanitize(v) {
     .slice(0, 20000);
 }
 
-// ============ MONTAR MENSAGEM DO USUÁRIO ============
+// ============ MONTAR MENSAGEM / SUPORTE A CONVERSA ============
 function montarMensagem(body) {
-  const { action, order, section, instructions, agentName } = body;
-  const nome = agentName ? `\n\nNome do agente escolhido pelo cliente: "${sanitize(agentName)}"` : '';
-  
+  const { action, order, section, instructions, agentName, agentType, mensagem, historico } = body;
+  const nome = agentName ? `\n\nAgente: "${sanitize(agentName)}"` : '';
+
+  // Modo conversa — retorna messages array para multi-turn
+  if (action === 'conversa' && mensagem) {
+    return null; // sinaliza para usar modo conversa
+  }
+
   const pedido = order ? `
 DADOS DO PEDIDO:
 - Tipo: ${sanitize(order.serviceType || '')}
@@ -91,40 +96,10 @@ DADOS DO PEDIDO:
 - Prazo: ${sanitize(order.deadline || '')}
 - Requisitos: ${sanitize(order.requirements || '')}` : '';
 
-  const instrucoes = instructions ? `\nINSTRUÇÕES ADICIONAIS: ${sanitize(instructions)}` : '';
-  const secao = section ? `\nSEÇÃO SOLICITADA: ${sanitize(section)}` : '';
+  const instrucoes = instructions ? `\nINSTRUÇÕES: ${sanitize(instructions)}` : '';
+  const secao = section ? `\nSEÇÃO: ${sanitize(section)}` : '';
 
-  return `AÇÃO SOLICITADA: ${sanitize(action)}${nome}${pedido}${secao}${instrucoes}
-
-Retorne APENAS JSON válido conforme o formato especificado no prompt mestre.`;
-}
-
-// ============ SALVAR NO FIRESTORE ============
-async function salvarNoFirestore(orderId, uid, resultado) {
-  const projectId = process.env.FIREBASE_PROJECT_ID || 'academicofacil-87df6';
-  const apiKey = process.env.FIREBASE_API_KEY;
-  if (!apiKey || !orderId) return;
-
-  try {
-    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/orders/${orderId}/ai_outputs`;
-    await fetch(url + `?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          stage:       { stringValue: resultado.stage || '' },
-          summary:     { stringValue: resultado.summary || '' },
-          content:     { stringValue: resultado.content || '' },
-          qualityScore:{ integerValue: resultado.quality_score?.overall || 0 },
-          risks:       { stringValue: JSON.stringify(resultado.risks || []) },
-          pendingQ:    { stringValue: JSON.stringify(resultado.pending_questions || []) },
-          nextAction:  { stringValue: resultado.next_action || '' },
-          createdBy:   { stringValue: 'ia_academica' },
-          uid:         { stringValue: uid }
-        }
-      })
-    });
-  } catch (e) { console.error('Firestore save error:', e); }
+  return `AÇÃO: ${sanitize(action)}${nome}${pedido}${secao}${instrucoes}\n\nRetorne APENAS JSON válido conforme o prompt mestre.`;
 }
 
 // ============ HANDLER PRINCIPAL ============
@@ -167,6 +142,46 @@ export default async function handler(req) {
 
   // Chamar Claude
   try {
+    const { action, mensagem, historico, agentName, agentType, order } = body;
+    const isModoConversa = action === 'conversa' && mensagem;
+
+    // System prompt — modo conversa usa prompt personalizado do agente
+    let systemPrompt = PROMPT_MESTRE;
+    if (isModoConversa) {
+      const tipo = agentType || 'edu';
+      const base = tipo === 'corp'
+        ? `Você é ${sanitize(agentName || 'Assistente')}, um assistente corporativo personalizado do AcadêmicoFácil. Foque em produtividade profissional: e-mails, relatórios, apresentações, atas e processos.`
+        : `Você é ${sanitize(agentName || 'Assistente')}, um assistente acadêmico personalizado do AcadêmicoFácil. Foque em apoio acadêmico: revisão, ABNT, metodologia e preparação para defesas.`;
+      systemPrompt = `${base}
+
+PERFIL DO CLIENTE:
+${sanitize(order?.requirements || '')}
+
+REGRAS:
+- Responda sempre como ${sanitize(agentName || 'Assistente')}, nunca como "IA genérica"
+- Seja objetivo e prático
+- Use markdown básico (negrito, listas) quando ajudar
+- Nunca invente referências ou dados
+- Responda em português brasileiro`;
+    }
+
+    // Montar messages array
+    let messages;
+    if (isModoConversa) {
+      // Multi-turn com histórico
+      const hist = Array.isArray(historico) ? historico.slice(-8) : [];
+      messages = [
+        ...hist.map(h => ({
+          role: h.role === 'user' ? 'user' : 'assistant',
+          content: sanitize(h.content)
+        })),
+        { role: 'user', content: sanitize(mensagem) }
+      ];
+    } else {
+      const msg = montarMensagem(body);
+      messages = [{ role: 'user', content: msg || 'Diagnostique este pedido.' }];
+    }
+
     const claudeResp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -176,9 +191,9 @@ export default async function handler(req) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: PROMPT_MESTRE,
-        messages: [{ role: 'user', content: montarMensagem(body) }]
+        max_tokens: isModoConversa ? 1500 : 4096,
+        system: systemPrompt,
+        messages
       })
     });
 
@@ -188,15 +203,28 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ ok: false, error: 'Erro na IA', details: claudeData }), { status: 502 });
     }
 
-    const rawText = claudeData.content?.[0]?.text || '{}';
+    const rawText = claudeData.content?.[0]?.text || '';
 
-    // Parse JSON — remove possível ```json wrapper
+    // Modo conversa — retorna texto direto sem parsear JSON
+    if (isModoConversa) {
+      return new Response(JSON.stringify({
+        ok: true,
+        content: rawText,
+        agent: 'ia_academica',
+        stage: 'conversa',
+        agent_name: sanitize(agentName || '')
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://academicofacil.com.br' }
+      });
+    }
+
+    // Modo acadêmico — parse JSON estruturado
     let resultado;
     try {
       const clean = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
       resultado = JSON.parse(clean);
     } catch {
-      // Se não for JSON válido, encapsula como content
       resultado = {
         agent: 'ia_academica',
         stage: action,
@@ -209,10 +237,7 @@ export default async function handler(req) {
       };
     }
 
-    // Nome personalizado do agente
     if (agentName) resultado.agent_name = sanitize(agentName);
-
-    // Salvar no Firestore
     if (orderId) await salvarNoFirestore(orderId, user.uid, resultado);
 
     return new Response(JSON.stringify({ ok: true, ...resultado }), {
