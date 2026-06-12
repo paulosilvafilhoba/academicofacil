@@ -6,6 +6,7 @@
     { "source": "/agentes", "destination": "/agentes.html" },
     { "source": "/agentes/educacional", "destination": "/agentes/educacional.html" },
     { "source": "/agentes/corporativo", "destination": "/agentes/corporativo.html" },
+    { "source": "/agente-academico", "destination": "/agente-academico.html" },
     { "source": "/agente/:nome", "destination": "/agente.html" }
   ],
   "cleanUrls": true,
