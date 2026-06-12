@@ -606,6 +606,11 @@ tr:last-child td{border-bottom:none}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         Financeiro
       </div>
+      <div class="nav-item" onclick="showP('admin-agentes',this);loadAgentRequests()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Agentes IA
+        <span class="nav-badge" id="admin-agents-badge">0</span>
+      </div>
     </div>
 
     <div class="sidebar-bottom">
@@ -926,6 +931,59 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- ADMIN AGENTES IA -->
+<div id="panel-admin-agentes" class="panel">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">📋 Aguardando análise</div><div class="stat-val" id="ag-count-aguardando">0</div></div>
+    <div class="stat-card"><div class="stat-label">📤 Proposta enviada</div><div class="stat-val" id="ag-count-proposta">0</div></div>
+    <div class="stat-card"><div class="stat-label">💳 Pagos</div><div class="stat-val" id="ag-count-pago">0</div></div>
+    <div class="stat-card"><div class="stat-label">✅ Ativos</div><div class="stat-val" id="ag-count-ativo">0</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🤖 Pedidos de agentes personalizados</span>
+      <button class="btn-sm" onclick="loadAgentRequests()" style="background:rgba(99,102,241,.1);color:var(--indigo2);border:none;padding:6px 14px;border-radius:100px;font-size:12px;cursor:pointer">↻ Atualizar</button>
+    </div>
+    <div id="ag-list" style="display:flex;flex-direction:column;gap:0"></div>
+  </div>
+</div>
+
+<!-- MODAL PROPOSTA AGENTE -->
+<div id="proposta-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;overflow:hidden;max-height:90vh;overflow-y:auto">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h3 style="font-size:16px;margin-bottom:2px">Enviar proposta</h3>
+        <p style="font-size:12px;color:var(--muted)" id="pm-cliente-nome"></p>
+      </div>
+      <button onclick="fecharPropostaModal()" style="background:var(--bg2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;color:var(--muted)">✕</button>
+    </div>
+    <div style="padding:20px 24px">
+      <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.8;color:var(--muted)" id="pm-perfil"></div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Texto da proposta *</label>
+        <textarea id="pm-proposta" rows="5" placeholder="Descreva o escopo do agente, o que será configurado, como funciona o acesso..." style="width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;outline:none"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Valor (R$) *</label>
+          <input type="number" id="pm-valor" placeholder="397" min="1" style="width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Plano</label>
+          <select id="pm-plano" style="width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none">
+            <option value="basico">Básico — R$ 197</option>
+            <option value="completo" selected>Completo — R$ 397</option>
+            <option value="premium">Premium — R$ 797</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="enviarProposta()" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer">Enviar proposta pelo WhatsApp →</button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">O link da proposta será gerado automaticamente</p>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL STATUS PEDIDO -->
 <div id="status-modal">
   <div class="status-box">
@@ -1196,7 +1254,7 @@ function showP(panelId, navEl) {
     'painel':'Painel','meu-pedido':'Meu pedido','chat':'Chat',
     'arquivos':'Arquivos','historico':'Histórico','novo-pedido':'Novo pedido',
     'admin-overview':'Visão geral','admin-pedidos':'Pedidos',
-    'admin-clientes':'Clientes','admin-financeiro':'Financeiro'
+    'admin-clientes':'Clientes','admin-financeiro':'Financeiro','admin-agentes':'Agentes IA'
   };
   const el = document.getElementById('topbar-title');
   if(el) el.textContent = titles[panelId] || panelId;
@@ -1958,6 +2016,123 @@ async function excluirPedido(orderId) {
   }
 }
 
+// ============ ADMIN AGENTES IA ============
+let _agentRequestAtual = null;
+
+async function loadAgentRequests() {
+  try {
+    const snap = await db.collection('agent_requests').orderBy('createdAt','desc').get();
+    const list = document.getElementById('ag-list');
+    let counts = { aguardando_analise:0, proposta_enviada:0, pago:0, ativo:0 };
+    let html = '';
+
+    snap.forEach(doc => {
+      const d = doc.data();
+      if(counts[d.status] !== undefined) counts[d.status]++;
+
+      const statusLabels = {
+        aguardando_analise: '<span style="background:rgba(245,158,11,.12);color:#D97706;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">⏳ Aguardando análise</span>',
+        proposta_enviada:   '<span style="background:rgba(99,102,241,.12);color:var(--indigo2);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">📤 Proposta enviada</span>',
+        aguardando_pagamento:'<span style="background:rgba(245,158,11,.12);color:#D97706;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">💳 Aguardando pagamento</span>',
+        pago:               '<span style="background:rgba(16,185,129,.12);color:var(--green);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">✅ Pago</span>',
+        ativo:              '<span style="background:rgba(16,185,129,.2);color:var(--green);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">🤖 Ativo</span>',
+      };
+
+      const tipoIcon = { edu:'🎓', corp:'💼', combo:'⚡' };
+      const data = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString('pt-BR') : '—';
+      const badge = statusLabels[d.status] || `<span style="font-size:11px;color:var(--muted)">${d.status}</span>`;
+
+      html += `
+      <div style="padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px">
+        <div style="font-size:22px;flex-shrink:0;margin-top:2px">${tipoIcon[d.tipo]||'🤖'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:14px;font-weight:600;color:var(--text)">${d.nomeAgente ? `"${escapeHtml(d.nomeAgente)}" · ` : ''}${escapeHtml(d.nome||'—')}</span>
+            ${badge}
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px">📱 ${escapeHtml(d.whatsapp||'—')} · 📧 ${escapeHtml(d.email||'—')}</div>
+          <div style="font-size:12px;color:var(--muted)">📚 ${escapeHtml(d.area||d.cargo||'—')} · ${data}</div>
+          ${d.tarefas ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">"${escapeHtml(d.tarefas.slice(0,80))}..."</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          ${d.status === 'aguardando_analise' ? `<button class="or-btn or-btn-g" onclick="abrirPropostaModal('${doc.id}','${escapeHtml(d.nome||'')}','${escapeHtml(d.whatsapp||'')}','${escapeHtml(d.area||d.cargo||'')}','${escapeHtml(d.tarefas||'')}')">Enviar proposta</button>` : ''}
+          ${d.status === 'pago' ? `<button class="or-btn or-btn-p" onclick="ativarAgente('${doc.id}')">✅ Ativar</button>` : ''}
+          ${d.status === 'ativo' ? `<button class="or-btn" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:var(--green)" onclick="copyLink('${escapeHtml(d.nomeAgente||'')}')">🔗 Link</button>` : ''}
+        </div>
+      </div>`;
+    });
+
+    document.getElementById('ag-list').innerHTML = html || '<p style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Nenhum pedido ainda.</p>';
+    document.getElementById('ag-count-aguardando').textContent = counts.aguardando_analise;
+    document.getElementById('ag-count-proposta').textContent   = counts.proposta_enviada;
+    document.getElementById('ag-count-pago').textContent       = counts.pago;
+    document.getElementById('ag-count-ativo').textContent      = counts.ativo;
+
+    const total = snap.size;
+    document.getElementById('admin-agents-badge').textContent = counts.aguardando_analise || '';
+  } catch(e) { console.error(e); }
+}
+
+function abrirPropostaModal(id, nome, zap, area, tarefas) {
+  _agentRequestAtual = { id, zap };
+  document.getElementById('pm-cliente-nome').textContent = `${nome} · ${zap}`;
+  document.getElementById('pm-perfil').innerHTML = `<strong>Área:</strong> ${escapeHtml(area)}<br><strong>Tarefas:</strong> ${escapeHtml(tarefas)}`;
+  document.getElementById('pm-proposta').value = '';
+  document.getElementById('pm-valor').value = '397';
+  document.getElementById('proposta-modal').style.display = 'flex';
+}
+
+function fecharPropostaModal() {
+  document.getElementById('proposta-modal').style.display = 'none';
+  _agentRequestAtual = null;
+}
+
+async function enviarProposta() {
+  if(!_agentRequestAtual) return;
+  const proposta = document.getElementById('pm-proposta').value.trim();
+  const valor    = parseFloat(document.getElementById('pm-valor').value);
+  const plano    = document.getElementById('pm-plano').value;
+
+  if(!proposta) { toast('Digite o texto da proposta','error'); return; }
+  if(!valor || valor < 1) { toast('Informe um valor válido','error'); return; }
+
+  try {
+    await db.collection('agent_requests').doc(_agentRequestAtual.id).update({
+      proposta,
+      valorProposta: valor,
+      plano,
+      status: 'proposta_enviada',
+      propostaEnviadaEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Link da proposta
+    const link = `https://academicofacil.com.br/agentes?proposta=${_agentRequestAtual.id}`;
+    const msg = `🤖 *Proposta do seu agente personalizado*\n\nOlá! Analisamos seu perfil e preparamos uma proposta exclusiva para você.\n\n📋 *Veja os detalhes e confirme o pagamento:*\n${link}\n\n_Qualquer dúvida estamos à disposição!_`;
+    window.open(`https://wa.me/${_agentRequestAtual.zap.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
+
+    toast('Proposta enviada pelo WhatsApp!','success');
+    fecharPropostaModal();
+    loadAgentRequests();
+  } catch(e) {
+    toast('Erro ao salvar proposta','error');
+    console.error(e);
+  }
+}
+
+async function ativarAgente(id) {
+  if(!confirm('Ativar este agente? O cliente poderá acessar imediatamente via link.')) return;
+  try {
+    await db.collection('agent_requests').doc(id).update({ status: 'ativo', ativadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+    toast('Agente ativado!','success');
+    loadAgentRequests();
+  } catch(e) { toast('Erro ao ativar','error'); }
+}
+
+function copyLink(nomeAgente) {
+  const link = `https://academicofacil.com.br/agente/${nomeAgente.toLowerCase().replace(/\s+/g,'-')}`;
+  navigator.clipboard.writeText(link).then(() => toast('Link copiado: ' + link,'success'));
+}
+
 // ============ VER PEDIDO ADMIN ============
 function verPedidoAdmin(orderId) {
   toast('Pedido #' + orderId.slice(-6).toUpperCase() + ' — Em breve detalhes completos aqui.','');
@@ -1983,7 +2158,7 @@ function showP(id, navEl) {
     'painel':'Painel','meu-pedido':'Meu pedido','chat':'Chat',
     'arquivos':'Arquivos','historico':'Histórico','novo-pedido':'Novo pedido',
     'admin-overview':'Visão geral','admin-pedidos':'Pedidos',
-    'admin-clientes':'Clientes','admin-financeiro':'Financeiro'
+    'admin-clientes':'Clientes','admin-financeiro':'Financeiro','admin-agentes':'Agentes IA'
   };
   document.getElementById('topbar-title').textContent = titles[id]||'';
   if(id==='chat') {
