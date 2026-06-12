@@ -241,6 +241,7 @@ body{font-family:'Inter',sans-serif;background:var(--void);color:var(--text);dis
 <div id="splash">
   <div class="splash-logo">🎓</div>
   <div class="splash-name">IA Acadêmica</div>
+  <div style="font-size:11px;color:var(--muted);margin-top:-8px;font-family:'JetBrains Mono',monospace">Ferramenta de produção · Admin only</div>
   <div class="splash-bar"><div class="splash-progress"></div></div>
   <div class="splash-status" id="splash-status">inicializando sistema...</div>
 </div>
@@ -400,8 +401,15 @@ async function init() {
   // Verificar autenticação
   auth.onAuthStateChanged(async user => {
     if(!user) {
-      // Redirecionar para login com retorno
-      window.location.href = '/dashboard?redirect=ia-academica';
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    // Somente admin pode usar a interface de produção
+    const ADMIN = 'paulosilvafilhoba@gmail.com';
+    if(user.email !== ADMIN) {
+      // Cliente não tem acesso — redirecionar para dashboard
+      window.location.href = '/dashboard';
       return;
     }
 
@@ -422,10 +430,7 @@ async function init() {
       if(!snap.exists) { mostrarNotFound(); return; }
 
       const d = snap.data();
-      // Verificar se o pedido pertence ao usuário (ou é admin)
-      const isAdmin = user.email === 'paulosilvafilhoba@gmail.com';
-      if(d.clientId !== user.uid && !isAdmin) { mostrarNotFound(); return; }
-
+      // Admin pode acessar qualquer pedido
       AGENTE.orderId = orderId;
       AGENTE.perfil = d;
 
