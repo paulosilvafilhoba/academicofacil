@@ -613,22 +613,30 @@ footer a{color:rgba(255,255,255,.6);text-decoration:none}
       </div>
     </div>
 
-    <!-- STEP 2: AGUARDANDO ANÁLISE -->
-    <div id="modal-step-2" style="display:none;text-align:center;padding:48px 28px">
-      <div style="font-size:56px;margin-bottom:16px">📋</div>
-      <h3 style="font-size:20px;font-family:'Space Grotesk',sans-serif;margin-bottom:8px;color:var(--text)">Perfil enviado com sucesso!</h3>
-      <p style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto 6px;line-height:1.7">Nossa equipe vai analisar seu perfil e enviar a proposta personalizada.</p>
-      <p id="step2-protocolo" style="font-size:12px;font-weight:700;color:var(--indigo2);margin:0 0 24px"></p>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;text-align:left;margin-bottom:24px">
-        <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">O que acontece agora:</p>
+    <!-- STEP 2: CONFIRMAÇÃO COM RESUMO -->
+    <div id="modal-step-2" style="display:none;text-align:center;padding:36px 28px">
+      <div style="font-size:48px;margin-bottom:12px">✅</div>
+      <h3 style="font-size:20px;font-family:'Space Grotesk',sans-serif;margin-bottom:6px;color:var(--text)">Solicitação recebida!</h3>
+      <p id="step2-protocolo" style="font-size:11px;font-weight:700;color:var(--indigo2);margin:0 0 16px"></p>
+
+      <!-- RESUMO DO QUE FOI SOLICITADO -->
+      <div style="background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(34,211,238,.03));border:1px solid var(--border2);border-radius:var(--radius);padding:18px;text-align:left;margin-bottom:16px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px">Resumo da sua solicitação</p>
+        <div id="step2-resumo" style="font-size:13px;color:var(--text);line-height:2"></div>
+      </div>
+
+      <!-- PRÓXIMOS PASSOS -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:left;margin-bottom:20px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px">O que acontece agora</p>
         <div style="font-size:13px;color:var(--muted);line-height:2.2">
-          <div>✅ Perfil registrado no sistema</div>
-          <div>🔍 Análise pela nossa equipe (até 24h)</div>
-          <div>📱 Proposta enviada pelo WhatsApp</div>
-          <div>💳 Você aprova e paga</div>
-          <div>🤖 Agente criado e entregue</div>
+          <div>🔍 Nossa equipe analisa seu perfil (até 24h)</div>
+          <div>📋 Você recebe uma proposta personalizada</div>
+          <div>💳 Aprova e paga diretamente no site</div>
+          <div>🤖 Seu agente é criado e entregue</div>
         </div>
       </div>
+
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Acompanhe o status da sua solicitação pelo e-mail cadastrado.</p>
       <button class="btn-close-success" onclick="fecharModal()">Entendido!</button>
     </div>
 
@@ -808,16 +816,22 @@ async function enviarPerfil() {
     document.getElementById('modal-step-2').style.display = 'block';
     document.getElementById('step2-protocolo').textContent = `Protocolo: #${ref.id.slice(-6).toUpperCase()}`;
 
+    // Preencher resumo com os dados da solicitação
+    const tipoLabel = {edu:'Agente Educacional 🎓', corp:'Agente Corporativo 💼', combo:'Agente Combo ⚡'};
+    const planoLabel = {basico:'Básico (R$ 197)', completo:'Completo (R$ 397)', premium:'Premium (R$ 797)'};
+    document.getElementById('step2-resumo').innerHTML = `
+      <div><strong>Agente:</strong> ${nomeAg ? `"${nomeAg}"` : 'a definir'}</div>
+      <div><strong>Tipo:</strong> ${tipoLabel[_tipo]||_tipo}</div>
+      <div><strong>Plano:</strong> ${planoLabel[_plano]||_plano}</div>
+      <div><strong>Área:</strong> ${area}</div>
+      <div><strong>Tarefas:</strong> ${tarefas.slice(0,80)}${tarefas.length>80?'...':''}</div>
+    `;
+
     toast('Perfil enviado! Aguarde nossa análise.', 'success');
 
   } catch(e) {
-    console.error(e);
-    // Fallback WhatsApp
-    const msg = `🤖 *Solicitação de Agente IA*\n\nNome: ${nome}\nE-mail: ${email}\nWhatsApp: ${zap}\nNome do agente: ${nomeAg||'não definido'}\nTipo: ${_tipo} | Plano ref: ${_plano}\nÁrea: ${area}\n\nTarefas:\n${tarefas}\n\nObs: ${obs}`;
-    window.open(`https://wa.me/5571920031180?text=${encodeURIComponent(msg)}`, '_blank');
-    toast('Redirecionando para WhatsApp...', '');
-    document.getElementById('modal-step-1').style.display = 'none';
-    document.getElementById('modal-step-2').style.display = 'block';
+    console.error('Erro ao salvar:', e);
+    toast('Erro ao enviar. Verifique sua conexão e tente novamente.', 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Enviar meu perfil e aguardar proposta →';
   }
