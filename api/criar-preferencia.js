@@ -34,7 +34,53 @@ function calcularValor(tipo, laudas, prazo) {
   return total;
 }
 
-// ============ VERIFICAR FIREBASE ID TOKEN ============
+// ============ VERIFICAR ELEGIBILIDADE DA PROMOÇÃO (servidor) ============
+// Garante que o desconto só é aplicado se: promo ativa no Firestore + cliente sem pedido pago anterior.
+// Usa a REST API do Firestore (sem SDK), com o mesmo projeto do app.
+async function obterPromoElegivel(uid) {
+  const projectId = process.env.FIREBASE_PROJECT_ID || 'academicofacil-87df6';
+  const apiKey = process.env.FIREBASE_API_KEY;
+  const base = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
+  const keyQS = apiKey ? `?key=${apiKey}` : '';
+  try {
+    // 1) Config da promo
+    const promoResp = await fetch(`${base}/config/promo_primeiro_trabalho${keyQS}`);
+    if (!promoResp.ok) return null;
+    const promoDoc = await promoResp.json();
+    const f = promoDoc.fields || {};
+    const ativo = f.ativo?.booleanValue === true;
+    const desconto = parseInt(f.desconto?.integerValue ?? f.desconto?.doubleValue ?? 0);
+    if (!ativo || !desconto || desconto < 1 || desconto > 100) return null;
+
+    // 2) Cliente já tem pedido? (consulta orders por clientId)
+    const queryResp = await fetch(`${base}:runQuery${keyQS}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'orders' }],
+          where: {
+            fieldFilter: {
+              field: { fieldPath: 'clientId' },
+              op: 'EQUAL',
+              value: { stringValue: uid }
+            }
+          },
+          limit: 1
+        }
+      })
+    });
+    const rows = await queryResp.json();
+    const temPedido = Array.isArray(rows) && rows.some(r => r.document);
+    if (temPedido) return null; // não é mais o primeiro trabalho
+
+    return { desconto };
+  } catch {
+    return null;
+  }
+}
+
+
 async function verificarToken(authHeader) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
   const idToken = authHeader.slice(7);
@@ -127,6 +173,17 @@ export default async function handler(req) {
     });
   }
 
+  // ✅ Aplicar promoção SOMENTE se validada no servidor (browser não pode forjar desconto)
+  let valorCheio = valorServidor;
+  let descontoAplicado = 0;
+  if (body.aplicar_promo && !body.valor_fixo) {
+    const promo = await obterPromoElegivel(user.uid);
+    if (promo) {
+      descontoAplicado = promo.desconto;
+      valorServidor = valorCheio - Math.round(valorCheio * promo.desconto / 100);
+    }
+  }
+
   const nomeServico = NOME_SERVICO[tipoS] || tipoS;
 
   const mpHeaders = {
@@ -158,7 +215,9 @@ export default async function handler(req) {
 
       return new Response(JSON.stringify({
         payment_id: pixData.id,
-        valor: valorServidor, // ✅ retorna o valor real calculado no servidor
+        valor: valorServidor, // ✅ retorna o valor real calculado no servidor (já com desconto se aplicável)
+        valor_cheio: valorCheio,
+        desconto: descontoAplicado,
         qr_code: pixData.point_of_interaction?.transaction_data?.qr_code || null,
         qr_code_base64: pixData.point_of_interaction?.transaction_data?.qr_code_base64 || null
       }), {
@@ -194,7 +253,9 @@ export default async function handler(req) {
 
     return new Response(JSON.stringify({
       init_point: data.init_point,
-      valor: valorServidor // ✅ valor confirmado pelo servidor
+      valor: valorServidor, // ✅ valor confirmado pelo servidor (já com desconto se aplicável)
+      valor_cheio: valorCheio,
+      desconto: descontoAplicado
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://academicofacil.com.br' }
