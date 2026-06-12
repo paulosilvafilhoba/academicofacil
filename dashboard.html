@@ -602,7 +602,7 @@ tr:last-child td{border-bottom:none}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Clientes
       </div>
-      <div class="nav-item" onclick="showP('admin-financeiro',this);loadFinanceiro();carregarCuponsConfig()">
+      <div class="nav-item" onclick="showP('admin-financeiro',this);loadFinanceiro();carregarCuponsConfig();carregarPromoConfig()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         Financeiro
       </div>
@@ -837,6 +837,49 @@ tr:last-child td{border-bottom:none}
               <thead><tr><th>Pedido</th><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Pagamento</th><th>Data</th></tr></thead>
               <tbody id="fin-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Carregando...</td></tr></tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- PROMOÇÃO PRIMEIRO TRABALHO -->
+        <div class="card" style="margin-top:20px">
+          <div class="card-header">
+            <span class="card-title">🎁 Promoção — Primeiro trabalho</span>
+            <span style="font-size:11px;color:var(--muted)">Desconto automático para clientes sem pedido anterior</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+              <div>
+                <p style="font-size:14px;font-weight:500;color:var(--text);margin:0 0 3px">Ativar promoção de primeiro trabalho</p>
+                <p style="font-size:12px;color:var(--muted);margin:0">Quando ativo, clientes sem pedido verão o banner na landing page</p>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="promo-ativo" onchange="salvarPromoConfig()" style="width:16px;height:16px;accent-color:var(--indigo)">
+                <span style="font-size:12px;color:var(--muted)">Ativo</span>
+              </label>
+            </div>
+
+            <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start">
+              <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Desconto (%)</label>
+                <input type="number" id="promo-desconto" min="1" max="100" placeholder="10" style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+              </div>
+              <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Título do banner</label>
+                <input type="text" id="promo-titulo-admin" placeholder="Promoção de boas-vindas!" style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+              </div>
+            </div>
+
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Descrição do banner</label>
+              <input type="text" id="promo-desc-admin" placeholder="10% de desconto no primeiro trabalho. Solicite agora →" style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+            </div>
+
+            <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;line-height:1.6">
+              💡 <strong>Como funciona:</strong> O desconto <strong>não é aplicado automaticamente</strong> no pagamento — é um sinal visual para o cliente. Você aplica o desconto manualmente ao enviar a proposta no painel de pedidos, informando o valor já com desconto.
+            </div>
+
+            <button onclick="salvarPromoConfig()" style="padding:10px 20px;background:linear-gradient(135deg,var(--indigo),#4F46E5);color:#fff;border:none;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;align-self:flex-start">Salvar configuração</button>
           </div>
         </div>
 
@@ -1197,8 +1240,8 @@ function setupUI() {
     loadClientData();
     loadFiles();
     loadChat();
+    verificarPrimeiroTrabalho(user.uid); // verificar desconto
   }
-  // Notifica que auth está pronto (para tratar retorno do MP)
   window.dispatchEvent(new Event('af-auth-ready'));
 }
 
@@ -1942,6 +1985,103 @@ async function confirmarStatus() {
   } catch(e) {
     toast('Erro ao atualizar status','error');
   }
+}
+
+// ============ PROMOÇÃO PRIMEIRO TRABALHO ============
+async function verificarPrimeiroTrabalho(uid) {
+  try {
+    // Verificar se cliente já fez algum pedido
+    const snap = await db.collection('orders')
+      .where('clientId','==', uid)
+      .where('status','!=','cancelado')
+      .limit(1).get();
+
+    const jafez = !snap.empty;
+    if(jafez) {
+      // Já fez trabalho — limpar promo do localStorage
+      localStorage.removeItem('af-promo-config');
+      return;
+    }
+
+    // Primeiro cliente — verificar se há promo ativa no Firestore
+    const promoSnap = await db.collection('config').doc('promo_primeiro_trabalho').get();
+    if(!promoSnap.exists) { localStorage.removeItem('af-promo-config'); return; }
+
+    const promo = promoSnap.data();
+    if(!promo.ativo) { localStorage.removeItem('af-promo-config'); return; }
+
+    // Salvar no localStorage para exibir no index.html
+    localStorage.setItem('af-promo-config', JSON.stringify({
+      ativo: true,
+      desconto: promo.desconto,
+      titulo: promo.titulo || 'Promoção de boas-vindas!',
+      descricao: promo.descricao || `${promo.desconto}% de desconto no seu primeiro trabalho.`
+    }));
+
+    // Mostrar banner no dashboard
+    mostrarBannerPromo(promo);
+  } catch(e) { console.error(e); }
+}
+
+function mostrarBannerPromo(promo) {
+  // Criar banner no topo do conteúdo principal
+  const existente = document.getElementById('dashboard-promo-banner');
+  if(existente) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'dashboard-promo-banner';
+  banner.style.cssText = 'background:linear-gradient(90deg,rgba(245,158,11,.1),rgba(99,102,241,.08));border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer';
+  banner.onclick = () => showP('novo-pedido', document.querySelector('.nav-item[onclick*="novo-pedido"]'));
+  banner.innerHTML = `
+    <span style="font-size:22px">🎁</span>
+    <div style="flex:1">
+      <p style="font-size:13px;font-weight:700;color:#92400E;margin:0">${escapeHtml(promo.titulo||'Promoção de boas-vindas!')}</p>
+      <p style="font-size:12px;color:#B45309;margin:0">${escapeHtml(promo.descricao||`${promo.desconto}% de desconto no primeiro trabalho`)} — Solicite agora →</p>
+    </div>
+    <span style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap">${promo.desconto}% OFF</span>
+    <button onclick="event.stopPropagation();this.parentElement.remove()" style="background:none;border:none;font-size:16px;cursor:pointer;color:#B45309;padding:2px 6px">✕</button>`;
+
+  const content = document.querySelector('.content');
+  if(content) content.insertBefore(banner, content.firstChild);
+}
+
+// ============ ADMIN — GERENCIAR PROMOÇÃO ============
+async function salvarPromoConfig() {
+  const ativo   = document.getElementById('promo-ativo').checked;
+  const desconto = parseInt(document.getElementById('promo-desconto').value) || 0;
+  const titulo  = document.getElementById('promo-titulo-admin').value.trim();
+  const desc    = document.getElementById('promo-desc-admin').value.trim();
+
+  if(ativo && (!desconto || desconto < 1 || desconto > 100)) {
+    toast('Informe um desconto entre 1% e 100%', 'error'); return;
+  }
+
+  try {
+    await db.collection('config').doc('promo_primeiro_trabalho').set({
+      ativo,
+      desconto,
+      titulo:    titulo || 'Promoção de boas-vindas!',
+      descricao: desc   || `${desconto}% de desconto no primeiro trabalho`
+    });
+    toast(`Promoção ${ativo ? 'ativada' : 'desativada'}!`, 'success');
+    carregarPromoConfig();
+  } catch(e) { toast('Erro ao salvar','error'); console.error(e); }
+}
+
+async function carregarPromoConfig() {
+  try {
+    const snap = await db.collection('config').doc('promo_primeiro_trabalho').get();
+    if(!snap.exists) return;
+    const d = snap.data();
+    const cb = document.getElementById('promo-ativo');
+    if(cb) cb.checked = d.ativo;
+    const ed = document.getElementById('promo-desconto');
+    if(ed) ed.value = d.desconto || '';
+    const et = document.getElementById('promo-titulo-admin');
+    if(et) et.value = d.titulo || '';
+    const edesc = document.getElementById('promo-desc-admin');
+    if(edesc) edesc.value = d.descricao || '';
+  } catch(e) {}
 }
 
 // ============ CUPONS — ADMIN ============
