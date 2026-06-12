@@ -3,7 +3,10 @@
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/privacidade", "destination": "/privacidade.html" },
     { "source": "/termos", "destination": "/termos.html" },
-    { "source": "/agentes", "destination": "/agentes.html" }
+    { "source": "/agentes", "destination": "/agentes.html" },
+    { "source": "/agentes/educacional", "destination": "/agentes/educacional.html" },
+    { "source": "/agentes/corporativo", "destination": "/agentes/corporativo.html" },
+    { "source": "/agente/:nome", "destination": "/agente.html" }
   ],
   "cleanUrls": true,
   "trailingSlash": false,
