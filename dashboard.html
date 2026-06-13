@@ -664,6 +664,24 @@ tr:last-child td{border-bottom:none}
             <div class="stat-sub">Trabalhos entregues</div>
           </div>
         </div>
+
+        <!-- BOTÕES DE AÇÃO RÁPIDA -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+          <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 18px; text-align: center; cursor: pointer; transition: all .2s; hover: transform .2s;" onclick="showP('novo-pedido',null); window.scrollTo({top: 0, behavior: 'smooth'})">
+            <div style="font-size: 32px; margin-bottom: 10px;">📄</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--indigo2); margin-bottom: 6px;">Criar Novo Pedido</div>
+            <div style="font-size: 11px; color: var(--muted);">Preencha o formulário</div>
+          </div>
+          
+          ${isAdmin ? `
+          <div style="background: linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 12px; padding: 18px; text-align: center; cursor: pointer; transition: all .2s;" onclick="showP('admin-agentes',null); loadAgentRequests(); loadTeamAgents(); window.scrollTo({top: 0, behavior: 'smooth'})">
+            <div style="font-size: 32px; margin-bottom: 10px;">🤖</div>
+            <div style="font-size: 13px; font-weight: 600; color: #FB923C; margin-bottom: 6px;">Admin: Gerenciar</div>
+            <div style="font-size: 11px; color: var(--muted);">Agentes, códigos, IA</div>
+          </div>
+          ` : ''}
+        </div>
+
         <div class="card">
           <div class="card-header"><span class="card-title">Pedidos recentes</span></div>
           <div id="recent-orders"><p style="color:var(--muted);font-size:13px">Nenhum pedido ainda. <span style="color:var(--indigo2);cursor:pointer" onclick="showP('novo-pedido',null)">Criar primeiro pedido →</span></p></div>
@@ -1036,6 +1054,15 @@ tr:last-child td{border-bottom:none}
     </div>
     <div id="prod-list" style="display:flex;flex-direction:column;gap:0"></div>
   </div>
+
+  <!-- NOVO: Códigos Promocionais (5 Laudas Grátis) -->
+  <div class="card" style="margin-top:20px">
+    <div class="card-header">
+      <span class="card-title">🎁 Códigos Promocionais (5 Laudas Grátis)</span>
+      <button class="btn-sm" onclick="gerarCodigosPromociónais()" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;padding:7px 16px;border-radius:100px;font-size:12px;cursor:pointer;font-weight:600">+ Gerar 20 códigos</button>
+    </div>
+    <div id="promo-codes-list" style="display:flex;flex-direction:column;gap:0"></div>
+  </div>
 </div>
 
 <!-- MODAL CRIAR AGENTE DA EQUIPE -->
@@ -1234,6 +1261,17 @@ tr:last-child td{border-bottom:none}
       <span class="resumo-total-label">Total a pagar</span>
       <span class="resumo-total-value" id="rs-total">R$ 0</span>
     </div>
+    
+    <!-- NOVO: Campo Código Promocional -->
+    <div style="padding:16px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;margin-bottom:16px">
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">🎁 Código Promocional (até 5 laudas grátis)</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="promo-code-input" placeholder="GRATIS001" maxlength="20" style="flex:1;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;text-transform:uppercase">
+        <button onclick="aplicarCodigoPromocional()" style="padding:10px 16px;background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.3);color:#10B981;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s">Aplicar</button>
+      </div>
+      <div id="promo-msg" style="font-size:11px;margin-top:6px;color:var(--muted);min-height:14px"></div>
+    </div>
+    
     <div class="resumo-footer">
       <button class="btn-primary" style="flex:1" id="btn-resumo-confirm" onclick="confirmarResumo()">
         Confirmar e escolher pagamento →
@@ -1642,7 +1680,162 @@ async function showOrderDetail(orderId) {
         <span>${formatDate(d.createdAt)}</span><span>${pct}% concluído</span>
       </div>
       ${d.tema ? `<div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:8px;font-size:13px;color:var(--muted)"><strong style="color:var(--text)">Tema:</strong> ${d.tema}</div>` : ''}
+      
+      ${d.status === 'em_andamento' || d.status === 'documento_gerado' ? `
+        <div style="margin-top:20px; border-top: 1px solid var(--border); padding-top: 20px;">
+          <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 16px; color: var(--text);">🤖 Gerar Documento com IA</h3>
+          
+          <div id="ia-progress" style="display: none; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--indigo2); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <span style="font-size: 12px; color: var(--muted);">Gerando documento com Claude IA...</span>
+          </div>
+          
+          <div id="ia-result" style="display: none; margin-bottom: 16px;"></div>
+          
+          ${d.status === 'documento_gerado' ? `
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 14px;">
+              <p style="font-size: 12px; color: #10B981; font-weight: 600; margin: 0 0 10px;">✅ Documento já foi gerado!</p>
+              <a href="${d.documentUrl || '#'}" download style="display: inline-block; padding: 8px 14px; background: linear-gradient(135deg, #10B981, #059669); color: #fff; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none;">
+                📥 Baixar Documento
+              </a>
+            </div>
+          ` : `
+            <button id="btn-gerar-ia" onclick="gerarDocumentoComIA('${orderId}')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;">
+              🤖 Gerar Documento com IA (Claude)
+            </button>
+            <p style="font-size: 10px; color: var(--muted); margin-top: 8px; text-align: center;">A IA analisará seu tema, instituição e requisitos para gerar um documento estruturado.</p>
+          `}
+        </div>
+      ` : ''}
     </div>`;
+}
+
+// ============ DASHBOARD IA — GERAR DOCUMENTO COM CLAUDE ============
+
+async function gerarDocumentoComIA(orderId) {
+  const doc = await db.collection('orders').doc(orderId).get();
+  if (!doc.exists) {
+    toast('Pedido não encontrado', 'error');
+    return;
+  }
+
+  const orderData = doc.data();
+  const btnGerar = document.getElementById('btn-gerar-ia');
+  const progressDiv = document.getElementById('ia-progress');
+  const resultDiv = document.getElementById('ia-result');
+
+  // Resetar UI
+  resultDiv.style.display = 'none';
+  progressDiv.style.display = 'flex';
+  btnGerar.disabled = true;
+  btnGerar.textContent = '⏳ Gerando documento...';
+
+  try {
+    // 1. Obter ID token
+    const idToken = await currentUser.getIdToken();
+
+    // 2. Chamar /api/ia-academica
+    const resp = await fetch('/api/ia-academica', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        action: 'gerar_documento_completo',
+        orderId: orderId,
+        tipo_servico: orderData.tipo,
+        tema: orderData.tema || '',
+        laudas: orderData.laudas || 0,
+        instituicao: orderData.inst || '',
+        descricao: orderData.desc || '',
+        prazo: orderData.prazo || 'normal'
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error || `Erro ${resp.status}`);
+    }
+
+    const result = await resp.json();
+
+    // 3. Salvar resultado em Firestore
+    if (result.ok && result.documentUrl) {
+      await db.collection('orders').doc(orderId).collection('ai_outputs').add({
+        tipo: 'documento_gerado',
+        url: result.documentUrl,
+        filename: result.filename || 'documento.docx',
+        stage: result.stage || 'completo',
+        quality_score: result.quality_score || 0,
+        clientId: currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Atualizar pedido com status
+      await db.collection('orders').doc(orderId).update({
+        status: 'documento_gerado',
+        documentUrl: result.documentUrl,
+        documentGeradoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Mostrar resultado
+      progressDiv.style.display = 'none';
+      resultDiv.style.display = 'flex';
+      resultDiv.innerHTML = `
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 16px;">
+          <p style="font-size: 13px; color: #10B981; font-weight: 600; margin: 0 0 8px;">✅ Documento gerado com sucesso!</p>
+          <p style="font-size: 12px; color: var(--muted); margin: 0 0 12px;">Qualidade: ${(result.quality_score || 85).toFixed(0)}/100</p>
+          <a href="${result.documentUrl}" download="${result.filename || 'documento.docx'}" style="display: inline-block; padding: 10px 16px; background: linear-gradient(135deg, #10B981, #059669); color: #fff; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; cursor: pointer;">
+            📥 Baixar Documento
+          </a>
+        </div>
+      `;
+
+      toast('Documento gerado! ✅', 'success');
+    } else {
+      throw new Error(result.message || 'Erro ao gerar documento');
+    }
+
+  } catch (error) {
+    console.error('Erro ao gerar documento:', error);
+    progressDiv.style.display = 'none';
+    resultDiv.style.display = 'flex';
+    resultDiv.innerHTML = `
+      <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 16px;">
+        <p style="font-size: 13px; color: #DC2626; font-weight: 600; margin: 0 0 8px;">❌ Erro ao gerar documento</p>
+        <p style="font-size: 12px; color: var(--muted); margin: 0;">${escapeHtml(error.message)}</p>
+      </div>
+    `;
+    toast('Erro ao gerar documento: ' + error.message, 'error');
+  } finally {
+    btnGerar.disabled = false;
+    btnGerar.textContent = '🤖 Gerar Documento com IA';
+  }
+}
+
+async function verificarDocumentoGerado(orderId) {
+  try {
+    const snap = await db.collection('orders').doc(orderId).collection('ai_outputs')
+      .where('tipo', '==', 'documento_gerado')
+      .orderBy('createdAt', 'desc')
+      .limit(1)
+      .get();
+
+    if (!snap.empty) {
+      const doc = snap.docs[0].data();
+      return {
+        existe: true,
+        url: doc.url,
+        filename: doc.filename,
+        qualidade: doc.quality_score
+      };
+    }
+    return { existe: false };
+  } catch (e) {
+    console.error('Erro ao verificar documento:', e);
+    return { existe: false };
+  }
 }
 
 // ============ CHAT ============
@@ -1816,27 +2009,45 @@ function criarPedido() {
   let valor = valorCheio;
   let descontoPct = 0;
   let descontoValor = 0;
+  let descontoPromo = 0;
+  let codigoAplicado = null;
+  
+  // Primeiro: desconto de promoção (%)
   if(promoAtiva && promoAtiva.ativo && promoAtiva.desconto > 0) {
     descontoPct = promoAtiva.desconto;
     descontoValor = Math.round(valorCheio * descontoPct / 100);
     valor = valorCheio - descontoValor;
   }
+  
+  // Segundo: código promocional (laudas grátis)
+  if(window.promoCodeAtual) {
+    const result = aplicarDescontoPromoCode(valor, laudas);
+    valor = result.valor;
+    descontoPromo = result.desconto;
+    codigoAplicado = window.promoCodeAtual.codigo;
+  }
 
-  pendingOrder = {tipo, laudas, prazo, tema, inst, desc, valor, valorCheio, descontoPct, descontoValor, servico: nomeServico[tipo], arquivo: pendingFile ? pendingFile.name : null, isTeste: testMode};
+  pendingOrder = {tipo, laudas, prazo, tema, inst, desc, valor, valorCheio, descontoPct, descontoValor, servico: nomeServico[tipo], arquivo: pendingFile ? pendingFile.name : null, isTeste: testMode, codigoPromocional: codigoAplicado, descontoPromo};
 
   // Preencher modal de resumo
   document.getElementById('rs-servico').textContent = nomeServico[tipo];
   document.getElementById('rs-laudas').textContent = laudas ? `${laudas} laudas` : 'Fixo';
   document.getElementById('rs-prazo').textContent = prazoLabel[prazo] || prazo;
 
-  // Linha de desconto
+  // Linha de desconto (%)
   const rowDesc = document.getElementById('rs-row-desconto');
   if(descontoPct > 0) {
     document.getElementById('rs-desconto').textContent = `-${descontoPct}% (−R$ ${descontoValor.toLocaleString('pt-BR')})`;
     rowDesc.style.display = 'flex';
-    document.getElementById('rs-total').innerHTML = `<span style="font-size:15px;color:var(--muted);text-decoration:line-through;-webkit-text-fill-color:var(--muted);margin-right:8px">R$ ${valorCheio.toLocaleString('pt-BR')}</span>R$ ${valor.toLocaleString('pt-BR')}`;
   } else {
     rowDesc.style.display = 'none';
+  }
+  
+  // Atualizar total com todos os descontos
+  if(descontoValor > 0 || descontoPromo > 0) {
+    const totalDesconto = descontoValor + descontoPromo;
+    document.getElementById('rs-total').innerHTML = `<span style="font-size:15px;color:var(--muted);text-decoration:line-through;-webkit-text-fill-color:var(--muted);margin-right:8px">R$ ${valorCheio.toLocaleString('pt-BR')}</span>R$ ${valor.toLocaleString('pt-BR')}`;
+  } else {
     document.getElementById('rs-total').textContent = 'R$ '+valor.toLocaleString('pt-BR');
   }
 
@@ -1884,6 +2095,22 @@ function confirmarResumo() {
     }).catch(e => {
       console.error(e);
       toast('Erro ao criar pedido teste', 'error');
+    });
+    return;
+  }
+  
+  // Se código promocional deixar valor = 0, pula pagamento
+  if(pendingOrder && pendingOrder.valor === 0 && pendingOrder.codigoPromocional) {
+    salvarPedido('em_andamento').then(orderId => {
+      toast(`✓ Pedido criado grátis com código ${pendingOrder.codigoPromocional}!`, 'success');
+      closeResumoModal();
+      loadClientData();
+      window.promoCodeAtual = null;
+      document.getElementById('promo-code-input').value = '';
+      document.getElementById('promo-msg').textContent = '';
+    }).catch(e => {
+      console.error(e);
+      toast('Erro ao criar pedido', 'error');
     });
     return;
   }
@@ -2593,9 +2820,154 @@ function mudarStatus(orderId, novoStatus) {
   });
 }
 
-function showPedidoDetalhes(orderId) {
-  toast('Abrindo pedido ' + orderId.slice(0,8) + '...', '');
-  // Pode expandir para abrir um modal com detalhes completos
+// ============ CÓDIGO PROMOCIONAL (5 LAUDAS GRÁTIS) ============
+async function gerarCodigosPromociónais() {
+  const codigos = [];
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  
+  for (let i = 0; i < 20; i++) {
+    let codigo = 'GRATIS';
+    for (let j = 0; j < 3; j++) {
+      codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    
+    const numSufixo = String(i + 1).padStart(3, '0');
+    codigo = `GRATIS${numSufixo}`;
+    
+    codigos.push({
+      codigo: codigo,
+      habilitado: true,
+      usos: 0,
+      laudasGratis: 5,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+  
+  // Salvar no Firestore
+  const batch = db.batch();
+  codigos.forEach(c => {
+    batch.set(db.collection('promo_codes').doc(c.codigo), c);
+  });
+  
+  try {
+    await batch.commit();
+    toast('✅ 20 códigos promocionais criados!', 'success');
+    loadCodigosPromociónais();
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao criar códigos', 'error');
+  }
+}
+
+async function loadCodigosPromociónais() {
+  try {
+    const snap = await db.collection('promo_codes').orderBy('criadoEm', 'desc').get();
+    const list = document.getElementById('promo-codes-list');
+    if (!list) return;
+    
+    let html = '';
+    snap.forEach(doc => {
+      const c = doc.data();
+      const statusColor = c.habilitado ? '#10B981' : '#EF4444';
+      const statusLabel = c.habilitado ? '✅ Habilitado' : '❌ Desabilitado';
+      
+      html += `
+      <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;justify-content:space-between">
+        <div style="flex:1;min-width:0">
+          <div style="font-family:monospace;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">${doc.id}</div>
+          <div style="font-size:11px;color:var(--muted)">Usos: ${c.usos || 0} · ${statusLabel}</div>
+        </div>
+        <button onclick="togglePromoCode('${doc.id}',${!c.habilitado})" style="padding:6px 12px;background:${c.habilitado ? 'rgba(239,68,68,.1)' : 'rgba(16,185,129,.1)'};color:${statusColor};border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer">
+          ${c.habilitado ? 'Desabilitar' : 'Habilitar'}
+        </button>
+      </div>`;
+    });
+    
+    list.innerHTML = html || '<p style="color:var(--muted);font-size:12px;text-align:center;padding:16px">Nenhum código criado. Clique em "Gerar 20 códigos"</p>';
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+async function togglePromoCode(codigo, novoStatus) {
+  try {
+    await db.collection('promo_codes').doc(codigo).update({
+      habilitado: novoStatus
+    });
+    toast(`✅ Código ${novoStatus ? 'habilitado' : 'desabilitado'}`, 'success');
+    loadCodigosPromociónais();
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao atualizar código', 'error');
+  }
+}
+
+async function aplicarCodigoPromocional() {
+  const codigo = document.getElementById('promo-code-input').value.trim().toUpperCase();
+  const msg = document.getElementById('promo-msg');
+  
+  if (!codigo) {
+    msg.style.color = 'var(--muted2)';
+    msg.textContent = '';
+    return;
+  }
+  
+  try {
+    const docSnap = await db.collection('promo_codes').doc(codigo).get();
+    
+    if (!docSnap.exists) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ Código inválido';
+      window.promoCodeAtual = null;
+      return;
+    }
+    
+    const c = docSnap.data();
+    
+    if (!c.habilitado) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ Este código foi desabilitado';
+      window.promoCodeAtual = null;
+      return;
+    }
+    
+    // Válido e habilitado
+    msg.style.color = '#10B981';
+    msg.textContent = `✅ Código válido! Até ${c.laudasGratis} laudas grátis`;
+    window.promoCodeAtual = {
+      codigo: codigo,
+      laudasGratis: c.laudasGratis
+    };
+    
+    // Recalcular total
+    setTimeout(() => {
+      document.getElementById('btn-resumo-confirm').innerHTML = '';
+      mostrarResumoModal();
+    }, 500);
+    
+  } catch(e) {
+    console.error(e);
+    msg.style.color = 'var(--red)';
+    msg.textContent = '❌ Erro ao validar código';
+  }
+}
+
+function aplicarDescontoPromoCode(valor, laudas) {
+  if (!window.promoCodeAtual) return { valor, desconto: 0 };
+  
+  const { laudasGratis } = window.promoCodeAtual;
+  
+  // Se o pedido tem até X laudas, é 100% grátis
+  if (laudas <= laudasGratis) {
+    return { valor: 0, desconto: valor, tipo: 'codigo' };
+  }
+  
+  // Se tem mais, calcula desconto proporcional
+  const valorPorLauda = valor / laudas;
+  const desconto = valorPorLauda * laudasGratis;
+  const novoValor = valor - desconto;
+  
+  return { valor: novoValor, desconto, tipo: 'codigo' };
 }
 
 // ============ TEAM AGENTS (EQUIPE) ============
