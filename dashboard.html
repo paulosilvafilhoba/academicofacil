@@ -760,6 +760,15 @@ tr:last-child td{border-bottom:none}
           <div class="nfg">
             <label>Descrição e requisitos</label>
             <textarea id="np-desc" rows="3" placeholder="Descreva o que precisa, orientações do professor, normas específicas da instituição, etc." style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;resize:vertical"></textarea>
+
+            <!-- Checkbox Teste (apenas admin) -->
+            <div id="teste-section" style="display:none;margin-top:16px;padding:12px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;color:var(--text);font-size:13px;font-weight:500">
+                <input type="checkbox" id="np-teste" onchange="testMode=this.checked">
+                <span>🧪 Marcar como teste (cliente não precisa pagar)</span>
+              </label>
+              <p style="margin:6px 0 0;font-size:12px;color:var(--muted)">Teste ativado → cliente vê "Teste" em azul e pula a tela de pagamento.</p>
+            </div>
           </div>
 
           <!-- UPLOAD -->
@@ -1003,6 +1012,15 @@ tr:last-child td{border-bottom:none}
     </div>
     <div id="ag-list" style="display:flex;flex-direction:column;gap:0"></div>
   </div>
+
+  <!-- NOVO: Pedidos em Produção (Equipe de Redação) -->
+  <div class="card" style="margin-top:20px">
+    <div class="card-header">
+      <span class="card-title">📄 Pedidos em Produção (Equipe)</span>
+      <button class="btn-sm" onclick="loadPedidosEmProducao()" style="background:rgba(99,102,241,.1);color:var(--indigo2);border:none;padding:6px 14px;border-radius:100px;font-size:12px;cursor:pointer">↻ Atualizar</button>
+    </div>
+    <div id="prod-list" style="display:flex;flex-direction:column;gap:0"></div>
+  </div>
 </div>
 
 <!-- MODAL PROPOSTA AGENTE -->
@@ -1124,12 +1142,17 @@ tr:last-child td{border-bottom:none}
       <span class="resumo-label" style="color:#D97706">🎁 Promoção</span>
       <span class="resumo-value" id="rs-desconto" style="color:#D97706;font-weight:700">—</span>
     </div>
+    <!-- Aviso de Teste -->
+    <div class="resumo-row" id="rs-row-teste" style="display:none;padding:12px 24px;background:rgba(59,139,212,.12);border-top:1px solid rgba(59,139,212,.25)">
+      <span class="resumo-label" style="color:#3B8BD4">🧪 Teste</span>
+      <span class="resumo-value" style="color:#3B8BD4;font-weight:700">Sem pagamento obrigatório</span>
+    </div>
     <div class="resumo-total">
       <span class="resumo-total-label">Total a pagar</span>
       <span class="resumo-total-value" id="rs-total">R$ 0</span>
     </div>
     <div class="resumo-footer">
-      <button class="btn-primary" style="flex:1" onclick="confirmarResumo()">
+      <button class="btn-primary" style="flex:1" id="btn-resumo-confirm" onclick="confirmarResumo()">
         Confirmar e escolher pagamento →
       </button>
       <button class="btn-ghost" onclick="closeResumoModal()">Editar</button>
@@ -1224,6 +1247,7 @@ let pendingOrder = null;
 let selectedPayMethod = 'pix';
 let unsubChat = null;
 let promoAtiva = null; // {ativo, desconto, titulo, descricao} quando cliente elegível
+let testMode = false; // Marcado como teste (admin) = sem pagamento obrigatório
 
 // ============ INIT ============
 // Fallback: se Firebase não responder em 8s, mostrar login
@@ -1715,7 +1739,7 @@ function criarPedido() {
     valor = valorCheio - descontoValor;
   }
 
-  pendingOrder = {tipo, laudas, prazo, tema, inst, desc, valor, valorCheio, descontoPct, descontoValor, servico: nomeServico[tipo], arquivo: pendingFile ? pendingFile.name : null};
+  pendingOrder = {tipo, laudas, prazo, tema, inst, desc, valor, valorCheio, descontoPct, descontoValor, servico: nomeServico[tipo], arquivo: pendingFile ? pendingFile.name : null, isTeste: testMode};
 
   // Preencher modal de resumo
   document.getElementById('rs-servico').textContent = nomeServico[tipo];
@@ -1731,6 +1755,16 @@ function criarPedido() {
   } else {
     rowDesc.style.display = 'none';
     document.getElementById('rs-total').textContent = 'R$ '+valor.toLocaleString('pt-BR');
+  }
+
+  // Aviso de teste
+  const rowTeste = document.getElementById('rs-row-teste');
+  if(testMode) {
+    rowTeste.style.display = 'flex';
+    document.getElementById('btn-resumo-confirm').textContent = '✓ Confirmar como teste (sem pagamento)';
+  } else {
+    rowTeste.style.display = 'none';
+    document.getElementById('btn-resumo-confirm').textContent = 'Confirmar e escolher pagamento →';
   }
 
   // Campos opcionais
@@ -1756,6 +1790,21 @@ function closeResumoModal() {
 }
 
 function confirmarResumo() {
+  // Se for teste, pula pagamento e vai direto pra em_andamento
+  if(testMode && pendingOrder) {
+    salvarPedido('em_andamento').then(orderId => {
+      toast('✓ Pedido teste criado! Status: Em andamento', 'success');
+      closeResumoModal();
+      loadClientData();
+      testMode = false;
+      document.getElementById('np-teste').checked = false;
+    }).catch(e => {
+      console.error(e);
+      toast('Erro ao criar pedido teste', 'error');
+    });
+    return;
+  }
+  
   closeResumoModal();
   document.getElementById('pay-service-name').textContent = pendingOrder.servico + (pendingOrder.laudas ? ` — ${pendingOrder.laudas} laudas` : '');
   document.getElementById('pay-amount-display').textContent = 'R$ '+pendingOrder.valor.toLocaleString('pt-BR');
@@ -1931,6 +1980,7 @@ async function salvarPedido(status) {
     descontoPct: pendingOrder.descontoPct || 0,
     descontoValor: pendingOrder.descontoValor || 0,
     promoAplicada: (pendingOrder.descontoPct || 0) > 0,
+    isTeste: pendingOrder.isTeste || false,
     mpPaymentId: pendingOrder.mpPaymentId || null,
     status: status,
     etapa: 'briefing',
@@ -2401,6 +2451,69 @@ async function loadAgentRequests() {
   } catch(e) { console.error(e); }
 }
 
+async function loadPedidosEmProducao() {
+  try {
+    // Carregar pedidos em status "em_andamento" ou "revisao"
+    const snap = await db.collection('orders')
+      .where('status','in',['em_andamento','revisao'])
+      .orderBy('createdAt','desc')
+      .get();
+    
+    const list = document.getElementById('prod-list');
+    let html = '';
+
+    snap.forEach(doc => {
+      const o = doc.data();
+      const cliente = o.clientName || o.clientEmail || 'Cliente';
+      const data = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('pt-BR') : '—';
+      const statusColor = o.status === 'em_andamento' ? '#D97706' : '#3B8BD4';
+      const statusText = o.status === 'em_andamento' ? '⏳ Em andamento' : '👀 Revisão';
+      const testeBadge = o.isTeste ? '<span style="background:rgba(59,139,212,.12);color:#3B8BD4;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600">🧪 Teste</span>' : '';
+
+      html += `
+      <div style="padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px">
+        <div style="font-size:18px;flex-shrink:0;margin-top:4px">${o.tipo === 'artigo' ? '📰' : o.tipo === 'redacao' ? '✍️' : '📑'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:14px;font-weight:600;color:var(--text)">${escapeHtml(o.servico||'Serviço')}</span>
+            <span style="background:rgba(${statusColor === '#D97706' ? '217,119,6' : '59,139,212'},.12);color:${statusColor};padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">${statusText}</span>
+            ${testeBadge}
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px">👤 ${escapeHtml(cliente)} · 📝 ${o.laudas||'—'} laudas · ⏱️ ${escapeHtml(o.prazo||'—')}</div>
+          <div style="font-size:12px;color:var(--muted)">💰 R$ ${o.valor?.toLocaleString('pt-BR')||'—'} · ${data}</div>
+          ${o.desc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">"${escapeHtml(o.desc.slice(0,70))}..."</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button class="or-btn or-btn-g" onclick="showPedidoDetalhes('${doc.id}')">👁️ Ver</button>
+          ${o.status === 'em_andamento' ? `<button class="or-btn" style="background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);color:var(--indigo2);font-size:11px" onclick="mudarStatus('${doc.id}','revisao')">→ Revisão</button>` : ''}
+          ${o.status === 'revisao' ? `<button class="or-btn or-btn-p" style="font-size:11px" onclick="mudarStatus('${doc.id}','concluido')">✅ Concluído</button>` : ''}
+        </div>
+      </div>`;
+    });
+
+    document.getElementById('prod-list').innerHTML = html || '<p style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Nenhum pedido em produção.</p>';
+  } catch(e) { console.error(e); }
+}
+
+function mudarStatus(orderId, novoStatus) {
+  if(!confirm(`Mudar status para "${novoStatus}"?`)) return;
+  db.collection('orders').doc(orderId).update({
+    status: novoStatus,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    toast(`Status atualizado para ${novoStatus}`, 'success');
+    loadPedidosEmProducao();
+  }).catch(e => {
+    console.error(e);
+    toast('Erro ao atualizar status', 'error');
+  });
+}
+
+function showPedidoDetalhes(orderId) {
+  toast('Abrindo pedido ' + orderId.slice(0,8) + '...', '');
+  // Pode expandir para abrir um modal com detalhes completos
+}
+
 function abrirPropostaModal(id, nome, zap, area, tarefas) {
   _agentRequestAtual = { id, zap };
   document.getElementById('pm-cliente-nome').textContent = `${nome} · ${zap}`;
@@ -2492,6 +2605,18 @@ function showP(id, navEl) {
   if(id==='chat') {
     document.getElementById('chat-badge').style.display='none';
     loadChat();
+  }
+  // Mostrar section de teste apenas se for novo-pedido e admin
+  if(id==='novo-pedido') {
+    testMode = false;
+    if(document.getElementById('np-teste')) document.getElementById('np-teste').checked = false;
+    if(document.getElementById('teste-section')) {
+      document.getElementById('teste-section').style.display = isAdmin ? 'block' : 'none';
+    }
+  }
+  // Carregar pedidos em produção quando abre painel de agentes
+  if(id==='admin-agentes') {
+    loadPedidosEmProducao();
   }
 }
 
