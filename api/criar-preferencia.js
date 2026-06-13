@@ -202,7 +202,9 @@ export default async function handler(req) {
           transaction_amount: valorServidor,
           description: nomeServico,
           payment_method_id: 'pix',
-          payer: { email: emailCliente }
+          payer: { email: emailCliente },
+          external_reference: user.uid,
+          notification_url: 'https://academicofacil.com.br/api/webhook-mp'
         })
       });
       const pixData = await pixResp.json();
@@ -240,7 +242,8 @@ export default async function handler(req) {
         },
         auto_return: 'approved',
         statement_descriptor: 'ACADEMICOFACIL',
-        external_reference: user.uid
+        external_reference: user.uid,
+        notification_url: 'https://academicofacil.com.br/api/webhook-mp'
       })
     });
 
