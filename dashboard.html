@@ -222,7 +222,7 @@ tr:last-child td{border-bottom:none}
 /* PAYMENT MODAL */
 #pay-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
 #pay-modal.open{display:flex}
-.pay-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:480px;position:relative}
+.pay-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:420px;position:relative;max-height:85vh;overflow-y:auto}
 .pay-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--cyan));border-radius:16px 16px 0 0}
 .pay-title{font-size:18px;margin-bottom:6px}
 .pay-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
@@ -1138,14 +1138,14 @@ tr:last-child td{border-bottom:none}
         <span class="resumo-value"><span class="resumo-file-tag" id="rs-arquivo">—</span></span>
       </div>
     </div>
-    <div class="resumo-row" id="rs-row-desconto" style="display:none;padding:12px 24px;background:rgba(245,158,11,.08);border-top:1px solid rgba(245,158,11,.2)">
-      <span class="resumo-label" style="color:#D97706">🎁 Promoção</span>
-      <span class="resumo-value" id="rs-desconto" style="color:#D97706;font-weight:700">—</span>
+    <div class="resumo-row" id="rs-row-desconto" style="display:none;padding:18px 24px;background:rgba(245,158,11,.14);border-top:1px solid rgba(245,158,11,.3);border-radius:8px;margin-top:8px">
+      <span class="resumo-label" style="color:#D97706;font-size:15px;font-weight:600">🎁 Promoção ativa</span>
+      <span class="resumo-value" id="rs-desconto" style="color:#D97706;font-weight:700;font-size:15px">—</span>
     </div>
     <!-- Aviso de Teste -->
-    <div class="resumo-row" id="rs-row-teste" style="display:none;padding:12px 24px;background:rgba(59,139,212,.12);border-top:1px solid rgba(59,139,212,.25)">
-      <span class="resumo-label" style="color:#3B8BD4">🧪 Teste</span>
-      <span class="resumo-value" style="color:#3B8BD4;font-weight:700">Sem pagamento obrigatório</span>
+    <div class="resumo-row" id="rs-row-teste" style="display:none;padding:18px 24px;background:rgba(59,139,212,.14);border-top:1px solid rgba(59,139,212,.3);border-radius:8px;margin-top:8px">
+      <span class="resumo-label" style="color:#3B8BD4;font-size:15px;font-weight:600">🧪 Teste</span>
+      <span class="resumo-value" style="color:#3B8BD4;font-weight:700;font-size:15px">Sem pagamento obrigatório</span>
     </div>
     <div class="resumo-total">
       <span class="resumo-total-label">Total a pagar</span>
@@ -2251,25 +2251,24 @@ function mostrarBannerPromo(promo) {
 
   const banner = document.createElement('div');
   banner.id = 'dashboard-promo-banner';
-  banner.style.cssText = 'position:relative;background:linear-gradient(120deg,#F59E0B 0%,#F97316 45%,#6366F1 110%);border-radius:16px;padding:22px 24px;margin-bottom:22px;overflow:hidden;cursor:pointer;box-shadow:0 12px 40px rgba(245,158,11,.35);animation:promoPulse 2.6s ease-in-out infinite';
+  banner.style.cssText = 'position:relative;background:linear-gradient(120deg,#F59E0B 0%,#F97316 45%,#6366F1 110%);border-radius:18px;padding:32px 32px;margin-bottom:24px;overflow:hidden;cursor:pointer;box-shadow:0 16px 48px rgba(245,158,11,.4);animation:promoPulse 2.6s ease-in-out infinite';
   banner.onclick = () => showP('novo-pedido', document.querySelector('.nav-item[onclick*="novo-pedido"]'));
   banner.innerHTML = `
-    <div style="position:absolute;top:-40px;right:-20px;font-size:140px;opacity:.12;transform:rotate(-12deg);pointer-events:none">🎁</div>
-    <div style="position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-      <div style="font-size:46px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))">🎉</div>
+    <div style="position:absolute;top:-40px;right:-20px;font-size:160px;opacity:.15;transform:rotate(-12deg);pointer-events:none">🎁</div>
+    <div style="position:relative;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div style="font-size:56px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))">🎉</div>
       <div style="flex:1;min-width:200px">
-        <div style="display:inline-block;background:rgba(255,255,255,.25);color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px;margin-bottom:6px">Oferta exclusiva</div>
-        <p style="font-size:22px;font-weight:800;color:#fff;margin:0 0 4px;text-shadow:0 1px 4px rgba(0,0,0,.2)">${escapeHtml(promo.titulo||'Promoção de boas-vindas!')}</p>
-        <p style="font-size:14px;color:rgba(255,255,255,.92);margin:0;font-weight:500">${escapeHtml(promo.descricao||`${promo.desconto}% de desconto no seu primeiro trabalho`)}</p>
+        <div style="display:inline-block;background:rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:4px 12px;border-radius:100px;margin-bottom:8px">🚀 Oferta exclusiva</div>
+        <p style="font-size:26px;font-weight:800;color:#fff;margin:0 0 6px;text-shadow:0 2px 4px rgba(0,0,0,.25)">${escapeHtml(promo.titulo||'Promoção de boas-vindas!')}</p>
+        <p style="font-size:15px;color:rgba(255,255,255,.95);margin:0;font-weight:500;line-height:1.4">${escapeHtml(promo.descricao||`${promo.desconto}% de desconto no seu primeiro trabalho`)}</p>
       </div>
       <div style="text-align:center">
-        <div style="background:#fff;color:#F97316;font-size:34px;font-weight:900;line-height:1;padding:12px 18px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.2)">${promo.desconto}%<div style="font-size:12px;font-weight:800;letter-spacing:.1em;color:#F59E0B">OFF</div></div>
+        <div style="background:#fff;color:#F97316;font-size:42px;font-weight:900;line-height:1;padding:14px 22px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.25)">${promo.desconto}%<div style="font-size:13px;font-weight:800;letter-spacing:.15em;color:#F59E0B;margin-top:2px">OFF</div></div>
       </div>
-      <div style="width:100%;display:flex;justify-content:flex-end;margin-top:4px">
-        <span style="background:#fff;color:#1F2433;font-size:14px;font-weight:800;padding:10px 22px;border-radius:100px;box-shadow:0 4px 14px rgba(0,0,0,.18)">Solicitar agora com desconto →</span>
+      <div style="width:100%;display:flex;justify-content:flex-end;margin-top:6px">
+        <span style="background:#fff;color:#1F2433;font-size:15px;font-weight:800;padding:12px 28px;border-radius:100px;box-shadow:0 6px 18px rgba(0,0,0,.2)">Solicitar agora com desconto →</span>
       </div>
-    </div>
-    <button onclick="event.stopPropagation();document.getElementById('dashboard-promo-banner').remove()" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,.25);border:none;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>`;
+    </div>`
 
   // Injetar keyframes uma única vez
   if(!document.getElementById('promo-kf')) {
