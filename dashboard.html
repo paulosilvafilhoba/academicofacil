@@ -608,7 +608,7 @@ tr:last-child td{border-bottom:none}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         Financeiro
       </div>
-      <div class="nav-item" onclick="showP('admin-agentes',this);loadAgentRequests()">
+      <div class="nav-item" onclick="showP('admin-agentes',this);loadAgentRequests();loadTeamAgents()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
         Agentes IA
         <span class="nav-badge" id="admin-agents-badge">0</span>
@@ -1000,11 +1000,21 @@ tr:last-child td{border-bottom:none}
 <!-- ADMIN AGENTES IA -->
 <div id="panel-admin-agentes" class="panel">
   <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">👥 Agentes da equipe</div><div class="stat-val" id="ag-team-count">0</div></div>
     <div class="stat-card"><div class="stat-label">📋 Aguardando análise</div><div class="stat-val" id="ag-count-aguardando">0</div></div>
     <div class="stat-card"><div class="stat-label">📤 Proposta enviada</div><div class="stat-val" id="ag-count-proposta">0</div></div>
-    <div class="stat-card"><div class="stat-label">💳 Pagos</div><div class="stat-val" id="ag-count-pago">0</div></div>
     <div class="stat-card"><div class="stat-label">✅ Ativos</div><div class="stat-val" id="ag-count-ativo">0</div></div>
   </div>
+
+  <!-- NOVA: Agentes da Equipe -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">👥 Agentes da Equipe de Produção</span>
+      <button class="btn-sm" onclick="abrirModalNovoAgente()" style="background:linear-gradient(135deg,#4F46E5,#3B82F6);color:#fff;border:none;padding:7px 16px;border-radius:100px;font-size:12px;cursor:pointer;font-weight:600">+ Novo agente</button>
+    </div>
+    <div id="team-agents-list" style="display:flex;flex-direction:column;gap:0"></div>
+  </div>
+
   <div class="card">
     <div class="card-header">
       <span class="card-title">🤖 Pedidos de agentes personalizados</span>
@@ -1016,14 +1026,82 @@ tr:last-child td{border-bottom:none}
   <!-- NOVO: Pedidos em Produção (Equipe de Redação) -->
   <div class="card" style="margin-top:20px">
     <div class="card-header">
-      <span class="card-title">📄 Pedidos em Produção (Equipe)</span>
+      <span class="card-title">📄 Pedidos em Produção (Atribuição)</span>
       <button class="btn-sm" onclick="loadPedidosEmProducao()" style="background:rgba(99,102,241,.1);color:var(--indigo2);border:none;padding:6px 14px;border-radius:100px;font-size:12px;cursor:pointer">↻ Atualizar</button>
     </div>
     <div id="prod-list" style="display:flex;flex-direction:column;gap:0"></div>
   </div>
 </div>
 
-<!-- MODAL PROPOSTA AGENTE -->
+<!-- MODAL CRIAR AGENTE DA EQUIPE -->
+<div id="novo-agente-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:580px;overflow:hidden;max-height:90vh;overflow-y:auto">
+    <div style="padding:28px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="logo-academico.png" alt="Logo" style="width:40px;height:40px;border-radius:8px">
+        <div>
+          <h3 style="font-size:18px;font-weight:700;margin:0;color:var(--text)">Novo Agente</h3>
+          <p style="font-size:12px;color:var(--muted);margin:2px 0 0">Membro da equipe de produção</p>
+        </div>
+      </div>
+      <button onclick="fecharModalNovoAgente()" style="background:var(--bg2);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="padding:28px 32px;display:flex;flex-direction:column;gap:18px">
+      
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Nome do agente *</label>
+        <input type="text" id="na-nome" placeholder="Ex: Marina Costa, Dr. Philips, IA Redação V2" style="width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif">
+      </div>
+
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Especialidade *</label>
+        <select id="na-especialidade" style="width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif">
+          <option value="">Escolha uma especialidade...</option>
+          <option value="tcc">📚 TCC e Monografia</option>
+          <option value="artigos">📰 Artigos Científicos</option>
+          <option value="redacao">✍️ Redações e Textos</option>
+          <option value="formatacao">🎨 Formatação (ABNT, APA)</option>
+          <option value="revisao">👀 Revisão e Edição</option>
+          <option value="pesquisa">🔍 Pesquisa e Referências</option>
+          <option value="multi">⚡ Múltiplas áreas</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Bio / Descrição</label>
+        <textarea id="na-bio" rows="3" placeholder="Descreva as habilidades, experiência e áreas de atuação do agente..." style="width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;outline:none;max-height:120px"></textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Capacidade (pedidos/mês)</label>
+          <input type="number" id="na-capacidade" placeholder="5" min="1" max="50" value="5" style="width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Tempo de resposta (horas)</label>
+          <input type="number" id="na-tempo" placeholder="48" min="1" max="480" value="48" style="width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif">
+        </div>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Status</label>
+        <select id="na-status" style="width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif">
+          <option value="disponivel" selected>✅ Disponível</option>
+          <option value="ocupado">⏳ Ocupado (não atribuir)</option>
+          <option value="pausado">⏸️ Pausado</option>
+        </select>
+      </div>
+
+      <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;color:var(--muted)">
+        <strong style="color:var(--text)">💡 Dica:</strong> Agentes são membros da sua equipe que vão produzir os documentos. Você pode criar agentes reais (sua equipe) ou agentes virtuais (IA).
+      </div>
+
+      <button onclick="criarNovoAgente()" style="width:100%;padding:14px;background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .2s">
+        ✨ Criar agente
+      </button>
+    </div>
+  </div>
+</div>
 <div id="proposta-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;overflow:hidden;max-height:90vh;overflow-y:auto">
     <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
@@ -2468,6 +2546,7 @@ async function loadPedidosEmProducao() {
       const statusColor = o.status === 'em_andamento' ? '#D97706' : '#3B8BD4';
       const statusText = o.status === 'em_andamento' ? '⏳ Em andamento' : '👀 Revisão';
       const testeBadge = o.isTeste ? '<span style="background:rgba(59,139,212,.12);color:#3B8BD4;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600">🧪 Teste</span>' : '';
+      const agenteBadge = o.assignedAgent ? `<span style="background:rgba(16,185,129,.12);color:#10B981;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">✅ ${escapeHtml(o.assignedAgent.slice(0,20))}</span>` : '<span style="background:rgba(107,114,128,.08);color:var(--muted);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">⚪ Sem agente</span>';
 
       html += `
       <div style="padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px">
@@ -2477,13 +2556,14 @@ async function loadPedidosEmProducao() {
             <span style="font-size:14px;font-weight:600;color:var(--text)">${escapeHtml(o.servico||'Serviço')}</span>
             <span style="background:rgba(${statusColor === '#D97706' ? '217,119,6' : '59,139,212'},.12);color:${statusColor};padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">${statusText}</span>
             ${testeBadge}
+            ${agenteBadge}
           </div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:2px">👤 ${escapeHtml(cliente)} · 📝 ${o.laudas||'—'} laudas · ⏱️ ${escapeHtml(o.prazo||'—')}</div>
           <div style="font-size:12px;color:var(--muted)">💰 R$ ${o.valor?.toLocaleString('pt-BR')||'—'} · ${data}</div>
           ${o.desc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">"${escapeHtml(o.desc.slice(0,70))}..."</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-          <button class="or-btn or-btn-g" onclick="showPedidoDetalhes('${doc.id}')">👁️ Ver</button>
+          <button class="or-btn or-btn-g" style="font-size:11px" onclick="atribuirAgente('${doc.id}','${escapeHtml(o.servico||'')}')">👥 Atribuir</button>
           ${o.status === 'em_andamento' ? `<button class="or-btn" style="background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);color:var(--indigo2);font-size:11px" onclick="mudarStatus('${doc.id}','revisao')">→ Revisão</button>` : ''}
           ${o.status === 'revisao' ? `<button class="or-btn or-btn-p" style="font-size:11px" onclick="mudarStatus('${doc.id}','concluido')">✅ Concluído</button>` : ''}
         </div>
@@ -2511,6 +2591,191 @@ function mudarStatus(orderId, novoStatus) {
 function showPedidoDetalhes(orderId) {
   toast('Abrindo pedido ' + orderId.slice(0,8) + '...', '');
   // Pode expandir para abrir um modal com detalhes completos
+}
+
+// ============ TEAM AGENTS (EQUIPE) ============
+async function loadTeamAgents() {
+  try {
+    const snap = await db.collection('team_agents').orderBy('createdAt','desc').get();
+    const list = document.getElementById('team-agents-list');
+    let html = '';
+
+    snap.forEach(doc => {
+      const a = doc.data();
+      const especialidadeEmoji = {
+        tcc:'📚',artigos:'📰',redacao:'✍️',formatacao:'🎨',
+        revisao:'👀',pesquisa:'🔍',multi:'⚡'
+      };
+      const emoji = especialidadeEmoji[a.especialidade] || '🤖';
+      const statusColor = a.status === 'disponivel' ? '#10B981' : a.status === 'ocupado' ? '#F59E0B' : '#6B7280';
+      const statusLabel = a.status === 'disponivel' ? '✅ Disponível' : a.status === 'ocupado' ? '⏳ Ocupado' : '⏸️ Pausado';
+
+      html += `
+      <div style="padding:16px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px">
+        <div style="font-size:28px;flex-shrink:0">${emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:15px;font-weight:600;color:var(--text)">${escapeHtml(a.nome||'Agente')}</span>
+            <span style="background:rgba(${statusColor === '#10B981' ? '16,185,129' : statusColor === '#F59E0B' ? '245,158,11' : '107,114,128'},.12);color:${statusColor};padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600">${statusLabel}</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">${escapeHtml(a.especialidade||'—')} · Capacidade: ${a.capacidade||'—'} pedidos/mês</div>
+          ${a.bio ? `<div style="font-size:12px;color:var(--muted);margin-bottom:4px">"${escapeHtml(a.bio.slice(0,80))}${a.bio.length > 80 ? '...' : ''}"</div>` : ''}
+          <div style="font-size:11px;color:var(--muted2)">Tempo de resposta: ${a.tempo||'—'}h · Criado em ${a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString('pt-BR') : '—'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button class="or-btn" style="background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);color:var(--indigo2);font-size:12px" onclick="editarAgente('${doc.id}','${escapeHtml(a.nome||'')}')">✏️ Editar</button>
+          <button class="or-btn" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#EF4444;font-size:12px" onclick="confirmarDelete('${doc.id}','${escapeHtml(a.nome||'')}')">🗑️ Remover</button>
+        </div>
+      </div>`;
+    });
+
+    document.getElementById('team-agents-list').innerHTML = html || '<p style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Nenhum agente criado. Crie um novo agente para começar!</p>';
+    document.getElementById('ag-team-count').textContent = snap.size;
+  } catch(e) { console.error(e); }
+}
+
+function abrirModalNovoAgente() {
+  document.getElementById('na-nome').value = '';
+  document.getElementById('na-especialidade').value = '';
+  document.getElementById('na-bio').value = '';
+  document.getElementById('na-capacidade').value = '5';
+  document.getElementById('na-tempo').value = '48';
+  document.getElementById('na-status').value = 'disponivel';
+  document.getElementById('novo-agente-modal').style.display = 'flex';
+}
+
+function fecharModalNovoAgente() {
+  document.getElementById('novo-agente-modal').style.display = 'none';
+}
+
+async function criarNovoAgente() {
+  const nome = document.getElementById('na-nome').value.trim();
+  const especialidade = document.getElementById('na-especialidade').value;
+  const bio = document.getElementById('na-bio').value.trim();
+  const capacidade = parseInt(document.getElementById('na-capacidade').value) || 5;
+  const tempo = parseInt(document.getElementById('na-tempo').value) || 48;
+  const status = document.getElementById('na-status').value;
+
+  if(!nome || !especialidade) {
+    toast('Preencha nome e especialidade', 'error');
+    return;
+  }
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Criando...';
+
+  try {
+    await db.collection('team_agents').add({
+      nome, especialidade, bio, capacidade, tempo, status,
+      pedidosAtribuidos: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      ativo: true
+    });
+    toast('✅ Agente criado com sucesso!', 'success');
+    fecharModalNovoAgente();
+    loadTeamAgents();
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao criar agente', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Criar agente';
+  }
+}
+
+function editarAgente(id, nome) {
+  toast(`Editando agente: ${nome}`, '');
+  // Implementar depois: modal de edição
+}
+
+function confirmarDelete(id, nome) {
+  if(!confirm(`Remover agente "${nome}"?`)) return;
+  
+  db.collection('team_agents').doc(id).delete().then(() => {
+    toast(`✅ Agente "${nome}" removido`, 'success');
+    loadTeamAgents();
+  }).catch(e => {
+    console.error(e);
+    toast('Erro ao remover agente', 'error');
+  });
+}
+
+let _pedidoAtribuirId = null;
+let _pedidoAtribuirNome = null;
+
+async function atribuirAgente(orderId, nomeServico) {
+  _pedidoAtribuirId = orderId;
+  _pedidoAtribuirNome = nomeServico;
+
+  // Carregar agentes disponíveis
+  try {
+    const snap = await db.collection('team_agents').where('status','==','disponivel').orderBy('nome').get();
+    let html = '<div style="display:flex;flex-direction:column;gap:8px">';
+
+    if(snap.empty) {
+      html += '<p style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Nenhum agente disponível no momento.</p>';
+    } else {
+      snap.forEach(doc => {
+        const a = doc.data();
+        html += `
+        <button onclick="confirmarAtribuicao('${doc.id}','${escapeHtml(a.nome||'Agente')}')" 
+                style="padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;text-align:left;cursor:pointer;color:var(--text);font-size:13px;transition:all .2s;font-weight:500" 
+                onmouseover="this.style.background='var(--surface)';this.style.borderColor='var(--indigo2)'" 
+                onmouseout="this.style.background='var(--bg2)';this.style.borderColor='var(--border)'">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+            <span style="font-size:16px">👤</span>
+            <span style="font-weight:600">${escapeHtml(a.nome||'Agente')}</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:auto">⏱️ ${a.tempo}h</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted)">${escapeHtml(a.especialidade||'—')} · Capacidade: ${a.capacidade}</div>
+        </button>`;
+      });
+    }
+
+    html += '</div>';
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+    modal.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:450px;overflow:hidden;max-height:90vh;overflow-y:auto">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
+        <h3 style="font-size:16px;margin:0;color:var(--text)">Atribuir agente</h3>
+        <p style="font-size:12px;color:var(--muted);margin:4px 0 0">${escapeHtml(_pedidoAtribuirNome)}</p>
+      </div>
+      <div style="padding:20px 24px">
+        ${html}
+      </div>
+      <div style="padding:16px 24px;border-top:1px solid var(--border);background:var(--bg2)">
+        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="width:100%;padding:11px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;font-weight:500">Cancelar</button>
+      </div>
+    </div>`;
+    
+    document.body.appendChild(modal);
+    modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao carregar agentes', 'error');
+  }
+}
+
+function confirmarAtribuicao(agentId, agentNome) {
+  if(!_pedidoAtribuirId) return;
+
+  db.collection('orders').doc(_pedidoAtribuirId).update({
+    assignedAgent: agentNome,
+    assignedAgentId: agentId,
+    assignedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    toast(`✅ Pedido atribuído a ${agentNome}`, 'success');
+    document.querySelector('[style*="z-index:400"]')?.remove();
+    loadPedidosEmProducao();
+    loadTeamAgents(); // Atualizar contadores
+  }).catch(e => {
+    console.error(e);
+    toast('Erro ao atribuir pedido', 'error');
+  });
 }
 
 function abrirPropostaModal(id, nome, zap, area, tarefas) {
