@@ -1799,6 +1799,8 @@ async function gerarQRPix() {
         document.getElementById('pay-amount-display').textContent = 'R$ ' + data.valor.toLocaleString('pt-BR');
         if(pendingOrder) pendingOrder.valorConfirmado = data.valor;
       }
+      // Guardar o payment_id do MP para o webhook casar o pagamento ao pedido
+      if(pendingOrder && data.payment_id) pendingOrder.mpPaymentId = String(data.payment_id);
       return;
     }
     throw new Error('sem qr_code_base64');
@@ -1929,6 +1931,7 @@ async function salvarPedido(status) {
     descontoPct: pendingOrder.descontoPct || 0,
     descontoValor: pendingOrder.descontoValor || 0,
     promoAplicada: (pendingOrder.descontoPct || 0) > 0,
+    mpPaymentId: pendingOrder.mpPaymentId || null,
     status: status,
     etapa: 'briefing',
     pagamento: selectedPayMethod,
