@@ -617,11 +617,7 @@ tr:last-child td{border-bottom:none}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
         Agentes IA
         <span class="nav-badge" id="admin-agents-badge">0</span>
-      </div>      <div class="nav-item" onclick="showP('gerenciar-cupons',this);carregarCupons()">
-        🎟️ Gerenciar Cupons
-        <span class="nav-badge" id="cupons-badge">0</span>
       </div>
-      
     </div>
 
     <div class="sidebar-bottom">
@@ -740,22 +736,6 @@ tr:last-child td{border-bottom:none}
               <thead><tr><th>Pedido</th><th>Serviço</th><th>Laudas</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
               <tbody id="history-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Nenhum pedido ainda</td></tr></tbody>
             </table>
-          </div>
-        </div>
-      </div>
-
-            <!-- PAINEL: GERENCIAR CUPONS -->
-      <div id="panel-gerenciar-cupons" class="panel">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">🎟️ Gerenciar Cupons</span>
-            <span class="nav-badge" id="cupons-count">0</span>
-          </div>
-          <div style="margin-bottom: 16px;">
-            <button onclick="criarNovoCupom()" style="padding: 8px 16px; background: var(--indigo2); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">+ Novo Cupom</button>
-          </div>
-          <div id="cupons-list" style="display: flex; flex-direction: column; gap: 10px;">
-            <p style="color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0;">Carregando cupons...</p>
           </div>
         </div>
       </div>
@@ -1858,68 +1838,60 @@ async function verificarDocumentoGerado(orderId) {
   }
 }
 
-
-// ============ GERENCIAR CUPONS ============
-
 async function carregarCupons() {
   try {
+    const lista = document.getElementById('cupons-list');
+    lista.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Carregando...</p>';
+    
     const snap = await db.collection('promo_codes').get();
-    const count = document.getElementById('cupons-count');
-    count.textContent = snap.size;
+    document.getElementById('cupons-count').textContent = snap.size;
     
     if (snap.empty) {
-      document.getElementById('cupons-list').innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Nenhum cupom criado</p>';
+      lista.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Nenhum cupom</p>';
       return;
     }
     
     let html = '';
     snap.forEach(doc => {
-      const data = doc.data();
-      const statusBg = data.active ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)';
-      const statusColor = data.active ? '#10B981' : '#6B7280';
-      const statusTexto = data.active ? '✅ Ativo' : '❌ Inativo';
-      
-      html += `<div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <div>
-            <p style="font-weight: 600; margin: 0; font-size: 13px;">${data.code}</p>
-            <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Desconto: ${data.discount}%</p>
-          </div>
-          <div style="background: ${statusBg}; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;">
-            ${statusTexto}
-          </div>
+      const d = doc.data();
+      html += `<div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="flex: 1;">
+          <p style="font-weight: 600; margin: 0; font-size: 13px;">${d.code || '???'}</p>
+          <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Desconto: ${d.discount || 0}%</p>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button onclick="alternarCupom('${doc.id}', ${!data.active})" style="flex: 1; padding: 6px; background: rgba(59, 130, 246, 0.1); border: none; border-radius: 4px; color: var(--indigo2); font-size: 10px; font-weight: 600; cursor: pointer;">
-            ${data.active ? '🔒 Desativar' : '🔓 Ativar'}
-          </button>
-          <button onclick="deletarCupom('${doc.id}')" style="flex: 1; padding: 6px; background: rgba(220, 38, 38, 0.1); border: none; border-radius: 4px; color: #DC2626; font-size: 10px; font-weight: 600; cursor: pointer;">🗑️ Deletar</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px;">
+            <input type="checkbox" ${d.active ? 'checked' : ''} onchange="toggleCupom('${doc.id}', this.checked)" style="cursor: pointer; width: 16px; height: 16px;">
+            <span>${d.active ? 'Ativo' : 'Inativo'}</span>
+          </label>
+          <button onclick="deletarCupom('${doc.id}')" style="padding: 4px 8px; background: #DC2626; color: white; border: none; border-radius: 4px; font-size: 10px; cursor: pointer;">Delete</button>
         </div>
       </div>`;
     });
     
-    document.getElementById('cupons-list').innerHTML = html;
+    lista.innerHTML = html;
   } catch (e) {
     console.error('Erro:', e);
-    document.getElementById('cupons-list').innerHTML = 'Erro ao carregar cupons';
+    document.getElementById('cupons-list').innerHTML = '<p style="color: #DC2626;">Erro: ' + e.message + '</p>';
   }
 }
 
-async function alternarCupom(docId, ativo) {
+async function toggleCupom(docId, ativo) {
   try {
     await db.collection('promo_codes').doc(docId).update({active: ativo});
-    toast(ativo ? 'Cupom ativado' : 'Cupom desativado', 'success');
+    toast(ativo ? 'Ativado' : 'Desativado', 'success');
     carregarCupons();
   } catch (e) {
+    console.error('Erro:', e);
     toast('Erro: ' + e.message, 'error');
   }
 }
 
 async function deletarCupom(docId) {
-  if (!confirm('Deletar este cupom?')) return;
+  if (!confirm('Deletar cupom?')) return;
   try {
     await db.collection('promo_codes').doc(docId).delete();
-    toast('Cupom deletado', 'success');
+    toast('Deletado!', 'success');
     carregarCupons();
   } catch (e) {
     toast('Erro: ' + e.message, 'error');
@@ -1927,21 +1899,25 @@ async function deletarCupom(docId) {
 }
 
 function criarNovoCupom() {
-  const codigo = prompt('Código do cupom:');
+  const codigo = prompt('Código (ex: GRATIS001):');
   if (!codigo) return;
-  const desconto = prompt('Desconto (0-100):');
+  const desconto = prompt('Desconto % (0-100):');
   if (!desconto) return;
   
   db.collection('promo_codes').add({
     code: codigo.toUpperCase(),
     discount: parseInt(desconto),
     active: true,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    createdAt: new Date()
   }).then(() => {
     toast('Cupom criado!', 'success');
     carregarCupons();
-  }).catch(e => toast('Erro: ' + e.message, 'error'));
+  }).catch(e => {
+    console.error('Erro:', e);
+    toast('Erro: ' + e.message, 'error');
+  });
 }
+
 
 // ============ CHAT ============
 function loadChat() {
