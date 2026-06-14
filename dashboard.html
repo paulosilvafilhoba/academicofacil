@@ -617,20 +617,9 @@ tr:last-child td{border-bottom:none}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
         Agentes IA
         <span class="nav-badge" id="admin-agents-badge">0</span>
-      </div>      <div class="nav-item" onclick="showP('solicitacoes',this);carregarSolicitacoesPendentes()" style="margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
-        📋 Solicitações (v2.5)
-        <span class="nav-badge" id="solicitacoes-badge">0</span>
-      </div>
-      <div class="nav-item" onclick="showP('ia-fila',this)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-        ⚡ Consultor IA (v2.5)
-        <span class="nav-badge" id="ia-fila-badge">0</span>
-      </div>
-      <div class="nav-item" onclick="showP('revisar-docs',this)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9"/></svg>
-        🔍 Revisar Docs (v2.5)
-        <span class="nav-badge" id="revisar-badge">0</span>
+      </div>      <div class="nav-item" onclick="showP('gerenciar-cupons',this);carregarCupons()">
+        🎟️ Gerenciar Cupons
+        <span class="nav-badge" id="cupons-badge">0</span>
       </div>
       
     </div>
@@ -755,45 +744,23 @@ tr:last-child td{border-bottom:none}
         </div>
       </div>
 
-      <!-- V2.5: SOLICITAÇÕES -->
-      <div id="panel-solicitacoes" class="panel">
+            <!-- PAINEL: GERENCIAR CUPONS -->
+      <div id="panel-gerenciar-cupons" class="panel">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">📋 Solicitações Pendentes (v2.5)</span>
-            <span class="nav-badge" id="solicitacoes-count">0</span>
+            <span class="card-title">🎟️ Gerenciar Cupons</span>
+            <span class="nav-badge" id="cupons-count">0</span>
           </div>
-          <div id="solicitacoes-list" style="display: flex; flex-direction: column; gap: 12px; padding: 8px 0;">
-            <p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Carregando...</p>
+          <div style="margin-bottom: 16px;">
+            <button onclick="criarNovoCupom()" style="padding: 8px 16px; background: var(--indigo2); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">+ Novo Cupom</button>
+          </div>
+          <div id="cupons-list" style="display: flex; flex-direction: column; gap: 10px;">
+            <p style="color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0;">Carregando cupons...</p>
           </div>
         </div>
       </div>
 
-      <!-- V2.5: IA CONSULTOR -->
-      <div id="panel-ia-fila" class="panel">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">⚡ Consultor IA - Fila (v2.5)</span>
-          </div>
-          <div style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">
-            Fila IA será ativada após aprovar solicitações
-          </div>
-        </div>
-      </div>
-
-      <!-- V2.5: REVISAR DOCS -->
-      <div id="panel-revisar-docs" class="panel">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">🔍 Revisar Documentos (v2.5)</span>
-            <span class="nav-badge" id="revisar-count">0</span>
-          </div>
-          <div style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">
-            Documentos gerados aparecerão aqui
-          </div>
-        </div>
-      </div>
-
-            <!-- NOVO PEDIDO -->
+      <!-- NOVO PEDIDO -->
       <div id="panel-novo-pedido" class="panel">
         <div class="new-order-form">
           <h3 style="margin-bottom:20px;font-size:17px">Solicitar novo serviço</h3>
@@ -1891,79 +1858,89 @@ async function verificarDocumentoGerado(orderId) {
   }
 }
 
-// ============ V2.5: SOLICITAÇÕES ============
 
-async function carregarSolicitacoesPendentes() {
+// ============ GERENCIAR CUPONS ============
+
+async function carregarCupons() {
   try {
-    const lista = document.getElementById('solicitacoes-list');
-    const count = document.getElementById('solicitacoes-count');
+    const snap = await db.collection('promo_codes').get();
+    const count = document.getElementById('cupons-count');
+    count.textContent = snap.size;
     
-    lista.innerHTML = '<p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">⏳ Carregando...</p>';
-    
-    const ordersSnap = await db.collection('orders').get();
-    let allSolicitations = [];
-    
-    for (const orderDoc of ordersSnap.docs) {
-      try {
-        const solicitSnap = await orderDoc.ref.collection('solicitations')
-          .where('status', '==', 'pendente_admin')
-          .orderBy('criadaEm', 'desc')
-          .get();
-        
-        solicitSnap.forEach(doc => {
-          allSolicitations.push({id: doc.id, orderId: orderDoc.id, ...doc.data()});
-        });
-      } catch(e) {}
-    }
-    
-    count.textContent = allSolicitations.length;
-    
-    if (allSolicitations.length === 0) {
-      lista.innerHTML = '<div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center;"><p style="color: var(--muted); font-size: 13px; margin: 0;">📋 Nenhuma solicitação pendente</p></div>';
+    if (snap.empty) {
+      document.getElementById('cupons-list').innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Nenhum cupom criado</p>';
       return;
     }
     
     let html = '';
-    for (const item of allSolicitations) {
-      html += `<div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+    snap.forEach(doc => {
+      const data = doc.data();
+      const statusBg = data.active ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)';
+      const statusColor = data.active ? '#10B981' : '#6B7280';
+      const statusTexto = data.active ? '✅ Ativo' : '❌ Inativo';
+      
+      html += `<div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <div>
-            <p style="font-size: 13px; font-weight: 600; margin: 0;">#${item.orderId.slice(-6).toUpperCase()} - ${item.consultorNome || 'Admin'}</p>
-            <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Tipo: ${item.tipo}</p>
+            <p style="font-weight: 600; margin: 0; font-size: 13px;">${data.code}</p>
+            <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Desconto: ${data.discount}%</p>
           </div>
-          <p style="font-size: 12px; font-weight: 600; color: var(--indigo2); margin: 0;">${item.laudas} laudas</p>
+          <div style="background: ${statusBg}; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;">
+            ${statusTexto}
+          </div>
         </div>
-        <div style="display: flex; gap: 10px;">
-          <button onclick="toast('Tema: ${item.temaPreciso.substring(0, 50)}...', '')" style="flex: 1; padding: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px; color: var(--indigo2); font-size: 11px; font-weight: 600; cursor: pointer;">Ver</button>
-          <button onclick="aprovarParaIA('${item.orderId}', '${item.id}')" style="flex: 1; padding: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; color: #10B981; font-size: 11px; font-weight: 600; cursor: pointer;">✅ Aprovar</button>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="alternarCupom('${doc.id}', ${!data.active})" style="flex: 1; padding: 6px; background: rgba(59, 130, 246, 0.1); border: none; border-radius: 4px; color: var(--indigo2); font-size: 10px; font-weight: 600; cursor: pointer;">
+            ${data.active ? '🔒 Desativar' : '🔓 Ativar'}
+          </button>
+          <button onclick="deletarCupom('${doc.id}')" style="flex: 1; padding: 6px; background: rgba(220, 38, 38, 0.1); border: none; border-radius: 4px; color: #DC2626; font-size: 10px; font-weight: 600; cursor: pointer;">🗑️ Deletar</button>
         </div>
       </div>`;
-    }
-    lista.innerHTML = html;
+    });
+    
+    document.getElementById('cupons-list').innerHTML = html;
   } catch (e) {
     console.error('Erro:', e);
-    document.getElementById('solicitacoes-list').innerHTML = `<div style="color: #DC2626; padding: 20px; text-align: center;">Erro: ${e.message}</div>`;
+    document.getElementById('cupons-list').innerHTML = 'Erro ao carregar cupons';
   }
 }
 
-async function aprovarParaIA(orderId, solicitId) {
+async function alternarCupom(docId, ativo) {
   try {
-    await db.collection('orders').doc(orderId).collection('solicitations').doc(solicitId).update({
-      status: "aprovada_admin",
-      aprovouEm: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    await db.collection('orders').doc(orderId).update({solicitacaoStatus: "em_geracao"});
-    await db.collection('ia_fila').add({
-      orderId: orderId,
-      solicitationId: solicitId,
-      status: "aguardando_processamento",
-      enqueuedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    toast('✅ Solicitação aprovada para IA!', 'success');
-    carregarSolicitacoesPendentes();
+    await db.collection('promo_codes').doc(docId).update({active: ativo});
+    toast(ativo ? 'Cupom ativado' : 'Cupom desativado', 'success');
+    carregarCupons();
   } catch (e) {
     toast('Erro: ' + e.message, 'error');
   }
+}
+
+async function deletarCupom(docId) {
+  if (!confirm('Deletar este cupom?')) return;
+  try {
+    await db.collection('promo_codes').doc(docId).delete();
+    toast('Cupom deletado', 'success');
+    carregarCupons();
+  } catch (e) {
+    toast('Erro: ' + e.message, 'error');
+  }
+}
+
+function criarNovoCupom() {
+  const codigo = prompt('Código do cupom:');
+  if (!codigo) return;
+  const desconto = prompt('Desconto (0-100):');
+  if (!desconto) return;
+  
+  db.collection('promo_codes').add({
+    code: codigo.toUpperCase(),
+    discount: parseInt(desconto),
+    active: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    toast('Cupom criado!', 'success');
+    carregarCupons();
+  }).catch(e => toast('Erro: ' + e.message, 'error'));
 }
 
 // ============ CHAT ============
