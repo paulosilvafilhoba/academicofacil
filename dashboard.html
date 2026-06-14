@@ -622,12 +622,12 @@ tr:last-child td{border-bottom:none}
         📋 Solicitações (v2.5)
         <span class="nav-badge" id="solicitacoes-badge">0</span>
       </div>
-      <div class="nav-item" onclick="showP('ia-fila',this);monitorarIAFila()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        🤖 IA Consultor (v2.5)
+      <div class="nav-item" onclick="showP('ia-fila',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        ⚡ Consultor IA (v2.5)
         <span class="nav-badge" id="ia-fila-badge">0</span>
       </div>
-      <div class="nav-item" onclick="showP('revisar-docs',this);carregarDocumentosParaRevisar()">
+      <div class="nav-item" onclick="showP('revisar-docs',this)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9"/></svg>
         🔍 Revisar Docs (v2.5)
         <span class="nav-badge" id="revisar-badge">0</span>
@@ -755,52 +755,40 @@ tr:last-child td{border-bottom:none}
         </div>
       </div>
 
-      <!-- V2.5: SOLICITAÇÕES PENDENTES -->
+      <!-- V2.5: SOLICITAÇÕES -->
       <div id="panel-solicitacoes" class="panel">
         <div class="card">
           <div class="card-header">
             <span class="card-title">📋 Solicitações Pendentes (v2.5)</span>
             <span class="nav-badge" id="solicitacoes-count">0</span>
           </div>
-          <div id="solicitacoes-list" style="display: flex; flex-direction: column; gap: 12px;">
-            <p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Carregando solicitações...</p>
+          <div id="solicitacoes-list" style="display: flex; flex-direction: column; gap: 12px; padding: 8px 0;">
+            <p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Carregando...</p>
           </div>
         </div>
       </div>
 
-      <!-- V2.5: IA CONSULTOR FILA -->
+      <!-- V2.5: IA CONSULTOR -->
       <div id="panel-ia-fila" class="panel">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">🤖 IA Consultor - Fila (v2.5)</span>
+            <span class="card-title">⚡ Consultor IA - Fila (v2.5)</span>
           </div>
-          <div style="margin-bottom: 16px;">
-            <p style="font-size: 12px; color: var(--muted); margin: 0;">Documentos em processamento e prontos para revisão</p>
-          </div>
-          <div id="ia-fila-processando" style="margin-bottom: 20px;">
-            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 12px;">⏳ Em Processamento</p>
-            <div id="fila-processando-items" style="display: flex; flex-direction: column; gap: 10px;">
-              <p style="color: var(--muted); font-size: 12px;">Nenhum documento em processamento</p>
-            </div>
-          </div>
-          <div id="ia-fila-prontos">
-            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 12px;">✅ Prontos para Revisão</p>
-            <div id="fila-prontos-items" style="display: flex; flex-direction: column; gap: 10px;">
-              <p style="color: var(--muted); font-size: 12px;">Nenhum documento pronto</p>
-            </div>
+          <div style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">
+            Fila IA será ativada após aprovar solicitações
           </div>
         </div>
       </div>
 
-      <!-- V2.5: REVISAR DOCUMENTOS -->
+      <!-- V2.5: REVISAR DOCS -->
       <div id="panel-revisar-docs" class="panel">
         <div class="card">
           <div class="card-header">
             <span class="card-title">🔍 Revisar Documentos (v2.5)</span>
             <span class="nav-badge" id="revisar-count">0</span>
           </div>
-          <div id="revisar-docs-list" style="display: flex; flex-direction: column; gap: 12px;">
-            <p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Carregando documentos para revisar...</p>
+          <div style="color: var(--muted); font-size: 12px; padding: 20px; text-align: center;">
+            Documentos gerados aparecerão aqui
           </div>
         </div>
       </div>
@@ -1903,7 +1891,7 @@ async function verificarDocumentoGerado(orderId) {
   }
 }
 
-// ============ V2.5: SOLICITAÇÕES PENDENTES ============
+// ============ V2.5: SOLICITAÇÕES ============
 
 async function carregarSolicitacoesPendentes() {
   try {
@@ -1923,11 +1911,7 @@ async function carregarSolicitacoesPendentes() {
           .get();
         
         solicitSnap.forEach(doc => {
-          allSolicitations.push({
-            id: doc.id,
-            orderId: orderDoc.id,
-            ...doc.data()
-          });
+          allSolicitations.push({id: doc.id, orderId: orderDoc.id, ...doc.data()});
         });
       } catch(e) {}
     }
@@ -1942,52 +1926,43 @@ async function carregarSolicitacoesPendentes() {
     let html = '';
     for (const item of allSolicitations) {
       html += `<div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div><p style="font-size: 13px; font-weight: 600; margin: 0; color: var(--text);">#${item.orderId.slice(-6).toUpperCase()} - ${item.consultorNome || 'Sem consultor'}</p>
-          <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Tipo: ${item.tipo}</p></div>
-          <div style="text-align: right;"><p style="font-size: 12px; font-weight: 600; color: var(--indigo2); margin: 0;">${item.laudas} laudas</p></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+          <div>
+            <p style="font-size: 13px; font-weight: 600; margin: 0;">#${item.orderId.slice(-6).toUpperCase()} - ${item.consultorNome || 'Admin'}</p>
+            <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Tipo: ${item.tipo}</p>
+          </div>
+          <p style="font-size: 12px; font-weight: 600; color: var(--indigo2); margin: 0;">${item.laudas} laudas</p>
         </div>
         <div style="display: flex; gap: 10px;">
-          <button onclick="toast('Detalhes: ${item.temaPreciso}', '')" style="flex: 1; padding: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px; color: var(--indigo2); font-size: 11px; font-weight: 600; cursor: pointer;">📋 Ver</button>
+          <button onclick="toast('Tema: ${item.temaPreciso.substring(0, 50)}...', '')" style="flex: 1; padding: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px; color: var(--indigo2); font-size: 11px; font-weight: 600; cursor: pointer;">Ver</button>
           <button onclick="aprovarParaIA('${item.orderId}', '${item.id}')" style="flex: 1; padding: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; color: #10B981; font-size: 11px; font-weight: 600; cursor: pointer;">✅ Aprovar</button>
-        </div></div>`;
+        </div>
+      </div>`;
     }
     lista.innerHTML = html;
   } catch (e) {
     console.error('Erro:', e);
-    document.getElementById('solicitacoes-list').innerHTML = '<div style="color: #DC2626; padding: 20px; text-align: center;">❌ Erro: ' + e.message + '</div>';
+    document.getElementById('solicitacoes-list').innerHTML = `<div style="color: #DC2626; padding: 20px; text-align: center;">Erro: ${e.message}</div>`;
   }
 }
 
 async function aprovarParaIA(orderId, solicitId) {
   try {
-    await db.collection('orders').doc(orderId).collection('solicitations').doc(solicitId).update({status: "aprovada_admin", aprovouEm: firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('orders').doc(orderId).collection('solicitations').doc(solicitId).update({
+      status: "aprovada_admin",
+      aprovouEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
     await db.collection('orders').doc(orderId).update({solicitacaoStatus: "em_geracao"});
-    await db.collection('ia_fila').add({orderId: orderId, solicitationId: solicitId, status: "aguardando_processamento", enqueuedAt: firebase.firestore.FieldValue.serverTimestamp()});
-    toast('✅ Solicitação aprovada!', 'success');
+    await db.collection('ia_fila').add({
+      orderId: orderId,
+      solicitationId: solicitId,
+      status: "aguardando_processamento",
+      enqueuedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('✅ Solicitação aprovada para IA!', 'success');
     carregarSolicitacoesPendentes();
   } catch (e) {
     toast('Erro: ' + e.message, 'error');
-  }
-}
-
-async function monitorarIAFila() {
-  try {
-    const snap = await db.collection('ia_fila').where('status', 'in', ['aguardando_processamento', 'processando']).get();
-    document.getElementById('ia-fila-badge').textContent = snap.size;
-    document.getElementById('fila-processando-items').innerHTML = snap.empty ? '<p style="color: var(--muted); font-size: 12px;">Nenhum em processamento</p>' : '<p style="color: var(--muted); font-size: 12px;">Monitorando...</p>';
-  } catch (e) {
-    console.error('Erro:', e);
-  }
-}
-
-async function carregarDocumentosParaRevisar() {
-  try {
-    const snap = await db.collectionGroup('document_generations').where('status', '==', 'gerada').limit(10).get();
-    document.getElementById('revisar-count').textContent = snap.size;
-    document.getElementById('revisar-docs-list').innerHTML = snap.empty ? '<p style="color: var(--muted); text-align: center; padding: 20px;">Nenhum documento para revisar</p>' : '<p style="color: var(--muted); text-align: center; padding: 20px;">Documentos carregados</p>';
-  } catch (e) {
-    console.error('Erro:', e);
   }
 }
 
