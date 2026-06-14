@@ -618,6 +618,21 @@ tr:last-child td{border-bottom:none}
         Agentes IA
         <span class="nav-badge" id="admin-agents-badge">0</span>
       </div>
+      <div class="nav-item" onclick="showP('solicitacoes',this);carregarSolicitacoesPendentes()" style="margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
+        📋 Solicitações (v2.5)
+        <span class="nav-badge" id="solicitacoes-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="showP('ia-fila',this);monitorarIAFila()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        🤖 IA Consultor (v2.5)
+        <span class="nav-badge" id="ia-fila-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="showP('revisar-docs',this);carregarDocumentosParaRevisar()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9"/></svg>
+        🔍 Revisar Docs (v2.5)
+        <span class="nav-badge" id="revisar-badge">0</span>
+      </div>
     </div>
 
     <div class="sidebar-bottom">
@@ -736,6 +751,56 @@ tr:last-child td{border-bottom:none}
               <thead><tr><th>Pedido</th><th>Serviço</th><th>Laudas</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
               <tbody id="history-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Nenhum pedido ainda</td></tr></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- V2.5: SOLICITAÇÕES PENDENTES -->
+      <div id="panel-solicitacoes" class="panel">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📋 Solicitações Pendentes (v2.5)</span>
+            <span class="nav-badge" id="solicitacoes-count">0</span>
+          </div>
+          <div id="solicitacoes-list" style="display: flex; flex-direction: column; gap: 12px;">
+            <p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Carregando solicitações...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- V2.5: IA CONSULTOR FILA -->
+      <div id="panel-ia-fila" class="panel">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🤖 IA Consultor - Fila (v2.5)</span>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <p style="font-size: 12px; color: var(--muted); margin: 0;">Documentos em processamento e prontos para revisão</p>
+          </div>
+          <div id="ia-fila-processando" style="margin-bottom: 20px;">
+            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 12px;">⏳ Em Processamento</p>
+            <div id="fila-processando-items" style="display: flex; flex-direction: column; gap: 10px;">
+              <p style="color: var(--muted); font-size: 12px;">Nenhum documento em processamento</p>
+            </div>
+          </div>
+          <div id="ia-fila-prontos">
+            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 12px;">✅ Prontos para Revisão</p>
+            <div id="fila-prontos-items" style="display: flex; flex-direction: column; gap: 10px;">
+              <p style="color: var(--muted); font-size: 12px;">Nenhum documento pronto</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- V2.5: REVISAR DOCUMENTOS -->
+      <div id="panel-revisar-docs" class="panel">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔍 Revisar Documentos (v2.5)</span>
+            <span class="nav-badge" id="revisar-count">0</span>
+          </div>
+          <div id="revisar-docs-list" style="display: flex; flex-direction: column; gap: 12px;">
+            <p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Carregando documentos para revisar...</p>
           </div>
         </div>
       </div>
@@ -1835,6 +1900,268 @@ async function verificarDocumentoGerado(orderId) {
   } catch (e) {
     console.error('Erro ao verificar documento:', e);
     return { existe: false };
+  }
+}
+
+// ============ V2.5: SOLICITAÇÕES PENDENTES ============
+
+async function carregarSolicitacoesPendentes() {
+  try {
+    const snap = await db.collectionGroup('solicitations')
+      .where('status', '==', 'pendente_admin')
+      .orderBy('criadaEm', 'desc')
+      .get();
+    
+    const lista = document.getElementById('solicitacoes-list');
+    const count = document.getElementById('solicitacoes-count');
+    count.textContent = snap.size;
+    
+    if (snap.empty) {
+      lista.innerHTML = '<p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Nenhuma solicitação pendente</p>';
+      return;
+    }
+    
+    let html = '';
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      const orderId = doc.ref.parent.parent.id;
+      
+      html += `
+        <div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div>
+              <p style="font-size: 13px; font-weight: 600; margin: 0; color: var(--text);">#${orderId.slice(-6).toUpperCase()} - ${data.consultorNome || 'Sem consultor'}</p>
+              <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Tipo: ${data.tipo}</p>
+            </div>
+            <div style="text-align: right;">
+              <p style="font-size: 12px; font-weight: 600; color: var(--indigo2); margin: 0;">${data.laudas} laudas</p>
+              <p style="font-size: 10px; color: var(--muted); margin: 4px 0 0 0;">Tema: ${data.temaPreciso.substring(0, 30)}...</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="abrirDetalheSolicitacao('${orderId}', '${doc.id}')" style="flex: 1; padding: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px; color: var(--indigo2); font-size: 11px; font-weight: 600; cursor: pointer;">
+              📋 Ver Detalhes
+            </button>
+            <button onclick="aprovarParaIA('${orderId}', '${doc.id}')" style="flex: 1; padding: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; color: #10B981; font-size: 11px; font-weight: 600; cursor: pointer;">
+              ✅ Aprovar IA
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    
+    lista.innerHTML = html;
+  } catch (e) {
+    console.error('Erro ao carregar solicitações:', e);
+    document.getElementById('solicitacoes-list').innerHTML = '<p style="color: #DC2626;">Erro ao carregar</p>';
+  }
+}
+
+async function abrirDetalheSolicitacao(orderId, solicitId) {
+  const solicit = await db.collection('orders').doc(orderId)
+    .collection('solicitations').doc(solicitId).get();
+  
+  const data = solicit.data();
+  
+  alert(`
+Tema: ${data.temaPreciso}
+Laudas: ${data.laudas}
+Tipo: ${data.tipo}
+Instituição: ${data.instituicao}
+
+Requisitos:
+${data.requisitos}
+
+Observações:
+${data.observacoes}
+  `);
+}
+
+async function aprovarParaIA(orderId, solicitId) {
+  try {
+    // Atualiza solicitação
+    await db.collection('orders').doc(orderId)
+      .collection('solicitations').doc(solicitId)
+      .update({
+        status: "aprovada_admin",
+        aprovouEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    
+    // Atualiza order
+    await db.collection('orders').doc(orderId).update({
+      solicitacaoStatus: "em_geracao"
+    });
+    
+    // Enfileira para IA
+    await db.collection('ia_fila').add({
+      orderId: orderId,
+      solicitationId: solicitId,
+      status: "aguardando_processamento",
+      enqueuedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    toast('✅ Solicitação aprovada! IA está gerando documento...', 'success');
+    carregarSolicitacoesPendentes();
+    monitorarIAFila();
+  } catch (e) {
+    console.error('Erro:', e);
+    toast('Erro ao aprovar solicitação', 'error');
+  }
+}
+
+// ============ V2.5: IA FILA ============
+
+async function monitorarIAFila() {
+  try {
+    const snap = await db.collection('ia_fila')
+      .where('status', 'in', ['aguardando_processamento', 'processando'])
+      .get();
+    
+    const processando = snap.docs.filter(d => d.data().status === 'processando');
+    const prontos = await db.collection('ia_fila')
+      .where('status', '==', 'concluido')
+      .limit(10)
+      .get();
+    
+    document.getElementById('ia-fila-badge').textContent = snap.size + prontos.size;
+    
+    // Renderizar processando
+    let htmlProc = '';
+    if (processando.length === 0) {
+      htmlProc = '<p style="color: var(--muted); font-size: 12px;">Nenhum documento em processamento</p>';
+    } else {
+      for (const doc of processando) {
+        const data = doc.data();
+        htmlProc += `
+          <div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+            <p style="font-size: 11px; font-weight: 600; margin: 0 0 8px; color: var(--text);">Pedido #${data.orderId.slice(-6)}</p>
+            <div style="background: var(--border); border-radius: 4px; height: 6px; overflow: hidden;">
+              <div style="background: var(--indigo2); height: 100%; width: ${data.progress || 30}%; transition: width .3s;"></div>
+            </div>
+            <p style="font-size: 10px; color: var(--muted); margin: 6px 0 0 0;">⏳ Gerando documento...</p>
+          </div>
+        `;
+      }
+    }
+    document.getElementById('fila-processando-items').innerHTML = htmlProc;
+    
+    // Renderizar prontos
+    let htmlProntos = '';
+    if (prontos.empty) {
+      htmlProntos = '<p style="color: var(--muted); font-size: 12px;">Nenhum documento pronto</p>';
+    } else {
+      for (const doc of prontos.docs) {
+        const data = doc.data();
+        htmlProntos += `
+          <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 12px;">
+            <p style="font-size: 11px; font-weight: 600; margin: 0 0 8px; color: #10B981;">✅ Pedido #${data.orderId.slice(-6)}</p>
+            <p style="font-size: 10px; color: var(--muted); margin: 0;">Qualidade: ${data.qualityScore || 85}/100</p>
+            <button onclick="carregarDocumentosParaRevisar()" style="width: 100%; padding: 6px; margin-top: 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #10B981; font-size: 10px; font-weight: 600; cursor: pointer;">
+              → Revisar
+            </button>
+          </div>
+        `;
+      }
+    }
+    document.getElementById('fila-prontos-items').innerHTML = htmlProntos;
+  } catch (e) {
+    console.error('Erro ao monitorar fila:', e);
+  }
+}
+
+// ============ V2.5: REVISAR DOCUMENTOS ============
+
+async function carregarDocumentosParaRevisar() {
+  try {
+    const snap = await db.collectionGroup('document_generations')
+      .where('status', '==', 'gerada')
+      .orderBy('terminouEm', 'desc')
+      .get();
+    
+    const lista = document.getElementById('revisar-docs-list');
+    const count = document.getElementById('revisar-count');
+    count.textContent = snap.size;
+    
+    if (snap.empty) {
+      lista.innerHTML = '<p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">Nenhum documento para revisar</p>';
+      return;
+    }
+    
+    let html = '';
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      const orderId = doc.ref.parent.parent.id;
+      
+      html += `
+        <div style="background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div>
+              <p style="font-size: 13px; font-weight: 600; margin: 0; color: var(--text);">#${orderId.slice(-6)}</p>
+              <p style="font-size: 11px; color: var(--muted); margin: 4px 0 0 0;">Qualidade: ${data.qualityScore || 85}/100</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="window.open('${data.documentoUrl}', '_blank')" style="flex: 1; padding: 8px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 6px; color: var(--indigo2); font-size: 11px; font-weight: 600; cursor: pointer;">
+              👁️ Preview
+            </button>
+            <button onclick="aprovarDocumento('${orderId}', '${doc.id}')" style="flex: 1; padding: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; color: #10B981; font-size: 11px; font-weight: 600; cursor: pointer;">
+              ✅ Aprovar
+            </button>
+            <button onclick="reprovarDocumento('${orderId}', '${doc.id}')" style="flex: 1; padding: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; color: #DC2626; font-size: 11px; font-weight: 600; cursor: pointer;">
+              ❌ Reprovar
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    
+    lista.innerHTML = html;
+  } catch (e) {
+    console.error('Erro ao carregar documentos:', e);
+  }
+}
+
+async function aprovarDocumento(orderId, generationId) {
+  try {
+    await db.collection('orders').doc(orderId)
+      .collection('document_generations').doc(generationId)
+      .update({ status: "aprovada" });
+    
+    await db.collection('orders').doc(orderId).update({
+      solicitacaoStatus: "pronta_cliente"
+    });
+    
+    toast('✅ Documento aprovado! Cliente será notificado.', 'success');
+    carregarDocumentosParaRevisar();
+  } catch (e) {
+    toast('Erro ao aprovar', 'error');
+  }
+}
+
+async function reprovarDocumento(orderId, generationId) {
+  const motivo = prompt('Motivo da rejeição:');
+  if (!motivo) return;
+  
+  try {
+    await db.collection('orders').doc(orderId)
+      .collection('document_generations').doc(generationId)
+      .update({ status: "rejeitada", motivo: motivo });
+    
+    // Enfileira novamente
+    await db.collection('ia_fila').add({
+      orderId: orderId,
+      generationId: generationId,
+      status: "aguardando_processamento",
+      tentativa: 2,
+      motivo: motivo,
+      enqueuedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    toast('⚠️ Documento rejeitado. IA vai refazer...', 'success');
+    carregarDocumentosParaRevisar();
+    monitorarIAFila();
+  } catch (e) {
+    toast('Erro ao reprovar', 'error');
   }
 }
 
