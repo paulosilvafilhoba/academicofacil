@@ -385,7 +385,7 @@ body.dark-mode footer{background:#03040A}
     </div>
 
     <a href="/dashboard" class="nav-cta nav-cta-ghost">Entrar</a>
-    <a href="/dashboard" class="nav-cta">Solicitar agora</a>
+    <a href="/orcamento" class="nav-cta">Solicitar agora</a>
   </div>
 </nav>
 
@@ -404,7 +404,7 @@ body.dark-mode footer{background:#03040A}
       <h1>Seu TCC, artigo ou<br>monografia <span class="grad">orientado<br>com expertise.</span></h1>
       <p class="hero-sub">Consultores especializados + plataforma digital segura. Orientação metodológica, revisão, formatação ABNT e apoio à pesquisa — do técnico ao doutorado.</p>
       <div class="hero-btns">
-        <a href="/dashboard" class="btn-glow">Solicitar assessoria agora →</a>
+        <a href="/orcamento" class="btn-glow">Solicitar assessoria agora →</a>
         <a href="#como-funciona" class="btn-outline">Ver como funciona →</a>
       </div>
     </div>
@@ -729,7 +729,7 @@ body.dark-mode footer{background:#03040A}
         <li>2 rodadas de revisão</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="/dashboard" class="price-cta cta-outline">Solicitar orçamento</a>
+      <a href="/orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
     </div>
     <div class="price-card featured">
       <div class="feat-badge">Mais solicitado</div>
@@ -744,7 +744,7 @@ body.dark-mode footer{background:#03040A}
         <li>3 rodadas de revisão</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="/dashboard" class="price-cta cta-solid">Solicitar orçamento</a>
+      <a href="/orcamento" class="price-cta cta-solid">Solicitar orçamento</a>
     </div>
     <div class="price-card">
       <h3>Pós / MBA</h3>
@@ -758,7 +758,7 @@ body.dark-mode footer{background:#03040A}
         <li>Suporte para defesa oral</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="/dashboard" class="price-cta cta-outline">Solicitar orçamento</a>
+      <a href="/orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
     </div>
   </div>
 </section>
@@ -1479,7 +1479,7 @@ function cbProcess(text){
         const msgs=document.getElementById('cb-msgs');
         const div=document.createElement('div');
         div.className='cbmsg bot';
-        div.innerHTML=`<div class="cbmsg-av">🤖</div><div><a href="/dashboard" style="display:inline-block;margin-top:4px;padding:10px 22px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border-radius:100px;text-decoration:none;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(99,102,241,.4)">Solicitar assessoria →</a></div>`;
+        div.innerHTML=`<div class="cbmsg-av">🤖</div><div><a href="/orcamento" style="display:inline-block;margin-top:4px;padding:10px 22px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border-radius:100px;text-decoration:none;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(99,102,241,.4)">Solicitar assessoria →</a></div>`;
         msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
       },200);
     });return;
@@ -1572,7 +1572,7 @@ function enviar(){
   const email=document.getElementById('email').value;
   const tipo=document.getElementById('tipo').value;
   if(!email||!tipo){alert('Preencha o tipo de trabalho e seu e-mail para continuar.');return}
-  window.location.href = '/dashboard?email=' + encodeURIComponent(email) + '&tipo=' + encodeURIComponent(tipo);
+  window.location.href = '/orcamento?email=' + encodeURIComponent(email) + '&tipo=' + encodeURIComponent(tipo);
 }
 function faq(btn){btn.closest('.faq-item').classList.toggle('open')}
 </script>
