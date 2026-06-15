@@ -69,50 +69,42 @@
 <body>
 
 <div class="container">
-  
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <div style="font-weight: 700; font-size: 18px; margin-bottom: 30px;">🎓 AcadêmicoFácil</div>
     
     <div id="nav-admin" class="hidden">
-      <div class="nav-item" onclick="switchRole('admin'); showPanel('admin-dash')">📊 Dashboard Admin</div>
-      <div class="nav-item" onclick="switchRole('admin'); showPanel('admin-cupons')">🎟️ Gerenciar Cupons</div>
-      <div class="nav-item" onclick="switchRole('admin'); showPanel('admin-pedidos')">📋 Pedidos</div>
+      <div class="nav-item" onclick="showPanel('admin-dash')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showPanel('admin-cupons')">🎟️ Cupons</div>
+      <div class="nav-item" onclick="showPanel('admin-pedidos')">📋 Pedidos</div>
     </div>
     
     <div id="nav-cliente" class="hidden">
-      <div class="nav-item" onclick="switchRole('cliente'); showPanel('cliente-novo')">✏️ Novo Pedido</div>
-      <div class="nav-item" onclick="switchRole('cliente'); showPanel('cliente-meus')">📋 Meus Pedidos</div>
+      <div class="nav-item" onclick="showPanel('cliente-novo')">✏️ Novo Pedido</div>
+      <div class="nav-item" onclick="showPanel('cliente-meus')">📋 Meus Pedidos</div>
     </div>
     
     <div class="nav-item" onclick="logout()" style="margin-top: 30px; background: rgba(220,38,38,0.1);">🚪 Sair</div>
   </div>
 
-  <!-- CONTENT -->
   <div class="content">
-    
-    <!-- ========== ADMIN ========== -->
-    
-    <!-- ADMIN: DASHBOARD -->
     <div id="panel-admin-dash" class="hidden">
-      <h2>📊 Dashboard Admin</h2>
+      <h2>📊 Dashboard</h2>
       <div class="grid">
         <div class="stat">
-          <div class="stat-label">Total de Pedidos</div>
+          <div class="stat-label">Pedidos</div>
           <div class="stat-value" id="stat-pedidos">0</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Receita Total</div>
+          <div class="stat-label">Receita</div>
           <div class="stat-value" id="stat-receita">R$ 0</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Cupons Ativos</div>
+          <div class="stat-label">Cupons</div>
           <div class="stat-value" id="stat-cupons">0</div>
         </div>
       </div>
     </div>
 
-    <!-- ADMIN: CUPONS -->
     <div id="panel-admin-cupons" class="hidden">
       <div class="card">
         <div class="card-title">🎟️ Gerenciar Cupons</div>
@@ -121,91 +113,83 @@
       </div>
     </div>
 
-    <!-- ADMIN: PEDIDOS -->
     <div id="panel-admin-pedidos" class="hidden">
       <div class="card">
-        <div class="card-title">📋 Pedidos Recentes</div>
+        <div class="card-title">📋 Pedidos</div>
         <div id="pedidos-lista"></div>
       </div>
     </div>
 
-    <!-- ========== CLIENTE ========== -->
-
-    <!-- CLIENTE: NOVO PEDIDO -->
     <div id="panel-cliente-novo" class="hidden">
       <div class="card">
         <div class="card-title">✏️ Novo Pedido</div>
         
         <div class="form-group">
-          <label>Tipo de Serviço</label>
+          <label>Tipo</label>
           <select id="select-servico" onchange="calcularValor()">
             <option value="">Selecione...</option>
             <option value="tecnico">TCC Técnico (R$25/lauda)</option>
             <option value="graduacao">TCC Graduação (R$35/lauda)</option>
-            <option value="pos">Pós / MBA (R$55/lauda)</option>
-            <option value="artigo">Artigo Científico (R$480)</option>
-            <option value="formatacao">Formatação ABNT (R$12/lauda)</option>
-            <option value="revisao">Revisão Textual (R$180)</option>
+            <option value="pos">Pós/MBA (R$55/lauda)</option>
+            <option value="artigo">Artigo (R$480)</option>
+            <option value="formatacao">Formatação (R$12/lauda)</option>
+            <option value="revisao">Revisão (R$180)</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>Número de Laudas</label>
+          <label>Laudas</label>
           <input id="input-laudas" type="number" placeholder="Ex: 10" onchange="calcularValor()">
         </div>
 
         <div class="form-group">
-          <label>Tema / Título do Trabalho</label>
+          <label>Tema</label>
           <input id="input-tema" placeholder="Tema do trabalho">
         </div>
 
         <div class="form-group">
-          <label>Descrição / Requisitos</label>
-          <textarea id="input-desc" placeholder="Detalhes do trabalho" style="height: 100px;"></textarea>
+          <label>Descrição</label>
+          <textarea id="input-desc" placeholder="Detalhes" style="height: 80px;"></textarea>
         </div>
 
         <div class="form-group">
-          <label>Cupom Promocional (opcional)</label>
-          <input id="input-cupom" placeholder="Ex: GRATIS001" onchange="aplicarCupom()" style="text-transform: uppercase;">
+          <label>Cupom</label>
+          <input id="input-cupom" placeholder="Cupom" style="text-transform: uppercase;" onchange="aplicarCupom()">
           <small id="cupom-msg" style="color: #94a3b8;"></small>
         </div>
 
         <div style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 15px 0;">
-          <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-            <span>Valor Base:</span>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Base:</span>
             <span id="valor-base">R$ 0</span>
           </div>
-          <div id="desconto-display" style="display: none; display: flex; justify-content: space-between; margin: 10px 0; color: #10b981;">
+          <div id="desconto-display" style="display: none; display: flex; justify-content: space-between; color: #10b981; margin: 10px 0;">
             <span>Desconto:</span>
             <span id="valor-desconto">- R$ 0</span>
           </div>
-          <div style="border-top: 1px solid #334155; padding-top: 10px; display: flex; justify-content: space-between; font-weight: 700; font-size: 16px;">
-            <span>Total a Pagar:</span>
+          <div style="border-top: 1px solid #334155; padding-top: 10px; display: flex; justify-content: space-between; font-weight: 700;">
+            <span>Total:</span>
             <span id="valor-total">R$ 0</span>
           </div>
         </div>
 
-        <button onclick="abrirModalPagamento()" style="width: 100%; padding: 15px; font-size: 16px;">Continuar para Pagamento →</button>
+        <button onclick="abrirModalPagamento()" style="width: 100%;">Continuar →</button>
       </div>
     </div>
 
-    <!-- CLIENTE: MEUS PEDIDOS -->
     <div id="panel-cliente-meus" class="hidden">
       <div class="card">
         <div class="card-title">📋 Meus Pedidos</div>
         <div id="meus-pedidos-lista"></div>
       </div>
     </div>
-
   </div>
-
 </div>
 
-<!-- MODAL: NOVO CUPOM -->
 <div id="modal-cupom" class="hidden modal">
   <div class="modal-content">
-    <h3 style="margin-bottom: 20px;">Novo Cupom</h3>
-    <input id="input-codigo" placeholder="Código (ex: GRATIS001)" style="text-transform: uppercase;">
+    <h3>Novo Cupom</h3>
+    <input id="input-codigo" placeholder="Código" style="text-transform: uppercase; margin-top: 15px;">
     <input id="input-desconto" type="number" placeholder="Desconto %" min="0" max="100">
     <div style="display: flex; gap: 10px; margin-top: 20px;">
       <button onclick="salvarCupom()" style="flex: 1;">Salvar</button>
@@ -214,32 +198,29 @@
   </div>
 </div>
 
-<!-- MODAL: PAGAMENTO -->
 <div id="modal-pagamento" class="hidden modal">
   <div class="modal-content">
-    <h3 style="margin-bottom: 20px;">Resumo do Pedido</h3>
-    
-    <div style="background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      <div style="margin: 8px 0;"><strong id="resumo-servico">-</strong></div>
-      <div style="margin: 8px 0; font-size: 12px; color: #94a3b8;" id="resumo-tema">-</div>
-      <div style="margin: 8px 0; font-size: 12px; color: #94a3b8;" id="resumo-laudas">-</div>
+    <h3>Resumo do Pedido</h3>
+    <div style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 15px 0;">
+      <div><strong id="resumo-servico">-</strong></div>
+      <div style="font-size: 12px; color: #94a3b8; margin-top: 10px;" id="resumo-tema">-</div>
       <div style="border-top: 1px solid #334155; margin-top: 10px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: 700;">
         <span>Total:</span>
         <span id="resumo-total">R$ 0</span>
       </div>
     </div>
 
-    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 15px;">
-      <input type="radio" name="metodo-pag" value="cartao" checked onchange="selecionarMetodo('cartao')">
-      💳 Cartão de Crédito (Mercado Pago)
+    <label style="display: flex; align-items: center; gap: 8px; margin: 15px 0;">
+      <input type="radio" name="metodo-pag" value="cartao" checked>
+      💳 Cartão (Mercado Pago)
     </label>
 
-    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 20px;">
-      <input type="radio" name="metodo-pag" value="teste" onchange="selecionarMetodo('teste')">
-      🧪 Pedido de Teste (sem pagar)
+    <label style="display: flex; align-items: center; gap: 8px; margin: 15px 0;">
+      <input type="radio" name="metodo-pag" value="teste">
+      🧪 Teste
     </label>
 
-    <button id="btn-pagar" onclick="processarPagamento()" style="width: 100%; padding: 15px; font-size: 16px;">Ir para Mercado Pago →</button>
+    <button id="btn-pagar" onclick="processarPagamento()" style="width: 100%;">Pagar →</button>
     <button onclick="fecharModal('modal-pagamento')" style="width: 100%; margin-top: 10px; background: #334155;">Cancelar</button>
   </div>
 </div>
@@ -259,12 +240,9 @@ const db = firebase.firestore();
 
 let currentUser = null;
 let usuarioAdmin = false;
-let currentRole = null;
 let pendingOrder = null;
 let cupomAplicado = null;
-let selectedPayMethod = 'cartao';
 
-// PREÇOS IGUAIS À API
 const PRECOS = {
   'tecnico': 25,
   'graduacao': 35,
@@ -274,10 +252,7 @@ const PRECOS = {
   'revisao': 180
 };
 
-const TIPO_FIXO = {
-  'artigo': true,
-  'revisao': true
-};
+const TIPO_FIXO = { 'artigo': true, 'revisao': true };
 
 auth.onAuthStateChanged(async user => {
   if (!user) {
@@ -286,7 +261,6 @@ auth.onAuthStateChanged(async user => {
   }
   
   currentUser = user;
-  
   const docUser = await db.collection('users').doc(user.uid).get();
   usuarioAdmin = docUser.exists && docUser.data().admin;
   
@@ -300,29 +274,21 @@ auth.onAuthStateChanged(async user => {
   }
 });
 
-function switchRole(role) {
-  currentRole = role;
-}
-
-function showPanel(panelId) {
+function showPanel(id) {
   document.querySelectorAll('[id^="panel-"]').forEach(p => p.classList.add('hidden'));
-  document.getElementById('panel-' + panelId).classList.remove('hidden');
+  document.getElementById('panel-' + id).classList.remove('hidden');
   
-  if (panelId === 'admin-cupons') carregarCupons();
-  if (panelId === 'admin-pedidos') carregarPedidosAdmin();
-  if (panelId === 'cliente-meus') carregarMeusPedidos();
+  if (id === 'admin-cupons') carregarCupons();
+  if (id === 'admin-pedidos') carregarPedidosAdmin();
+  if (id === 'cliente-meus') carregarMeusPedidos();
 }
-
-// ========== ADMIN ==========
 
 async function carregarDadosAdmin() {
   const pedidos = await db.collection('orders').get();
   document.getElementById('stat-pedidos').textContent = pedidos.size;
   
   let total = 0;
-  pedidos.forEach(doc => {
-    total += (doc.data().valor || 0);
-  });
+  pedidos.forEach(doc => total += (doc.data().valor || 0));
   document.getElementById('stat-receita').textContent = 'R$ ' + total.toFixed(2);
   
   const cupons = await db.collection('PROMOCOES').get();
@@ -333,45 +299,30 @@ async function carregarDadosAdmin() {
 async function carregarCupons() {
   const snap = await db.collection('PROMOCOES').get();
   let html = '';
-  
   snap.forEach(doc => {
     const d = doc.data();
-    html += `
-      <div class="cupom-item">
-        <div>
-          <div class="cupom-code">${d.code || 'SEM CÓDIGO'}</div>
-          <div class="cupom-desc">Desconto: ${d.discount || 0}%</div>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <div class="toggle ${d.active ? 'active' : ''}" onclick="toggleCupom('${doc.id}', ${!d.active})">
-            <span></span>
-          </div>
-          <button class="danger" onclick="deletarCupom('${doc.id}')" style="padding: 6px 10px; font-size: 12px;">Delete</button>
-        </div>
+    html += `<div class="cupom-item">
+      <div>
+        <div class="cupom-code">${d.code}</div>
+        <div class="cupom-desc">${d.discount}%</div>
       </div>
-    `;
+      <div style="display: flex; gap: 10px;">
+        <div class="toggle ${d.active ? 'active' : ''}" onclick="toggleCupom('${doc.id}', ${!d.active})"><span></span></div>
+        <button class="danger" onclick="deletarCupom('${doc.id}')" style="padding: 6px 10px; font-size: 11px;">Delete</button>
+      </div>
+    </div>`;
   });
-  
-  document.getElementById('cupons-lista').innerHTML = html || '<p class="error">Nenhum cupom</p>';
+  document.getElementById('cupons-lista').innerHTML = html || '<p class="error">Nenhum</p>';
 }
 
 async function carregarPedidosAdmin() {
   const snap = await db.collection('orders').orderBy('createdAt', 'desc').limit(20).get();
   let html = '';
-  
   snap.forEach(doc => {
     const d = doc.data();
-    html += `
-      <div class="pedido-item">
-        <strong>${d.servico || 'Serviço'}</strong> - #${doc.id.substring(0, 8).toUpperCase()}
-        <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">
-          Cliente: ${d.clientName || 'Anônimo'} | R$ ${d.valor || 0} | ${d.status || 'indefinido'}
-        </div>
-      </div>
-    `;
+    html += `<div class="pedido-item"><strong>${d.servico}</strong> - #${doc.id.substring(0, 8).toUpperCase()}<div style="font-size: 11px; color: #94a3b8; margin-top: 5px;">R$ ${d.valor} | ${d.status}</div></div>`;
   });
-  
-  document.getElementById('pedidos-lista').innerHTML = html || '<p class="error">Nenhum pedido</p>';
+  document.getElementById('pedidos-lista').innerHTML = html || '<p>-</p>';
 }
 
 function abrirModalCupom() {
@@ -383,7 +334,7 @@ async function salvarCupom() {
   const desconto = parseInt(document.getElementById('input-desconto').value);
   
   if (!codigo || !desconto) {
-    toast('Preecha todos os campos', 'error');
+    alert('Preencha os campos');
     return;
   }
   
@@ -394,36 +345,25 @@ async function salvarCupom() {
       active: true,
       createdAt: new Date()
     });
-    toast('✅ Cupom criado!', 'success');
-    fecharModal('modal-cupom');
     document.getElementById('input-codigo').value = '';
     document.getElementById('input-desconto').value = '';
+    fecharModal('modal-cupom');
     carregarCupons();
   } catch (e) {
-    toast('❌ Erro: ' + e.message, 'error');
+    alert('Erro: ' + e.message);
   }
 }
 
-async function toggleCupom(docId, ativo) {
-  try {
-    await db.collection('PROMOCOES').doc(docId).update({active: ativo});
-    carregarCupons();
-  } catch (e) {
-    toast('Erro: ' + e.message, 'error');
-  }
+async function toggleCupom(id, ativo) {
+  await db.collection('PROMOCOES').doc(id).update({active: ativo});
+  carregarCupons();
 }
 
-async function deletarCupom(docId) {
-  if (!confirm('Deletar cupom?')) return;
-  try {
-    await db.collection('PROMOCOES').doc(docId).delete();
-    carregarCupons();
-  } catch (e) {
-    toast('Erro: ' + e.message, 'error');
-  }
+async function deletarCupom(id) {
+  if (!confirm('Deletar?')) return;
+  await db.collection('PROMOCOES').doc(id).delete();
+  carregarCupons();
 }
-
-// ========== CLIENTE ==========
 
 function calcularValor() {
   const servico = document.getElementById('select-servico').value;
@@ -435,27 +375,12 @@ function calcularValor() {
     return;
   }
   
-  let valorBase = 0;
-  
-  if (TIPO_FIXO[servico]) {
-    // Preço fixo (artigo, revisao)
-    valorBase = PRECOS[servico];
-  } else {
-    // Preço por lauda
-    if (laudas <= 0) {
-      document.getElementById('valor-base').textContent = 'R$ 0';
-      document.getElementById('valor-total').textContent = 'R$ 0';
-      return;
-    }
-    valorBase = PRECOS[servico] * laudas;
-  }
-  
+  let valorBase = TIPO_FIXO[servico] ? PRECOS[servico] : (laudas > 0 ? PRECOS[servico] * laudas : 0);
   let valorFinal = valorBase;
   
   if (cupomAplicado) {
     const desconto = valorBase * (cupomAplicado.discount / 100);
     valorFinal = valorBase - desconto;
-    
     document.getElementById('desconto-display').style.display = 'flex';
     document.getElementById('valor-desconto').textContent = '- R$ ' + desconto.toFixed(2);
   } else {
@@ -468,52 +393,35 @@ function calcularValor() {
 
 async function aplicarCupom() {
   const codigo = document.getElementById('input-cupom').value.trim().toUpperCase();
-  const msgElement = document.getElementById('cupom-msg');
+  const msg = document.getElementById('cupom-msg');
   
   if (!codigo) {
     cupomAplicado = null;
-    msgElement.textContent = '';
+    msg.textContent = '';
     calcularValor();
     return;
   }
   
-  try {
-    const snap = await db.collection('PROMOCOES').where('code', '==', codigo).limit(1).get();
-    
-    if (snap.empty) {
-      msgElement.textContent = '❌ Cupom inválido';
-      cupomAplicado = null;
-      calcularValor();
-      return;
-    }
-    
-    const cupom = snap.docs[0].data();
-    
-    if (!cupom.active) {
-      msgElement.textContent = '❌ Cupom expirado';
-      cupomAplicado = null;
-      calcularValor();
-      return;
-    }
-    
-    cupomAplicado = cupom;
-    msgElement.textContent = '✅ Cupom ' + codigo + ' aplicado (' + cupom.discount + '% OFF)!';
+  const snap = await db.collection('PROMOCOES').where('code', '==', codigo).limit(1).get();
+  
+  if (snap.empty || !snap.docs[0].data().active) {
+    msg.textContent = 'Inválido';
+    cupomAplicado = null;
     calcularValor();
-    
-  } catch (e) {
-    console.error('Erro:', e);
-    msgElement.textContent = '❌ Erro ao validar';
+    return;
   }
+  
+  cupomAplicado = snap.docs[0].data();
+  msg.textContent = '✅ ' + codigo;
+  calcularValor();
 }
 
 function abrirModalPagamento() {
   const servico = document.getElementById('select-servico').value;
-  const laudas = document.getElementById('input-laudas').value;
   const tema = document.getElementById('input-tema').value;
-  const desc = document.getElementById('input-desc').value;
   
-  if (!servico || (!TIPO_FIXO[servico] && !laudas) || !tema) {
-    toast('Preecha todos os campos obrigatórios', 'error');
+  if (!servico || !tema) {
+    alert('Preecha campos');
     return;
   }
   
@@ -522,102 +430,67 @@ function abrirModalPagamento() {
   
   pendingOrder = {
     servico: servico,
-    laudas: parseInt(laudas) || 0,
+    laudas: parseInt(document.getElementById('input-laudas').value) || 0,
     tema: tema,
-    desc: desc,
+    desc: document.getElementById('input-desc').value,
     valor: valorTotal,
     valorCheio: valorBase,
     descontoValor: valorBase - valorTotal,
-    descontoPct: cupomAplicado ? cupomAplicado.discount : 0,
-    isTeste: false
+    descontoPct: cupomAplicado ? cupomAplicado.discount : 0
   };
   
-  document.getElementById('resumo-servico').textContent = servico + (laudas ? ' — ' + laudas + ' laudas' : '');
-  document.getElementById('resumo-tema').textContent = 'Tema: ' + tema;
-  document.getElementById('resumo-laudas').textContent = desc ? 'Requisitos: ' + desc.substring(0, 100) : '';
+  document.getElementById('resumo-servico').textContent = servico + (pendingOrder.laudas ? ' — ' + pendingOrder.laudas + ' laudas' : '');
+  document.getElementById('resumo-tema').textContent = tema;
   document.getElementById('resumo-total').textContent = 'R$ ' + valorTotal.toFixed(2);
-  
   document.getElementById('modal-pagamento').classList.remove('hidden');
 }
 
-function selecionarMetodo(metodo) {
-  selectedPayMethod = metodo;
-  const btn = document.getElementById('btn-pagar');
-  
-  if (metodo === 'teste') {
-    btn.textContent = 'Confirmar Pedido de Teste';
-  } else {
-    btn.textContent = 'Ir para Mercado Pago →';
-  }
-}
-
 async function processarPagamento() {
+  const metodo = document.querySelector('input[name="metodo-pag"]:checked').value;
   const btn = document.getElementById('btn-pagar');
   btn.disabled = true;
   
-  if (!pendingOrder) return;
-  
   try {
-    if (selectedPayMethod === 'teste') {
-      pendingOrder.isTeste = true;
-      await salvarPedido('em_andamento');
-      toast('✅ Pedido de teste criado!', 'success');
+    if (metodo === 'teste') {
+      await salvarPedido('em_andamento', true);
+      alert('✅ Pedido de teste criado');
       fecharModal('modal-pagamento');
-      await new Promise(r => setTimeout(r, 1500));
       showPanel('cliente-meus');
-      await carregarMeusPedidos();
+      carregarMeusPedidos();
     } else {
-      await abrirMercadoPago();
+      const idToken = await auth.currentUser.getIdToken();
+      const resp = await fetch('/api/criar-preferencia', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + idToken
+        },
+        body: JSON.stringify({
+          tipo_servico: pendingOrder.servico,
+          laudas: pendingOrder.laudas,
+          valor: pendingOrder.valor,
+          tema: pendingOrder.tema
+        })
+      });
+      
+      const data = await resp.json();
+      if (data.init_point) {
+        await salvarPedido('aguardando_pagamento', false);
+        window.open(data.init_point, '_blank');
+        fecharModal('modal-pagamento');
+      } else {
+        alert('Erro: ' + data.error);
+      }
     }
   } catch (e) {
-    toast('❌ Erro: ' + e.message, 'error');
+    alert('Erro: ' + e.message);
   } finally {
     btn.disabled = false;
   }
 }
 
-async function abrirMercadoPago() {
-  const btn = document.getElementById('btn-pagar');
-  btn.disabled = true;
-  btn.textContent = 'Gerando link...';
-  
-  try {
-    const idToken = await auth.currentUser.getIdToken();
-    const resp = await fetch('/api/criar-preferencia', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + idToken
-      },
-      body: JSON.stringify({
-        tipo_servico: pendingOrder.servico,
-        laudas: pendingOrder.laudas,
-        valor: pendingOrder.valor,
-        valorCheio: pendingOrder.valorCheio,
-        tema: pendingOrder.tema,
-        desc: pendingOrder.desc
-      })
-    });
-    
-    const data = await resp.json();
-    
-    if (data.init_point) {
-      await salvarPedido('aguardando_pagamento');
-      window.open(data.init_point, '_blank');
-      fecharModal('modal-pagamento');
-      toast('Redirecionando para o Mercado Pago...', 'success');
-    } else {
-      throw new Error(data.error || 'Sem link de pagamento');
-    }
-  } catch (e) {
-    toast('❌ Erro ao gerar link: ' + e.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Ir para Mercado Pago →';
-  }
-}
-
-async function salvarPedido(status) {
-  const ref = await db.collection('orders').add({
+async function salvarPedido(status, isTeste) {
+  await db.collection('orders').add({
     clientId: currentUser.uid,
     clientEmail: currentUser.email,
     clientName: currentUser.displayName || currentUser.email,
@@ -629,54 +502,30 @@ async function salvarPedido(status) {
     valorCheio: pendingOrder.valorCheio,
     descontoValor: pendingOrder.descontoValor,
     descontoPct: pendingOrder.descontoPct,
-    isTeste: pendingOrder.isTeste || false,
+    isTeste: isTeste,
     status: status,
-    pagamento: selectedPayMethod,
+    pagamento: isTeste ? 'teste' : 'cartao',
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
-  
   pendingOrder = null;
-  return ref.id;
 }
 
 async function carregarMeusPedidos() {
-  const snap = await db.collection('orders')
-    .where('clientId', '==', currentUser.uid)
-    .orderBy('createdAt', 'desc')
-    .get();
-  
+  const snap = await db.collection('orders').where('clientId', '==', currentUser.uid).orderBy('createdAt', 'desc').get();
   let html = '';
   snap.forEach(doc => {
     const d = doc.data();
-    html += `
-      <div class="pedido-item">
-        <strong>${d.servico || 'Serviço'}</strong> ${d.laudas ? '— ' + d.laudas + ' laudas' : ''}
-        <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">
-          R$ ${d.valor.toFixed(2)} | ${d.status || 'indefinido'} | #${doc.id.substring(0, 8).toUpperCase()}
-        </div>
-      </div>
-    `;
+    html += `<div class="pedido-item"><strong>${d.servico}</strong> ${d.laudas ? '— ' + d.laudas + ' laudas' : ''}<div style="font-size: 11px; color: #94a3b8; margin-top: 5px;">R$ ${d.valor.toFixed(2)} | ${d.status} | #${doc.id.substring(0, 8).toUpperCase()}</div></div>`;
   });
-  
-  document.getElementById('meus-pedidos-lista').innerHTML = html || '<p class="error">Nenhum pedido ainda</p>';
+  document.getElementById('meus-pedidos-lista').innerHTML = html || '<p>-</p>';
 }
 
-function fecharModal(modalId) {
-  document.getElementById(modalId).classList.add('hidden');
+function fecharModal(id) {
+  document.getElementById(id).classList.add('hidden');
 }
 
 function logout() {
-  auth.signOut().then(() => {
-    window.location.href = '/';
-  });
-}
-
-function toast(msg, type = 'success') {
-  const div = document.createElement('div');
-  div.className = 'toast ' + (type === 'error' ? 'error' : '');
-  div.textContent = msg;
-  document.body.appendChild(div);
-  setTimeout(() => div.remove(), 3000);
+  auth.signOut().then(() => window.location.href = '/');
 }
 </script>
 
