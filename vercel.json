@@ -1,13 +1,10 @@
 {
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/orcamento", "destination": "/orcamento.html" },
+    { "source": "/admin-orcamentos", "destination": "/admin-orcamentos.html" },
     { "source": "/privacidade", "destination": "/privacidade.html" },
-    { "source": "/termos", "destination": "/termos.html" },
-    { "source": "/agentes", "destination": "/agentes.html" },
-    { "source": "/agentes/educacional", "destination": "/agentes/educacional.html" },
-    { "source": "/agentes/corporativo", "destination": "/agentes/corporativo.html" },
-    { "source": "/agente-academico", "destination": "/agente-academico.html" },
-    { "source": "/agente/:nome", "destination": "/agente.html" }
+    { "source": "/termos", "destination": "/termos.html" }
   ],
   "cleanUrls": true,
   "trailingSlash": false,
@@ -15,7 +12,7 @@
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://academicofacil.com.br" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
