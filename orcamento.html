@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orçamento — AcadêmicoFácil</title>
+<meta name="description" content="Solicite orçamento para TCC, monografia, artigo, revisão ou formatação ABNT.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F0F4F8;--bg2:#E1E8F0;--surface:#fff;--border:rgba(99,102,241,.16);--border2:rgba(99,102,241,.32);--indigo:#4F46E5;--indigo2:#6366F1;--cyan:#06B6D4;--green:#10B981;--gold:#D97706;--red:#EF4444;--text:#1E293B;--muted:#64748B;--radius:16px;--shadow:0 18px 60px rgba(99,102,241,.12)}
+body{font-family:Inter,sans-serif;background:linear-gradient(135deg,#F0F4F8,#E8EEF8);color:var(--text);min-height:100vh;line-height:1.55}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;line-height:1.15}
+.bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.35}.o1{width:420px;height:420px;background:#6366F1;top:-160px;right:-120px}.o2{width:320px;height:320px;background:#22D3EE;bottom:-130px;left:-80px}
+nav{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 6%;background:rgba(255,255,255,.72);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);font-family:'Space Grotesk';font-weight:800;font-size:20px}.logo-mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--indigo),var(--cyan));display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;box-shadow:0 10px 24px rgba(79,70,229,.22)}
+.nav-actions{display:flex;gap:10px;align-items:center}.btn{border:0;border-radius:999px;padding:13px 22px;font-weight:700;font-family:'Space Grotesk';cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.2s}.btn-primary{background:linear-gradient(135deg,var(--indigo),#4338CA);color:#fff;box-shadow:0 12px 26px rgba(79,70,229,.24)}.btn-primary:hover{transform:translateY(-2px)}.btn-ghost{background:rgba(99,102,241,.08);color:var(--indigo);border:1px solid var(--border2)}
+main{position:relative;z-index:1;padding:48px 6% 80px}.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:start}
+.hero{margin-bottom:28px}.badge{display:inline-flex;gap:8px;align-items:center;background:rgba(99,102,241,.08);border:1px solid var(--border2);color:var(--indigo);border-radius:999px;padding:7px 16px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:18px}.dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 0 5px rgba(16,185,129,.13)}
+h1{font-size:clamp(32px,5vw,58px);letter-spacing:-.035em;margin-bottom:16px}.grad{background:linear-gradient(90deg,var(--indigo),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.sub{font-size:17px;color:var(--muted);max-width:680px}
+.card{background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.card-head{padding:24px 28px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(34,211,238,.06))}.card-head h2{font-size:22px}.card-head p{font-size:13px;color:var(--muted);margin-top:6px}
+.form{padding:28px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.fg{margin-bottom:16px}label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--muted);margin-bottom:7px}input,select,textarea{width:100%;border:1.5px solid var(--border);background:#fff;border-radius:12px;padding:13px 14px;font:14px Inter;color:var(--text);outline:none;transition:.2s}textarea{min-height:104px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--indigo);box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+.upload{border:1.5px dashed var(--border2);border-radius:14px;padding:18px;text-align:center;background:rgba(99,102,241,.04);cursor:pointer}.upload strong{color:var(--indigo)}.small{font-size:12px;color:var(--muted)}
+.summary{position:sticky;top:100px}.sum-body{padding:24px}.price{font-family:'Space Grotesk';font-size:42px;font-weight:800;background:linear-gradient(90deg,var(--indigo),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:10px 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid rgba(99,102,241,.12);font-size:13px}.row span:first-child{color:var(--muted)}.row strong{text-align:right}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.pay button{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;font-weight:800;color:var(--text)}.pay button.active{border-color:var(--indigo);background:rgba(99,102,241,.08);color:var(--indigo)}
+.status{display:none;margin-top:16px;padding:16px;border-radius:14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);color:#047857;font-size:13px}.status.err{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);color:#B91C1C}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:26px}.step{background:rgba(255,255,255,.75);border:1px solid var(--border);border-radius:14px;padding:16px}.step b{font-family:'Space Grotesk'}.step p{font-size:12px;color:var(--muted);margin-top:5px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.summary{position:static}.grid2{grid-template-columns:1fr}nav{padding:0 4%}main{padding:32px 4% 60px}.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div></div>
+<nav><a href="/" class="logo"><span class="logo-mark">🎓</span>AcadêmicoFácil</a><div class="nav-actions"><a class="btn btn-ghost" href="/dashboard">Entrar</a></div></nav>
+<main>
+  <div class="hero"><div class="badge"><span class="dot"></span> Orçamento online</div><h1>Solicite sua assessoria <span class="grad">acadêmica</span></h1><p class="sub">Preencha o formulário, revise o valor estimado e finalize o pagamento. O pedido ficará disponível para verificação administrativa e envio ao agente consultor.</p></div>
+  <div class="wrap">
+    <section class="card">
+      <div class="card-head"><h2>Dados do orçamento</h2><p>Quanto melhor o briefing, melhor será a proposta e o documento final.</p></div>
+      <div class="form">
+        <div class="grid2"><div class="fg"><label>Nome completo</label><input id="nome" placeholder="Seu nome"></div><div class="fg"><label>E-mail</label><input id="email" type="email" placeholder="voce@email.com"></div></div>
+        <div class="grid2"><div class="fg"><label>WhatsApp</label><input id="whatsapp" placeholder="(71) 9 0000-0000"></div><div class="fg"><label>Instituição</label><input id="instituicao" placeholder="Ex.: UNIME, SENAI, UFBA..."></div></div>
+        <div class="grid2"><div class="fg"><label>Tipo de serviço</label><select id="tipo" onchange="calcular()"><option value="">Selecione</option><option value="tecnico">TCC Técnico — R$ 25/lauda</option><option value="graduacao">TCC Graduação — R$ 35/lauda</option><option value="pos">Pós / MBA — R$ 55/lauda</option><option value="artigo">Artigo Científico — R$ 480</option><option value="formatacao">Formatação ABNT — R$ 12/lauda</option><option value="revisao">Revisão Textual — R$ 180</option></select></div><div class="fg"><label>Número de laudas</label><input id="laudas" type="number" min="1" max="500" placeholder="Ex.: 40" oninput="calcular()"></div></div>
+        <div class="grid2"><div class="fg"><label>Prazo desejado</label><select id="prazo" onchange="calcular()"><option value="normal">Normal — 15+ dias</option><option value="rapido">Rápido — 7 a 14 dias (+15%)</option><option value="urgente">Urgente — 3 a 6 dias (+30%)</option></select></div><div class="fg"><label>Área / Curso</label><input id="area" placeholder="Ex.: Administração, Direito, TI..."></div></div>
+        <div class="fg"><label>Tema ou título provisório</label><input id="tema" placeholder="Ex.: Gestão de pessoas na era digital"></div>
+        <div class="fg"><label>Descrição do que precisa</label><textarea id="descricao" placeholder="Cole aqui orientações do professor, normas, estrutura esperada, data da entrega, tipo de pesquisa, objetivos etc."></textarea></div>
+        <div class="fg"><label>Documento de apoio opcional</label><div class="upload" onclick="document.getElementById('arquivo').click()"><input id="arquivo" type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" style="display:none" onchange="mostrarArquivo()"><div style="font-size:28px">📎</div><strong>Clique para anexar</strong><p class="small" id="arquivoNome">PDF, DOCX, TXT ou imagem — até 20MB</p></div></div>
+      </div>
+    </section>
+    <aside class="card summary">
+      <div class="card-head"><h2>Resumo</h2><p>Confira antes de prosseguir.</p></div>
+      <div class="sum-body">
+        <div class="row"><span>Serviço</span><strong id="sServico">—</strong></div><div class="row"><span>Laudas</span><strong id="sLaudas">—</strong></div><div class="row"><span>Prazo</span><strong id="sPrazo">Normal</strong></div>
+        <div class="price" id="valor">—</div><p class="small">Valor estimado. Pode ser ajustado pelo administrador após análise do briefing.</p>
+        <div class="pay"><button id="pay-pix" class="active" onclick="setPay('pix')">💠 Pix</button><button id="pay-card" onclick="setPay('card')">💳 Cartão</button></div>
+        <button class="btn btn-primary" style="width:100%" id="btnEnviar" onclick="enviarOrcamento()">Enviar orçamento e pagar →</button>
+        <div class="status" id="statusBox"></div>
+      </div>
+    </aside>
+  </div>
+  <div class="steps"><div class="step"><b>1. Cliente preenche</b><p>Dados, tema, laudas, prazo e anexos.</p></div><div class="step"><b>2. Pagamento</b><p>Pix ou cartão pelo Mercado Pago.</p></div><div class="step"><b>3. Admin verifica</b><p>Pedido entra em triagem e pode ser enviado ao agente consultor.</p></div></div>
+</main>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAr8wl8rH_P0n6fEDhOVuqBif7YeTWmgsA",
+  authDomain: "academicofacil-87df6.firebaseapp.com",
+  projectId: "academicofacil-87df6",
+  storageBucket: "academicofacil-87df6.firebasestorage.app",
+  messagingSenderId: "854141046481",
+  appId: "1:854141046481:web:5cd46b7c7aeb9801cd3ff0"
+};
+firebase.initializeApp(firebaseConfig);const db=firebase.firestore();const storage=firebase.storage();
+const precos={tecnico:{pl:25,n:'TCC Técnico'},graduacao:{pl:35,n:'TCC Graduação'},pos:{pl:55,n:'Pós / MBA'},artigo:{fx:480,n:'Artigo Científico'},formatacao:{pl:12,n:'Formatação ABNT'},revisao:{fx:180,n:'Revisão Textual'}};
+let metodo='pix',valorAtual=0,arquivoSelecionado=null;
+function qs(k){return new URLSearchParams(location.search).get(k)||''}
+window.addEventListener('load',()=>{['email','tipo','laudas','prazo'].forEach(k=>{const v=qs(k); if(v&&document.getElementById(k)) document.getElementById(k).value=v;});calcular();});
+function setPay(m){metodo=m;document.getElementById('pay-pix').classList.toggle('active',m==='pix');document.getElementById('pay-card').classList.toggle('active',m==='card');document.getElementById('btnEnviar').textContent=m==='pix'?'Enviar orçamento e gerar Pix →':'Enviar orçamento e pagar no cartão →';}
+function calcular(){const tipo=document.getElementById('tipo').value;const laudas=parseInt(document.getElementById('laudas').value)||0;const prazo=document.getElementById('prazo').value;const p=precos[tipo];let total=0;if(p) total=p.fx||(p.pl*laudas);if(total&&prazo==='rapido') total=Math.round(total*1.15);if(total&&prazo==='urgente') total=Math.round(total*1.30);valorAtual=total||0;document.getElementById('valor').textContent=valorAtual?'R$ '+valorAtual.toLocaleString('pt-BR'):'—';document.getElementById('sServico').textContent=p?p.n:'—';document.getElementById('sLaudas').textContent=laudas||'—';document.getElementById('sPrazo').textContent=({normal:'Normal',rapido:'Rápido',urgente:'Urgente'})[prazo]||'Normal';}
+function mostrarArquivo(){arquivoSelecionado=document.getElementById('arquivo').files[0]||null;document.getElementById('arquivoNome').textContent=arquivoSelecionado?arquivoSelecionado.name:'PDF, DOCX, TXT ou imagem — até 20MB';}
+function msg(t,err=false){const b=document.getElementById('statusBox');b.className='status '+(err?'err':'');b.style.display='block';b.innerHTML=t;}
+async function enviarOrcamento(){const btn=document.getElementById('btnEnviar');const nome=document.getElementById('nome').value.trim(),email=document.getElementById('email').value.trim(),tipo=document.getElementById('tipo').value,tema=document.getElementById('tema').value.trim();if(!nome||!email||!tipo||!valorAtual){msg('Preencha nome, e-mail, serviço e quantidade de laudas quando necessário.',true);return;}btn.disabled=true;btn.textContent='Registrando...';try{let arquivoUrl='',arquivoNome='';const ref=await db.collection('orcamentos').add({nome,email,whatsapp:document.getElementById('whatsapp').value.trim(),instituicao:document.getElementById('instituicao').value.trim(),tipo,servico:precos[tipo].n,laudas:parseInt(document.getElementById('laudas').value)||0,prazo:document.getElementById('prazo').value,area:document.getElementById('area').value.trim(),tema,descricao:document.getElementById('descricao').value.trim(),valor:valorAtual,metodoPagamento:metodo,status:'aguardando_pagamento',fluxo:'orcamento_cliente',enviadoAoConsultor:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});if(arquivoSelecionado){const up=storage.ref(`orcamentos/${ref.id}/${Date.now()}_${arquivoSelecionado.name}`);await up.put(arquivoSelecionado);arquivoUrl=await up.getDownloadURL();arquivoNome=arquivoSelecionado.name;await ref.update({arquivoUrl,arquivoNome});}
+const resp=await fetch('/api/criar-preferencia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({servico:precos[tipo].n,valor:valorAtual,email,uid:ref.id,tipo:metodo})});const data=await resp.json();if(!resp.ok) throw new Error(data.error||'Erro ao criar pagamento');if(metodo==='card'&&data.init_point){await ref.update({paymentLink:data.init_point});location.href=data.init_point;return;}if(metodo==='pix'){await ref.update({paymentId:data.payment_id||'',pixQr:data.qr_code||'',pixQrBase64:data.qr_code_base64||''});msg(`<b>Orçamento enviado!</b><br>Seu protocolo é <b>${ref.id}</b>.<br>${data.qr_code_base64?`<img alt="QR Pix" style="width:160px;height:160px;margin:12px auto;display:block;border-radius:10px;background:#fff;padding:8px" src="data:image/png;base64,${data.qr_code_base64}">`:''}${data.qr_code?`<textarea readonly style="height:80px;margin-top:8px">${data.qr_code}</textarea>`:'Pix gerado. Caso o QR Code não apareça, use a chave profpaulofilho@gmail.com.'}<br><br>Após pagar, o administrador verificará o pedido e enviará para o agente consultor.`);btn.textContent='Orçamento enviado';return;}msg('Orçamento registrado. Aguarde contato do administrador.');}catch(e){console.error(e);msg('Erro: '+e.message,true);btn.disabled=false;btn.textContent='Tentar novamente';}}
+</script>
+</body></html>
