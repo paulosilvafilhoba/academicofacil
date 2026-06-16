@@ -385,7 +385,7 @@ body.dark-mode footer{background:#03040A}
     </div>
 
     <a href="/dashboard" class="nav-cta nav-cta-ghost">Entrar</a>
-    <a href="/orcamento" class="nav-cta">Solicitar agora</a>
+    <a href="#orcamento" class="nav-cta">Solicitar agora</a>
   </div>
 </nav>
 
@@ -404,7 +404,7 @@ body.dark-mode footer{background:#03040A}
       <h1>Seu TCC, artigo ou<br>monografia <span class="grad">orientado<br>com expertise.</span></h1>
       <p class="hero-sub">Consultores especializados + plataforma digital segura. Orientação metodológica, revisão, formatação ABNT e apoio à pesquisa — do técnico ao doutorado.</p>
       <div class="hero-btns">
-        <a href="/orcamento" class="btn-glow">Solicitar assessoria agora →</a>
+        <a href="#orcamento" class="btn-glow">Solicitar assessoria agora →</a>
         <a href="#como-funciona" class="btn-outline">Ver como funciona →</a>
       </div>
     </div>
@@ -729,7 +729,7 @@ body.dark-mode footer{background:#03040A}
         <li>2 rodadas de revisão</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="/orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
+      <a href="#orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
     </div>
     <div class="price-card featured">
       <div class="feat-badge">Mais solicitado</div>
@@ -744,7 +744,7 @@ body.dark-mode footer{background:#03040A}
         <li>3 rodadas de revisão</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="/orcamento" class="price-cta cta-solid">Solicitar orçamento</a>
+      <a href="#orcamento" class="price-cta cta-solid">Solicitar orçamento</a>
     </div>
     <div class="price-card">
       <h3>Pós / MBA</h3>
@@ -758,7 +758,7 @@ body.dark-mode footer{background:#03040A}
         <li>Suporte para defesa oral</li>
         <li>Entrega PDF e DOCX</li>
       </ul>
-      <a href="/orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
+      <a href="#orcamento" class="price-cta cta-outline">Solicitar orçamento</a>
     </div>
   </div>
 </section>
@@ -1479,7 +1479,7 @@ function cbProcess(text){
         const msgs=document.getElementById('cb-msgs');
         const div=document.createElement('div');
         div.className='cbmsg bot';
-        div.innerHTML=`<div class="cbmsg-av">🤖</div><div><a href="/orcamento" style="display:inline-block;margin-top:4px;padding:10px 22px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border-radius:100px;text-decoration:none;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(99,102,241,.4)">Solicitar assessoria →</a></div>`;
+        div.innerHTML=`<div class="cbmsg-av">🤖</div><div><a href="#orcamento" style="display:inline-block;margin-top:4px;padding:10px 22px;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border-radius:100px;text-decoration:none;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(99,102,241,.4)">Solicitar assessoria →</a></div>`;
         msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
       },200);
     });return;
@@ -1574,20 +1574,21 @@ async function enviar(){
   const laudas = document.getElementById('laudas').value;
   const prazo = document.getElementById('prazo').value;
   const valor = document.getElementById('priceOut').textContent;
+  const botao = document.querySelector('.btn-send');
 
-  const nomesTipos = {
-    tecnico: 'TCC Técnico',
-    graduacao: 'TCC Graduação',
-    pos: 'Pós-graduação / MBA',
-    artigo: 'Artigo Científico',
+  const tipoTexto = {
+    tecnico: 'TCC técnico',
+    graduacao: 'TCC graduação',
+    pos: 'Pós / MBA',
+    artigo: 'Artigo científico',
     formatacao: 'Formatação ABNT',
-    revisao: 'Revisão Textual'
+    revisao: 'Revisão textual'
   };
 
-  const nomesPrazos = {
-    normal: 'Normal',
-    rapido: 'Rápido (+15%)',
-    urgente: 'Urgente (+30%)'
+  const prazoTexto = {
+    normal: 'Normal — 15+ dias',
+    rapido: 'Rápido — 7 a 14 dias (+15%)',
+    urgente: 'Urgente — 3 a 6 dias (+30%)'
   };
 
   if(!email || !tipo){
@@ -1595,11 +1596,8 @@ async function enviar(){
     return;
   }
 
-  const botao = document.querySelector('.btn-send');
-  const textoOriginal = botao ? botao.textContent : '';
-
   try {
-    if(botao){
+    if (botao) {
       botao.disabled = true;
       botao.textContent = 'Enviando solicitação...';
     }
@@ -1609,39 +1607,32 @@ async function enviar(){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         nome: 'Lead do site AcadêmicoFácil',
-        email: email,
+        email,
         telefone: 'Não informado',
-        mensagem: `
-Nova solicitação de orçamento recebida pelo site AcadêmicoFácil.
-
-Tipo de trabalho: ${nomesTipos[tipo] || tipo}
-Quantidade de laudas: ${laudas || 'Não informado'}
-Prazo escolhido: ${nomesPrazos[prazo] || prazo}
-Valor estimado: ${valor || 'Não calculado'}
-E-mail do cliente: ${email}
-
-Ação recomendada: entrar em contato com o cliente para confirmar escopo, prazo, orientações do professor e forma de pagamento.
-        `.trim()
+        tipo: tipoTexto[tipo] || tipo,
+        laudas: laudas || 'Não informado',
+        prazo: prazoTexto[prazo] || prazo,
+        valor: valor || 'Não calculado',
+        mensagem: 'Solicitação enviada pela calculadora de orçamento do site AcadêmicoFácil.'
       })
     });
 
     const data = await resposta.json();
 
-    if(!resposta.ok){
-      console.error('Erro Resend:', data);
-      alert('Não foi possível enviar sua solicitação agora. Tente novamente em instantes ou fale pelo WhatsApp.');
+    if (!resposta.ok) {
+      console.error(data);
+      alert('Não foi possível enviar sua solicitação agora. Tente novamente em alguns minutos.');
       return;
     }
 
-    alert('Solicitação enviada com sucesso! Em breve entraremos em contato pelo e-mail informado.');
-
+    alert('Solicitação enviada com sucesso! Enviamos uma confirmação para seu e-mail. Em breve entraremos em contato.');
   } catch (erro) {
-    console.error('Erro ao enviar solicitação:', erro);
-    alert('Erro de conexão. Tente novamente ou fale pelo WhatsApp.');
+    console.error(erro);
+    alert('Erro de conexão. Tente novamente.');
   } finally {
-    if(botao){
+    if (botao) {
       botao.disabled = false;
-      botao.textContent = textoOriginal || 'Solicitar assessoria agora →';
+      botao.textContent = 'Solicitar assessoria agora →';
     }
   }
 }

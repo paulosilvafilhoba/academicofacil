@@ -1,32 +1,27 @@
-# Integração Resend - AcadêmicoFácil
+# AcadêmicoFácil - Integração Opção 1
 
-Arquivos incluídos:
+Este pacote contém a versão do site integrada com Cloudflare Email Routing + Resend.
 
-- `index.html`: arquivo completo da landing page com a função `enviar()` integrada ao endpoint `/api/send-email`.
-- `api/send-email.js`: função serverless da Vercel para envio via Resend.
+## Arquivos
 
-## Como publicar com segurança
+- `index.html`: página atualizada com o botão de orçamento enviando dados para `/api/send-email`.
+- `api/send-email.js`: função serverless da Vercel que envia:
+  1. Um e-mail interno para `paulosilvafilhoba@gmail.com`.
+  2. Uma confirmação automática para o e-mail informado pelo cliente.
 
-1. No GitHub, abra o repositório `academicofacil`.
-2. Substitua o `index.html` atual pelo arquivo `index.html` deste pacote.
-3. Confirme se existe a pasta `api` na raiz do projeto.
-4. Dentro da pasta `api`, coloque o arquivo `send-email.js`.
-5. Faça commit.
-6. Aguarde o deploy automático da Vercel.
-7. Teste a página de orçamento no site.
+## Como instalar
 
-## Variável obrigatória na Vercel
+1. No GitHub, substitua o arquivo `index.html` pelo arquivo deste pacote.
+2. No GitHub, substitua ou crie `api/send-email.js` com o arquivo deste pacote.
+3. Faça `Commit changes`.
+4. Aguarde o deploy automático da Vercel.
+5. Teste a API em:
+   `https://academicofacil.com.br/api/send-email`
 
-A variável abaixo precisa existir em `Settings > Environment Variables`:
+O resultado esperado no navegador é:
 
-```text
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxxx
+```json
+{"status":"API do AcadêmicoFácil funcionando","metodo":"GET"}
 ```
 
-## Teste esperado
-
-Ao preencher o orçamento e clicar em `Solicitar assessoria agora`, você deve receber um e-mail enviado por:
-
-```text
-AcadêmicoFácil <contato@academicofacil.com.br>
-```
+Depois teste o formulário de orçamento na página inicial.
