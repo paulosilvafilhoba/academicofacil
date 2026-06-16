@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
-
   if (req.method === 'GET') {
     return res.status(200).json({
-      status: 'API funcionando'
+      status: 'API do AcadêmicoFácil funcionando',
+      metodo: 'GET'
     });
   }
 
@@ -12,10 +12,22 @@ export default async function handler(req, res) {
     });
   }
 
-  // restante do código...
-}
+  try {
+    const { nome, email, telefone, mensagem } = req.body || {};
 
-    const response = await fetch('https://api.resend.com/emails', {
+    if (!nome || !email || !mensagem) {
+      return res.status(400).json({
+        error: 'Nome, e-mail e mensagem são obrigatórios.'
+      });
+    }
+
+    if (!process.env.RESEND_API_KEY) {
+      return res.status(500).json({
+        error: 'RESEND_API_KEY não configurada na Vercel.'
+      });
+    }
+
+    const resposta = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -37,22 +49,25 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
+    const data = await resposta.json();
 
-    if (!response.ok) {
+    if (!resposta.ok) {
       return res.status(500).json({
-        error: data.message || 'Erro ao enviar e-mail.'
+        error: data.message || 'Erro ao enviar pelo Resend.',
+        detalhe: data
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'E-mail enviado com sucesso.'
+      message: 'E-mail enviado com sucesso.',
+      data
     });
 
   } catch (error) {
     return res.status(500).json({
-      error: error.message
+      error: 'Erro interno na função.',
+      detalhe: error.message
     });
   }
 }
