@@ -37,14 +37,15 @@ export default async function handler(req, res) {
         from: 'AcadêmicoFácil <contato@academicofacil.com.br>',
         to: ['paulosilvafilhoba@gmail.com'],
         reply_to: email,
-        subject: `Novo contato - ${nome}`,
+        subject: `Nova solicitação AcadêmicoFácil - ${nome}`,
         html: `
-          <h2>Novo contato pelo AcadêmicoFácil</h2>
+          <h2>Nova solicitação pelo AcadêmicoFácil</h2>
           <p><strong>Nome:</strong> ${nome}</p>
           <p><strong>E-mail:</strong> ${email}</p>
           <p><strong>Telefone:</strong> ${telefone || 'Não informado'}</p>
           <p><strong>Mensagem:</strong></p>
-          <p>${mensagem}</p>
+          <p>${String(mensagem).replace(/
+/g, '<br>')}</p>
         `
       })
     });
