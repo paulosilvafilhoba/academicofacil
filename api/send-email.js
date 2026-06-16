@@ -1,16 +1,19 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
+
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      status: 'API funcionando'
+    });
   }
 
-  try {
-    const { nome, email, telefone, mensagem } = req.body;
+  if (req.method !== 'POST') {
+    return res.status(405).json({
+      error: 'Método não permitido'
+    });
+  }
 
-    if (!nome || !email || !mensagem) {
-      return res.status(400).json({
-        error: 'Nome, e-mail e mensagem são obrigatórios.'
-      });
-    }
+  // restante do código...
+}
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
