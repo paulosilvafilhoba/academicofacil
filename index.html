@@ -294,10 +294,11 @@ body.dark-mode .cta-outline{color:var(--indigo2)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .fg{margin-bottom:20px}
 .fg label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase}
-.fg select,.fg input{width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;transition:.2s;appearance:none}
+.fg select,.fg input,.fg textarea{width:100%;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;transition:.2s;appearance:none}
 .fg select option{background:var(--surface);color:var(--text)}
-.fg select:focus,.fg input:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-glow)}
-.fg input::placeholder{color:var(--muted)}
+.fg select:focus,.fg input:focus,.fg textarea:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-glow)}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted)}
+.fg textarea{resize:vertical;min-height:96px;line-height:1.5}
 .price-display{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .price-display .pd-label{font-size:14px;color:var(--muted)}
 .price-display .pd-value{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;background:linear-gradient(90deg,var(--indigo),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -771,6 +772,20 @@ body.dark-mode footer{background:#03040A}
     <div class="calc-box">
       <div class="form-row">
         <div class="fg">
+          <label for="nomeCompleto">Nome completo</label>
+          <input type="text" id="nomeCompleto" placeholder="Seu nome completo" autocomplete="name">
+        </div>
+        <div class="fg">
+          <label for="email">Seu e-mail</label>
+          <input type="email" id="email" placeholder="voce@email.com" autocomplete="email">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label for="telefone">Telefone / WhatsApp</label>
+          <input type="tel" id="telefone" placeholder="(71) 99999-9999" autocomplete="tel">
+        </div>
+        <div class="fg">
           <label for="tipo">Tipo de trabalho</label>
           <select id="tipo" onchange="calcular()">
             <option value="">Selecione</option>
@@ -781,6 +796,12 @@ body.dark-mode footer{background:#03040A}
             <option value="formatacao">Formatação ABNT</option>
             <option value="revisao">Revisão textual</option>
           </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label for="temaTrabalho">Tema do trabalho</label>
+          <input type="text" id="temaTrabalho" placeholder="Ex: IA na educação, gestão da manutenção...">
         </div>
         <div class="fg">
           <label for="laudas">Número de laudas</label>
@@ -797,8 +818,8 @@ body.dark-mode footer{background:#03040A}
           </select>
         </div>
         <div class="fg">
-          <label for="email">Seu e-mail</label>
-          <input type="email" id="email" placeholder="voce@email.com">
+          <label for="mensagem">Observações adicionais</label>
+          <input type="text" id="mensagem" placeholder="Ex: instituição, curso, orientações do professor...">
         </div>
       </div>
       <div class="price-display">
@@ -1569,10 +1590,14 @@ function calcular(){
   el.textContent='R$ '+total.toLocaleString('pt-BR')+(p.fx?'+':'');
 }
 async function enviar(){
+  const nomeCompleto = document.getElementById('nomeCompleto').value.trim();
   const email = document.getElementById('email').value.trim();
+  const telefone = document.getElementById('telefone').value.trim();
   const tipo = document.getElementById('tipo').value;
+  const temaTrabalho = document.getElementById('temaTrabalho').value.trim();
   const laudas = document.getElementById('laudas').value;
   const prazo = document.getElementById('prazo').value;
+  const mensagem = document.getElementById('mensagem').value.trim();
   const valor = document.getElementById('priceOut').textContent;
   const botao = document.querySelector('.btn-send');
 
@@ -1591,8 +1616,8 @@ async function enviar(){
     urgente: 'Urgente — 3 a 6 dias (+30%)'
   };
 
-  if(!email || !tipo){
-    alert('Preencha o tipo de trabalho e seu e-mail para continuar.');
+  if(!nomeCompleto || !email || !tipo || !temaTrabalho){
+    alert('Preencha nome completo, e-mail, tipo de trabalho e tema do trabalho para continuar.');
     return;
   }
 
@@ -1606,14 +1631,15 @@ async function enviar(){
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        nome: 'Lead do site AcadêmicoFácil',
+        nome: nomeCompleto,
         email,
-        telefone: 'Não informado',
+        telefone: telefone || 'Não informado',
         tipo: tipoTexto[tipo] || tipo,
+        tema: temaTrabalho,
         laudas: laudas || 'Não informado',
         prazo: prazoTexto[prazo] || prazo,
         valor: valor || 'Não calculado',
-        mensagem: 'Solicitação enviada pela calculadora de orçamento do site AcadêmicoFácil.'
+        mensagem: mensagem || 'Solicitação enviada pela calculadora de orçamento do site AcadêmicoFácil.'
       })
     });
 

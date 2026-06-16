@@ -1,27 +1,41 @@
-# AcadêmicoFácil - Integração Opção 1
+# AcadêmicoFácil - atualização nome completo e tema do trabalho
 
-Este pacote contém a versão do site integrada com Cloudflare Email Routing + Resend.
+Este pacote adiciona ao formulário de orçamento:
 
-## Arquivos
+- Nome completo
+- Telefone/WhatsApp
+- Tema do trabalho
+- Observações adicionais
 
-- `index.html`: página atualizada com o botão de orçamento enviando dados para `/api/send-email`.
-- `api/send-email.js`: função serverless da Vercel que envia:
-  1. Um e-mail interno para `paulosilvafilhoba@gmail.com`.
-  2. Uma confirmação automática para o e-mail informado pelo cliente.
+Também atualiza `api/send-email.js` para enviar esses dados no e-mail interno e no e-mail de confirmação ao cliente.
 
-## Como instalar
+## Como aplicar
 
-1. No GitHub, substitua o arquivo `index.html` pelo arquivo deste pacote.
-2. No GitHub, substitua ou crie `api/send-email.js` com o arquivo deste pacote.
-3. Faça `Commit changes`.
-4. Aguarde o deploy automático da Vercel.
-5. Teste a API em:
-   `https://academicofacil.com.br/api/send-email`
+1. Substitua o arquivo `index.html` da raiz do projeto.
+2. Substitua o arquivo `api/send-email.js`.
+3. Faça commit no GitHub.
+4. Aguarde o deploy da Vercel.
+5. Teste em `https://academicofacil.com.br/#orcamento`.
 
-O resultado esperado no navegador é:
+## Campos obrigatórios no formulário
 
-```json
-{"status":"API do AcadêmicoFácil funcionando","metodo":"GET"}
-```
+- Nome completo
+- E-mail
+- Tipo de trabalho
+- Tema do trabalho
 
-Depois teste o formulário de orçamento na página inicial.
+## Resultado esperado
+
+Você receberá um e-mail com:
+
+- Nome completo do cliente
+- E-mail
+- Telefone/WhatsApp
+- Tipo de trabalho
+- Tema do trabalho
+- Laudas
+- Prazo
+- Valor estimado
+- Observações
+
+O cliente receberá automaticamente a confirmação de solicitação.
