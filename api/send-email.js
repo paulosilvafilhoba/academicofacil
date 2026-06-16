@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const html = `
+    const htmlInterno = `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
         <h2>Novo contato/orçamento pelo AcadêmicoFácil</h2>
         <p><strong>Nome:</strong> ${escapeHtml(nome)}</p>
@@ -52,34 +52,74 @@ export default async function handler(req, res) {
       </div>
     `;
 
-    const response = await fetch('https://api.resend.com/emails', {
+    const htmlCliente = `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
+        <h2>Recebemos sua solicitação no AcadêmicoFácil</h2>
+        <p>Olá!</p>
+        <p>Recebemos sua solicitação de orçamento e nossa equipe entrará em contato em breve.</p>
+        ${tipo ? `<p><strong>Tipo de trabalho:</strong> ${escapeHtml(tipo)}</p>` : ''}
+        ${laudas ? `<p><strong>Laudas:</strong> ${escapeHtml(String(laudas))}</p>` : ''}
+        ${prazo ? `<p><strong>Prazo:</strong> ${escapeHtml(prazo)}</p>` : ''}
+        ${valor ? `<p><strong>Valor estimado:</strong> ${escapeHtml(valor)}</p>` : ''}
+        <p>Atenciosamente,<br><strong>Equipe AcadêmicoFácil</strong></p>
+        <hr>
+        <p style="font-size:12px;color:#6b7280">Este é um e-mail automático enviado por academicofacil.com.br</p>
+      </div>
+    `;
+
+    const headers = {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json'
+    };
+
+    const responseInterno = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify({
         from: 'AcadêmicoFácil <contato@academicofacil.com.br>',
         to: ['paulosilvafilhoba@gmail.com'],
         reply_to: email,
         subject: `Novo orçamento pelo AcadêmicoFácil - ${nome}`,
-        html
+        html: htmlInterno
       })
     });
 
-    const data = await response.json();
+    const dataInterno = await responseInterno.json();
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: data.message || 'Erro ao enviar e-mail pelo Resend.',
-        detalhe: data
+    if (!responseInterno.ok) {
+      return res.status(responseInterno.status).json({
+        error: dataInterno.message || 'Erro ao enviar e-mail interno pelo Resend.',
+        detalhe: dataInterno
+      });
+    }
+
+    const responseCliente = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        from: 'AcadêmicoFácil <contato@academicofacil.com.br>',
+        to: [email],
+        reply_to: 'contato@academicofacil.com.br',
+        subject: 'Recebemos sua solicitação - AcadêmicoFácil',
+        html: htmlCliente
+      })
+    });
+
+    const dataCliente = await responseCliente.json();
+
+    if (!responseCliente.ok) {
+      return res.status(responseCliente.status).json({
+        error: dataCliente.message || 'Erro ao enviar confirmação ao cliente pelo Resend.',
+        detalhe: dataCliente,
+        idInterno: dataInterno.id
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'E-mail enviado com sucesso.',
-      id: data.id
+      message: 'E-mails enviados com sucesso.',
+      idInterno: dataInterno.id,
+      idCliente: dataCliente.id
     });
   } catch (error) {
     return res.status(500).json({
