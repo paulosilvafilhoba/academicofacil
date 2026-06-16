@@ -26,6 +26,7 @@ export default async function handler(req, res) {
     const telefone = body.telefone || 'Não informado';
     const mensagem = body.mensagem || '';
     const tipo = body.tipo || '';
+    const tema = body.tema || body.temaTrabalho || '';
     const laudas = body.laudas || '';
     const prazo = body.prazo || '';
     const valor = body.valor || '';
@@ -36,28 +37,44 @@ export default async function handler(req, res) {
       });
     }
 
+    if (!nome || nome === 'Lead do site AcadêmicoFácil') {
+      return res.status(400).json({
+        error: 'O campo nome completo é obrigatório.'
+      });
+    }
+
+    if (!tipo || !tema) {
+      return res.status(400).json({
+        error: 'Tipo de trabalho e tema do trabalho são obrigatórios.'
+      });
+    }
+
     const htmlInterno = `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
         <h2>Novo contato/orçamento pelo AcadêmicoFácil</h2>
-        <p><strong>Nome:</strong> ${escapeHtml(nome)}</p>
+        <p><strong>Nome completo:</strong> ${escapeHtml(nome)}</p>
         <p><strong>E-mail:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Telefone:</strong> ${escapeHtml(telefone)}</p>
+        <p><strong>Telefone/WhatsApp:</strong> ${escapeHtml(telefone)}</p>
         ${tipo ? `<p><strong>Tipo de trabalho:</strong> ${escapeHtml(tipo)}</p>` : ''}
+        ${tema ? `<p><strong>Tema do trabalho:</strong> ${escapeHtml(tema)}</p>` : ''}
         ${laudas ? `<p><strong>Laudas:</strong> ${escapeHtml(String(laudas))}</p>` : ''}
         ${prazo ? `<p><strong>Prazo:</strong> ${escapeHtml(prazo)}</p>` : ''}
         ${valor ? `<p><strong>Valor estimado:</strong> ${escapeHtml(valor)}</p>` : ''}
-        ${mensagem ? `<p><strong>Mensagem:</strong></p><p>${escapeHtml(mensagem).replace(/\n/g, '<br>')}</p>` : ''}
+        ${mensagem ? `<p><strong>Observações:</strong></p><p>${escapeHtml(mensagem).replace(/\n/g, '<br>')}</p>` : ''}
         <hr>
         <p style="font-size:12px;color:#6b7280">Enviado automaticamente pelo site academicofacil.com.br</p>
       </div>
     `;
 
+    const saudacao = primeiroNome(nome);
+
     const htmlCliente = `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
         <h2>Recebemos sua solicitação no AcadêmicoFácil</h2>
-        <p>Olá!</p>
+        <p>Olá, ${escapeHtml(saudacao)}!</p>
         <p>Recebemos sua solicitação de orçamento e nossa equipe entrará em contato em breve.</p>
         ${tipo ? `<p><strong>Tipo de trabalho:</strong> ${escapeHtml(tipo)}</p>` : ''}
+        ${tema ? `<p><strong>Tema do trabalho:</strong> ${escapeHtml(tema)}</p>` : ''}
         ${laudas ? `<p><strong>Laudas:</strong> ${escapeHtml(String(laudas))}</p>` : ''}
         ${prazo ? `<p><strong>Prazo:</strong> ${escapeHtml(prazo)}</p>` : ''}
         ${valor ? `<p><strong>Valor estimado:</strong> ${escapeHtml(valor)}</p>` : ''}
@@ -79,7 +96,7 @@ export default async function handler(req, res) {
         from: 'AcadêmicoFácil <contato@academicofacil.com.br>',
         to: ['paulosilvafilhoba@gmail.com'],
         reply_to: email,
-        subject: `Novo orçamento pelo AcadêmicoFácil - ${nome}`,
+        subject: `Novo orçamento - ${tipo} - ${nome}`,
         html: htmlInterno
       })
     });
@@ -136,4 +153,9 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function primeiroNome(nome) {
+  const partes = String(nome || '').trim().split(/\s+/).filter(Boolean);
+  return partes.length ? partes[0] : 'tudo bem';
 }
