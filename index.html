@@ -1568,11 +1568,82 @@ function calcular(){
   if(prazo==='urgente')total=Math.round(total*1.30);
   el.textContent='R$ '+total.toLocaleString('pt-BR')+(p.fx?'+':'');
 }
-function enviar(){
-  const email=document.getElementById('email').value;
-  const tipo=document.getElementById('tipo').value;
-  if(!email||!tipo){alert('Preencha o tipo de trabalho e seu e-mail para continuar.');return}
-  window.location.href = '/orcamento?email=' + encodeURIComponent(email) + '&tipo=' + encodeURIComponent(tipo);
+async function enviar(){
+  const email = document.getElementById('email').value.trim();
+  const tipo = document.getElementById('tipo').value;
+  const laudas = document.getElementById('laudas').value;
+  const prazo = document.getElementById('prazo').value;
+  const valor = document.getElementById('priceOut').textContent;
+
+  const nomesTipos = {
+    tecnico: 'TCC Técnico',
+    graduacao: 'TCC Graduação',
+    pos: 'Pós-graduação / MBA',
+    artigo: 'Artigo Científico',
+    formatacao: 'Formatação ABNT',
+    revisao: 'Revisão Textual'
+  };
+
+  const nomesPrazos = {
+    normal: 'Normal',
+    rapido: 'Rápido (+15%)',
+    urgente: 'Urgente (+30%)'
+  };
+
+  if(!email || !tipo){
+    alert('Preencha o tipo de trabalho e seu e-mail para continuar.');
+    return;
+  }
+
+  const botao = document.querySelector('.btn-send');
+  const textoOriginal = botao ? botao.textContent : '';
+
+  try {
+    if(botao){
+      botao.disabled = true;
+      botao.textContent = 'Enviando solicitação...';
+    }
+
+    const resposta = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: 'Lead do site AcadêmicoFácil',
+        email: email,
+        telefone: 'Não informado',
+        mensagem: `
+Nova solicitação de orçamento recebida pelo site AcadêmicoFácil.
+
+Tipo de trabalho: ${nomesTipos[tipo] || tipo}
+Quantidade de laudas: ${laudas || 'Não informado'}
+Prazo escolhido: ${nomesPrazos[prazo] || prazo}
+Valor estimado: ${valor || 'Não calculado'}
+E-mail do cliente: ${email}
+
+Ação recomendada: entrar em contato com o cliente para confirmar escopo, prazo, orientações do professor e forma de pagamento.
+        `.trim()
+      })
+    });
+
+    const data = await resposta.json();
+
+    if(!resposta.ok){
+      console.error('Erro Resend:', data);
+      alert('Não foi possível enviar sua solicitação agora. Tente novamente em instantes ou fale pelo WhatsApp.');
+      return;
+    }
+
+    alert('Solicitação enviada com sucesso! Em breve entraremos em contato pelo e-mail informado.');
+
+  } catch (erro) {
+    console.error('Erro ao enviar solicitação:', erro);
+    alert('Erro de conexão. Tente novamente ou fale pelo WhatsApp.');
+  } finally {
+    if(botao){
+      botao.disabled = false;
+      botao.textContent = textoOriginal || 'Solicitar assessoria agora →';
+    }
+  }
 }
 function faq(btn){btn.closest('.faq-item').classList.toggle('open')}
 </script>
